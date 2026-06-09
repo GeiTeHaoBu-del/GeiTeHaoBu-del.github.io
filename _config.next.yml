@@ -1,0 +1,156 @@
+# ===============================================================
+# NexT主题配置 - 针对技术博客优化
+# ===============================================================
+
+# 主题方案：Muse | Mist | Pisces | Gemini
+scheme: Pisces
+
+# 主题色
+theme_color:
+  light: "#a855f7"
+  dark: "#c084fc"
+
+# 菜单配置
+menu:
+  home: / || fa fa-home
+  archives: /archives/ || fa fa-archive
+  categories: /categories/ || fa fa-th
+  tags: /tags/ || fa fa-tags
+  about: /about/ || fa fa-user
+
+# 侧边栏社交链接
+social:
+  GitHub: https://github.com/GeiTeHaoBu-del || fab fa-github
+
+# 代码高亮主题
+codeblock:
+  theme:
+    light: default
+    dark: stackoverflow-dark
+  copy_button:
+    enable: true
+    show_result: true
+    style: flat
+
+# 文章配置
+excerpt_description: true
+read_more_btn: true
+post_meta:
+  item_text: true
+  created_at: true
+  updated_at:
+    enable: true
+    another_day: true
+  categories: true
+  tags: true
+
+# 阅读进度条
+reading_progress:
+  enable: true
+  position: top
+  color: "#373E50"
+  height: 3px
+
+# 书签
+bookmark:
+  enable: false
+
+# GitHub Banner
+github_banner:
+  enable: true
+  permalink: https://github.com/GeiTeHaoBu-del
+  title: Follow me on GitHub
+
+# 字体配置
+font:
+  enable: true
+  global:
+    external: true
+    family: Lato
+    size: 1
+  title:
+    external: true
+    family: Lato
+    size: 1.5
+  codes:
+    external: true
+    family: consolas
+
+# SEO
+seo: true
+index_with_subtitle: true
+
+# 本地搜索
+local_search:
+  enable: true
+  trigger: auto
+  top_n_per_article: 10
+  unescape: false
+  preload: false
+
+# Math渲染（后续写公式可能用到）
+math:
+  every_page: false
+  mathjax:
+    enable: false
+  katex:
+    enable: false
+
+# Mermaid图表（架构图用）
+mermaid:
+  enable: true
+  theme: default
+
+# 页脚
+footer:
+  since: 2026
+  icon:
+    name: fa fa-robot
+    animated: false
+    color: "#808080"
+  copyright: 吴纪辰
+  powered: false
+
+# 自定义Logo
+custom_logo:
+  enabled: false
+
+# 动画效果
+motion:
+  enable: true
+  async: true
+  transition:
+    post_block: fadeIn
+    post_header: fadeInDown
+    post_body: fadeInUp
+    coll_header: fadeInLeft
+    sidebar: fadeInUp
+
+# 评论系统（后续可选开启Giscus）
+comments:
+  active: false
+
+# 自定义文件注入
+custom_file_path:
+  sidebar: source/_data/sidebar.njk
+  bodyEnd: source/_data/body-end.njk
+  variable: source/_data/variables.styl
+  mixin: source/_data/mixins.styl
+  style: source/_data/styles.styl
+
+# 侧边栏配置
+sidebar:
+  position: left
+  display: always
+  padding: 18
+  offset: 12
+  width_expanded: 280
+  width_dual_column: 240
+
+# Avatar
+avatar:
+  url: https://avatars.githubusercontent.com/u/215136888?v=4
+  rounded: true
+
+# Darkmode
+darkmode: true

@@ -1,0 +1,52 @@
+// ========== Custom Mixins ==========
+
+card-base()
+  background: $bg-card
+  border: 1px solid $border-color
+  border-radius: $radius-card
+  box-shadow: $shadow-card
+  transition: $transition
+  &:hover
+    border-color: $border-hover
+    box-shadow: $shadow-card-hover
+
+floating()
+  transform: translateY(0)
+  transition: $transition
+  &:hover
+    transform: translateY(-4px)
+
+glow-border()
+  border: 1px solid $border-color
+  &:hover
+    border-color: $purple-primary
+    box-shadow: 0 0 15px $purple-glow
+
+purple-accent()
+  color: $purple-primary
+  &:hover
+    color: $purple-light
+
+tag-style()
+  display: inline-block
+  padding: 2px 12px
+  background: $purple-subtle
+  color: $purple-light
+  border-radius: $radius-tag
+  font-size: 0.8em
+  border: 1px solid rgba(168, 85, 247, 0.2)
+  transition: $transition
+  &:hover
+    background: rgba(168, 85, 247, 0.2)
+    border-color: $purple-primary
+
+scrollbar-dark()
+  &::-webkit-scrollbar
+    width: 6px
+  &::-webkit-scrollbar-track
+    background: $bg-darkest
+  &::-webkit-scrollbar-thumb
+    background: $bg-card-hover
+    border-radius: 3px
+  &::-webkit-scrollbar-thumb:hover
+    background: $purple-dark
