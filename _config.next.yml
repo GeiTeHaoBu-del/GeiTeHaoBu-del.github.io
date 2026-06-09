@@ -63,18 +63,7 @@ github_banner:
 
 # 字体配置
 font:
-  enable: true
-  global:
-    external: true
-    family: Lato
-    size: 1
-  title:
-    external: true
-    family: Lato
-    size: 1.5
-  codes:
-    external: true
-    family: consolas
+  enable: false
 
 # SEO
 seo: true
@@ -149,8 +138,8 @@ sidebar:
 
 # Avatar
 avatar:
-  url: https://avatars.githubusercontent.com/u/215136888?v=4
+  url: /images/avatar.png
   rounded: true
 
 # Darkmode
-darkmode: true
+darkmode: false

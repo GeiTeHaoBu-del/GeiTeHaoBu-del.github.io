@@ -20,7 +20,6 @@ comments: false
 - **MiniRAG**：RAG入门项目，实现基础向量检索
 - **Local_Pdf_Chat_RAG**：生产级RAG系统，模块化架构设计
 - **ai-agents-from-zero**：Agent系统学习与实践
-- **MicroLM**：训练/微调概念速读
 
 ## 联系方式
 
