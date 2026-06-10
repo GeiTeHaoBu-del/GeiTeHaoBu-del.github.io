@@ -8,7 +8,7 @@ tags:
   - RRF
   - 混合检索
 categories:
-  - AI应用开发
+  - RAG
 summary: 用不到300行Python从零实现RAG系统，覆盖向量检索、BM25关键词检索、RRF混合融合、CrossEncoder重排序的完整pipeline，并给出每一步的原理和代码。
 description: 用不到300行Python从零实现RAG系统，覆盖向量检索、BM25关键词检索、RRF混合融合、CrossEncoder重排序的完整pipeline。
 ---

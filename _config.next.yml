@@ -46,7 +46,7 @@ post_meta:
 
 # 阅读进度条
 reading_progress:
-  enable: true
+  enable: false
   position: top
   color: "#373E50"
   height: 3px
@@ -57,9 +57,7 @@ bookmark:
 
 # GitHub Banner
 github_banner:
-  enable: true
-  permalink: https://github.com/GeiTeHaoBu-del
-  title: Follow me on GitHub
+  enable: false
 
 # 字体配置
 font:
