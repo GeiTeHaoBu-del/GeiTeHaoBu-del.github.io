@@ -1216,43 +1216,6 @@ pre code {
 .use-motion .menu-item {
   visibility: hidden;
 }
-.github-corner :hover .octo-arm {
-  animation: octocat-wave 560ms ease-in-out;
-}
-.github-corner svg {
-  color: #fff;
-  fill: var(--theme-color);
-  position: absolute;
-  right: 0;
-  top: 0;
-  z-index: 5;
-}
-@media (max-width: 991px) {
-  .github-corner {
-    display: none;
-  }
-  .github-corner svg {
-    color: var(--theme-color);
-    fill: #fff;
-  }
-  .github-corner .github-corner:hover .octo-arm {
-    animation: none;
-  }
-  .github-corner .github-corner .octo-arm {
-    animation: octocat-wave 560ms ease-in-out;
-  }
-}
-@keyframes octocat-wave {
-  0%, 100% {
-    transform: rotate(0);
-  }
-  20%, 60% {
-    transform: rotate(-25deg);
-  }
-  40%, 80% {
-    transform: rotate(10deg);
-  }
-}
 @media (max-width: 991px) {
   .sidebar {
     left: -280px;
@@ -1292,7 +1255,7 @@ pre code {
     vertical-align: middle;
   }
   .links-of-author a::before {
-    background: #fbff58;
+    background: #ff7303;
     display: inline-block;
     margin-right: 3px;
     transform: translateY(-2px);
@@ -1756,16 +1719,6 @@ pre code {
 }
 .back-to-top.back-to-top-on {
   bottom: 30px;
-}
-.reading-progress-bar {
-  --progress: 0;
-  background: #373e50;
-  height: 3px;
-  position: fixed;
-  z-index: 50;
-  width: var(--progress);
-  left: 0;
-  top: 0;
 }
 .rtl.post-body p,
 .rtl.post-body a,
@@ -3353,69 +3306,90 @@ html[data-theme="dark"] .column {
 html[data-theme="dark"] .sidebar-nav .sidebar-nav-link {
   color: #94a3b8 !important;
 }
-html[data-theme="dark"] .left-profile-card,
-html[data-theme="dark"] .left-tech-card,
-html[data-theme="dark"] .left-progress-card,
-html[data-theme="dark"] background: #1a1a2e {
-  border-color: rgba(168,85,247,0.15);
+html[data-theme="dark"] .left-profile-card {
+  background: #1a1a2e !important;
+  border-color: rgba(168,85,247,0.15) !important;
 }
-html[data-theme="dark"] .left-profile-card:hover,
-html[data-theme="dark"] .left-tech-card:hover,
-html[data-theme="dark"] .left-progress-card:hover,
-html[data-theme="dark"] background: #1a1a2e:hover {
-  border-color: rgba(168,85,247,0.4);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 0 20px rgba(168,85,247,0.3);
+html[data-theme="dark"] .left-profile-card:hover {
+  border-color: rgba(168,85,247,0.4) !important;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 0 20px rgba(168,85,247,0.3) !important;
 }
 html[data-theme="dark"] .left-profile-card .profile-avatar {
-  border-color: #a855f7;
-  box-shadow: 0 0 16px rgba(168,85,247,0.3);
+  border-color: #a855f7 !important;
+  box-shadow: 0 0 16px rgba(168,85,247,0.3) !important;
 }
 html[data-theme="dark"] .left-profile-card .profile-avatar:hover {
-  box-shadow: 0 0 24px rgba(168,85,247,0.5);
+  box-shadow: 0 0 24px rgba(168,85,247,0.5) !important;
 }
 html[data-theme="dark"] .left-profile-card .profile-name {
-  color: #e2e8f0;
+  color: #e2e8f0 !important;
+}
+html[data-theme="dark"] .left-profile-card .profile-bio {
+  color: #94a3b8 !important;
 }
 html[data-theme="dark"] .left-profile-card .profile-handle a {
-  color: #c084fc;
+  color: #c084fc !important;
 }
 html[data-theme="dark"] .left-profile-card .profile-stats {
-  border-top-color: rgba(168,85,247,0.15);
-  border-bottom-color: rgba(168,85,247,0.15);
+  border-top-color: rgba(168,85,247,0.15) !important;
+  border-bottom-color: rgba(168,85,247,0.15) !important;
 }
 html[data-theme="dark"] .left-profile-card .profile-stats .stat-num {
-  color: #e2e8f0;
+  color: #e2e8f0 !important;
+}
+html[data-theme="dark"] .left-profile-card .profile-stats .stat-label {
+  color: #64748b !important;
 }
 html[data-theme="dark"] .left-profile-card .profile-social a {
-  background: #0a0a0f;
-  border-color: rgba(168,85,247,0.15);
+  background: #0a0a0f !important;
+  border-color: rgba(168,85,247,0.15) !important;
+  color: #94a3b8 !important;
 }
 html[data-theme="dark"] .left-profile-card .profile-social a:hover {
-  background: rgba(168,85,247,0.1);
-  border-color: #a855f7;
-  color: #c084fc;
-  box-shadow: 0 0 8px rgba(168,85,247,0.3);
+  background: rgba(168,85,247,0.1) !important;
+  border-color: #a855f7 !important;
+  color: #c084fc !important;
+  box-shadow: 0 0 8px rgba(168,85,247,0.3) !important;
+}
+html[data-theme="dark"] .left-tech-card {
+  background: #1a1a2e !important;
+  border-color: rgba(168,85,247,0.15) !important;
+}
+html[data-theme="dark"] .left-tech-card:hover {
+  border-color: rgba(168,85,247,0.4) !important;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 0 20px rgba(168,85,247,0.3) !important;
 }
 html[data-theme="dark"] .left-tech-card .card-title {
-  color: #c084fc;
+  color: #c084fc !important;
 }
 html[data-theme="dark"] .left-tech-card .tech-tag {
-  background: rgba(168,85,247,0.1);
-  color: #c084fc;
-  border-color: rgba(168,85,247,0.2);
+  background: rgba(168,85,247,0.1) !important;
+  color: #c084fc !important;
+  border-color: rgba(168,85,247,0.2) !important;
 }
 html[data-theme="dark"] .left-tech-card .tech-tag:hover {
-  background: rgba(168,85,247,0.2);
-  border-color: #a855f7;
+  background: rgba(168,85,247,0.2) !important;
+  border-color: #a855f7 !important;
+}
+html[data-theme="dark"] .left-progress-card {
+  background: #1a1a2e !important;
+  border-color: rgba(168,85,247,0.15) !important;
+}
+html[data-theme="dark"] .left-progress-card:hover {
+  border-color: rgba(168,85,247,0.4) !important;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 0 20px rgba(168,85,247,0.3) !important;
 }
 html[data-theme="dark"] .left-progress-card .card-title {
-  color: #c084fc;
+  color: #c084fc !important;
+}
+html[data-theme="dark"] .left-progress-card .progress-label {
+  color: #94a3b8 !important;
 }
 html[data-theme="dark"] .left-progress-card .progress-bar {
-  background: #0a0a0f;
+  background: #0a0a0f !important;
 }
 html[data-theme="dark"] .left-progress-card .progress-fill {
-  background: linear-gradient(90deg, #7c3aed, #a855f7);
+  background: linear-gradient(90deg, #7c3aed, #a855f7) !important;
 }
 html[data-theme="dark"] .top-nav-bar {
   background: #1a1a2e;
@@ -3479,23 +3453,27 @@ html[data-theme="dark"] .right-stats-card .stats-item .stats-num {
   color: #c084fc;
 }
 html[data-theme="dark"] .right-tree-card .tree-cat-header .tree-icon {
-  color: #a855f7;
+  color: #a855f7 !important;
 }
 html[data-theme="dark"] .right-tree-card .tree-cat-header .tree-cat-name {
-  color: #e2e8f0;
+  color: #e2e8f0 !important;
 }
 html[data-theme="dark"] .right-tree-card .tree-cat-header .tree-cat-count {
-  background: #0a0a0f;
+  background: #0a0a0f !important;
+  color: #94a3b8 !important;
 }
 html[data-theme="dark"] .right-tree-card .tree-cat-header:hover {
-  background: rgba(168,85,247,0.1);
+  background: rgba(168,85,247,0.1) !important;
+}
+html[data-theme="dark"] .right-tree-card .tree-post-item a {
+  color: #94a3b8 !important;
 }
 html[data-theme="dark"] .right-tree-card .tree-post-item a:hover {
-  color: #c084fc;
-  background: rgba(168,85,247,0.1);
+  color: #c084fc !important;
+  background: rgba(168,85,247,0.1) !important;
 }
 html[data-theme="dark"] .right-tree-card .tree-post-item a .tree-dot {
-  background: #a855f7;
+  background: #a855f7 !important;
 }
 html[data-theme="dark"] .post-eof {
   background: rgba(168,85,247,0.25) !important;

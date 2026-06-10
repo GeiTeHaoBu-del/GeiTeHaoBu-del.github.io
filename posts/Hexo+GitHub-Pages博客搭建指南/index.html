@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#a855f7"><meta name="generator" content="Hexo 8.1.2">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#a855f7">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"geitehaobu-del.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":280,"width_dual_column":240,"display":"always","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"flat","show_result":true},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":false,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":true,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInUp","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":10,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="记录从零搭建Hexo博客并部署到GitHub Pages的全过程，涵盖环境准备、主题配置、深浅色切换、自定义组件注入、GitHub Actions自动部署等关键步骤。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hexo+GitHub Pages博客搭建指南：从零到自动部署">
+<meta property="og:url" content="https://geitehaobu-del.github.io/posts/Hexo+GitHub-Pages%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA%E6%8C%87%E5%8D%97/index.html">
+<meta property="og:site_name" content="吴纪辰的大模型学习路径">
+<meta property="og:description" content="记录从零搭建Hexo博客并部署到GitHub Pages的全过程，涵盖环境准备、主题配置、深浅色切换、自定义组件注入、GitHub Actions自动部署等关键步骤。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-06-09T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-06-10T08:31:56.765Z">
+<meta property="article:author" content="吴纪辰">
+<meta property="article:tag" content="CI&#x2F;CD">
+<meta property="article:tag" content="GitHub Pages">
+<meta property="article:tag" content="Hexo">
+<meta property="article:tag" content="NexT">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://geitehaobu-del.github.io/posts/Hexo+GitHub-Pages%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA%E6%8C%87%E5%8D%97/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://geitehaobu-del.github.io/posts/Hexo+GitHub-Pages%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA%E6%8C%87%E5%8D%97/","path":"posts/Hexo+GitHub-Pages博客搭建指南/","title":"Hexo+GitHub Pages博客搭建指南：从零到自动部署"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Hexo+GitHub Pages博客搭建指南：从零到自动部署 | 吴纪辰的大模型学习路径</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":"default","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">吴纪辰的大模型学习路径</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">AI应用开发工程师成长记录 | RAG · Agent · 训练微调 · 工程实践</p>
+      <img class="custom-logo-image" src="/%5Bobject%20Object%5D" alt="吴纪辰的大模型学习路径">
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E5%BC%95%E5%85%A5%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E9%80%89%E6%8B%A9Hexo%EF%BC%9F"><span class="nav-number">1.</span> <span class="nav-text">问题引入：为什么选择Hexo？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8E%9F%E7%90%86%E8%AE%B2%E8%A7%A3"><span class="nav-number">2.</span> <span class="nav-text">原理讲解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Hexo%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="nav-number">2.1.</span> <span class="nav-text">Hexo的工作流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GitHub-Pages-Actions%E9%83%A8%E7%BD%B2%E5%8E%9F%E7%90%86"><span class="nav-number">2.2.</span> <span class="nav-text">GitHub Pages + Actions部署原理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.</span> <span class="nav-text">代码实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="nav-number">3.1.</span> <span class="nav-text">1. 环境准备</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%AE%89%E8%A3%85NexT%E4%B8%BB%E9%A2%98"><span class="nav-number">3.2.</span> <span class="nav-text">2. 安装NexT主题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E7%AB%99%E7%82%B9%E9%85%8D%E7%BD%AE-config-yml%E5%85%B3%E9%94%AE%E9%A1%B9"><span class="nav-number">3.3.</span> <span class="nav-text">3. 站点配置_config.yml关键项</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE-config-next-yml%E5%85%B3%E9%94%AE%E9%A1%B9"><span class="nav-number">3.4.</span> <span class="nav-text">4. 主题配置_config.next.yml关键项</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E8%87%AA%E5%AE%9A%E4%B9%89%E6%A0%B7%E5%BC%8F%E5%92%8C%E7%BB%84%E4%BB%B6%E6%B3%A8%E5%85%A5"><span class="nav-number">3.5.</span> <span class="nav-text">5. 自定义样式和组件注入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-%E6%96%87%E7%AB%A0Front-Matter%E6%A8%A1%E6%9D%BF"><span class="nav-number">3.6.</span> <span class="nav-text">6. 文章Front Matter模板</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-GitHub-Actions%E8%87%AA%E5%8A%A8%E9%83%A8%E7%BD%B2"><span class="nav-number">3.7.</span> <span class="nav-text">7. GitHub Actions自动部署</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-%E5%A4%B4%E5%83%8F%E6%9C%AC%E5%9C%B0%E5%8C%96"><span class="nav-number">3.8.</span> <span class="nav-text">8. 头像本地化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C%E7%BB%93%E8%AE%BA%E4%B8%8E%E5%8F%8D%E6%80%9D"><span class="nav-number">4.</span> <span class="nav-text">实验结论与反思</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B8%A9%E8%BF%87%E7%9A%84%E5%9D%91"><span class="nav-number">4.1.</span> <span class="nav-text">踩过的坑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84"><span class="nav-number">4.2.</span> <span class="nav-text">项目文件结构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9D%A2%E8%AF%95%E5%85%B3%E8%81%94"><span class="nav-number">5.</span> <span class="nav-text">面试关联</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="吴纪辰"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">吴纪辰</p>
+  <div class="site-description" itemprop="description">记录大模型应用开发的学习与实践，涵盖RAG系统、Agent架构、模型微调、工程化部署等技术方向</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">3</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/GeiTeHaoBu-del" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;GeiTeHaoBu-del" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+<div class="left-profile-card">
+  <img class="profile-avatar" src="/images/avatar.png" alt="Jichen Wu" />
+  <div class="profile-name">Jichen Wu</div>
+  <div class="profile-handle"><a href="https://github.com/GeiTeHaoBu-del" target="_blank">@GeiTeHaoBu-del</a></div>
+  <div class="profile-bio">AI Application Developer<br/>Focused on RAG, Agent & LLM Engineering</div>
+  <div class="profile-stats">
+    <div class="stat-item">
+      <div class="stat-num">17</div>
+      <div class="stat-label">Repos</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">0</div>
+      <div class="stat-label">Followers</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">1</div>
+      <div class="stat-label">Following</div>
+    </div>
+  </div>
+  <div class="profile-social">
+    <a href="https://github.com/GeiTeHaoBu-del" target="_blank" title="GitHub"><i class="fab fa-github"></i></a>
+  </div>
+</div>
+
+<div class="left-tech-card">
+  <div class="card-title"><i class="fas fa-code"></i> Tech Stack</div>
+  <div class="tech-tags">
+    <span class="tech-tag">Python</span>
+    <span class="tech-tag">FastAPI</span>
+    <span class="tech-tag">LangChain</span>
+    <span class="tech-tag">LangGraph</span>
+    <span class="tech-tag">FAISS</span>
+    <span class="tech-tag">Gradio</span>
+    <span class="tech-tag">Docker</span>
+    <span class="tech-tag">MySQL</span>
+    <span class="tech-tag">Redis</span>
+    <span class="tech-tag">Vue.js</span>
+  </div>
+</div>
+
+<div class="left-progress-card">
+  <div class="card-title"><i class="fas fa-graduation-cap"></i> Learning Progress</div>
+  <div class="progress-item">
+    <div class="progress-label"><span>MiniRAG</span><span>66%</span></div>
+    <div class="progress-bar"><div class="progress-fill" style="width: 66%"></div></div>
+  </div>
+  <div class="progress-item">
+    <div class="progress-label"><span>Local_Pdf_Chat_RAG</span><span>0%</span></div>
+    <div class="progress-bar"><div class="progress-fill" style="width: 0%"></div></div>
+  </div>
+  <div class="progress-item">
+    <div class="progress-label"><span>ai-agents-from-zero</span><span>0%</span></div>
+    <div class="progress-bar"><div class="progress-fill" style="width: 0%"></div></div>
+  </div>
+  <div class="progress-item">
+    <div class="progress-label"><span>MicroLM</span><span>0%</span></div>
+    <div class="progress-bar"><div class="progress-fill" style="width: 0%"></div></div>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://geitehaobu-del.github.io/posts/Hexo+GitHub-Pages%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA%E6%8C%87%E5%8D%97/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="吴纪辰">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="吴纪辰的大模型学习路径">
+      <meta itemprop="description" content="记录大模型应用开发的学习与实践，涵盖RAG系统、Agent架构、模型微调、工程化部署等技术方向">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Hexo+GitHub Pages博客搭建指南：从零到自动部署 | 吴纪辰的大模型学习路径">
+      <meta itemprop="description" content="记录从零搭建Hexo博客并部署到GitHub Pages的全过程，涵盖环境准备、主题配置、深浅色切换、自定义组件注入、GitHub Actions自动部署等关键步骤。">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Hexo+GitHub Pages博客搭建指南：从零到自动部署
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2026-06-10 00:00:00 / 修改时间：16:31:56" itemprop="dateCreated datePublished" datetime="2026-06-10T00:00:00+08:00">2026-06-10</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Hexo%E5%BB%BA%E7%AB%99/" itemprop="url" rel="index"><span itemprop="name">Hexo建站</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+            <div class="post-description">记录从零搭建Hexo博客并部署到GitHub Pages的全过程，涵盖环境准备、主题配置、深浅色切换、自定义组件注入、GitHub Actions自动部署等关键步骤。</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="问题引入：为什么选择Hexo？"><a href="#问题引入：为什么选择Hexo？" class="headerlink" title="问题引入：为什么选择Hexo？"></a>问题引入：为什么选择Hexo？</h2><p>作为AI应用开发方向的学习者，我需要一个技术博客来沉淀项目经历、展示工程能力。Hexo的优势：</p>
+<ul>
+<li><strong>Markdown写作</strong>：技术文章天然适合Markdown，代码块、公式、表格无缝支持</li>
+<li><strong>静态站点</strong>：GitHub Pages免费托管，零服务器成本</li>
+<li><strong>主题生态</strong>：NexT主题成熟稳定，高度可定制</li>
+<li><strong>自动部署</strong>：push代码即可触发GitHub Actions构建发布，全流程自动化</li>
+</ul>
+<p>最终效果：<strong>push一篇Markdown → GitHub Actions自动构建 → 1分钟内线上更新</strong>。</p>
+<h2 id="原理讲解"><a href="#原理讲解" class="headerlink" title="原理讲解"></a>原理讲解</h2><h3 id="Hexo的工作流程"><a href="#Hexo的工作流程" class="headerlink" title="Hexo的工作流程"></a>Hexo的工作流程</h3><p>Hexo是一个基于Node.js的静态站点生成器，核心流程：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Markdown源文件 → Hexo渲染引擎 → HTML静态页面 → 部署到Web服务器</span><br></pre></td></tr></table></figure>
+
+<p>关键概念：</p>
+<table>
+<thead>
+<tr>
+<th>概念</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>source/_posts/</code></td>
+<td>文章Markdown存放目录</td>
+</tr>
+<tr>
+<td><code>_config.yml</code></td>
+<td>站点配置（标题、URL、部署方式等）</td>
+</tr>
+<tr>
+<td><code>_config.next.yml</code></td>
+<td>主题配置（NexT专用，覆盖默认配置）</td>
+</tr>
+<tr>
+<td><code>source/_data/</code></td>
+<td>自定义数据文件（样式、脚本、模板注入）</td>
+</tr>
+<tr>
+<td><code>themes/</code></td>
+<td>主题目录（npm安装的主题在node_modules中）</td>
+</tr>
+</tbody></table>
+<h3 id="GitHub-Pages-Actions部署原理"><a href="#GitHub-Pages-Actions部署原理" class="headerlink" title="GitHub Pages + Actions部署原理"></a>GitHub Pages + Actions部署原理</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">本地开发(push main) → GitHub Actions触发 → npm install → hexo generate → 产物推送到gh-pages分支 → GitHub Pages提供服务</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>main</code>分支：存放源码（Markdown、配置、样式）</li>
+<li><code>gh-pages</code>分支：存放构建产物（纯HTML&#x2F;CSS&#x2F;JS），由Actions自动推送</li>
+</ul>
+<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><h3 id="1-环境准备"><a href="#1-环境准备" class="headerlink" title="1. 环境准备"></a>1. 环境准备</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装Node.js（推荐18+LTS，我用的是20）</span></span><br><span class="line"><span class="comment"># Windows: https://nodejs.org/ 下载安装</span></span><br><span class="line"><span class="comment"># 验证</span></span><br><span class="line">node -v   <span class="comment"># v20.x.x</span></span><br><span class="line">npm -v    <span class="comment"># 10.x.x</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装Hexo CLI</span></span><br><span class="line">npm install -g hexo-cli</span><br><span class="line"></span><br><span class="line"><span class="comment"># 初始化博客</span></span><br><span class="line">hexo init my-blog</span><br><span class="line"><span class="built_in">cd</span> my-blog</span><br><span class="line">npm install</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-安装NexT主题"><a href="#2-安装NexT主题" class="headerlink" title="2. 安装NexT主题"></a>2. 安装NexT主题</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install hexo-theme-next</span><br></pre></td></tr></table></figure>
+
+<p>然后在<code>_config.yml</code>中设置：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">theme:</span> <span class="string">next</span></span><br></pre></td></tr></table></figure>
+
+<p>NexT的主题配置不要改<code>node_modules/hexo-theme-next/_config.yml</code>，而是在项目根目录创建<code>_config.next.yml</code>，Hexo会自动合并。这样主题升级时不会丢失自定义配置。</p>
+<h3 id="3-站点配置-config-yml关键项"><a href="#3-站点配置-config-yml关键项" class="headerlink" title="3. 站点配置_config.yml关键项"></a>3. 站点配置<code>_config.yml</code>关键项</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">title:</span> <span class="string">你的博客标题</span></span><br><span class="line"><span class="attr">subtitle:</span> <span class="string">&#x27;副标题&#x27;</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">站点描述，用于SEO</span></span><br><span class="line"><span class="attr">keywords:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">关键词1</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">关键词2</span></span><br><span class="line"><span class="attr">author:</span> <span class="string">你的名字</span></span><br><span class="line"><span class="attr">language:</span> <span class="string">zh-CN</span></span><br><span class="line"><span class="attr">timezone:</span> <span class="string">&#x27;Asia/Shanghai&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="attr">url:</span> <span class="string">https://username.github.io</span></span><br><span class="line"><span class="attr">permalink:</span> <span class="string">posts/:title/</span></span><br><span class="line"></span><br><span class="line"><span class="attr">theme:</span> <span class="string">next</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 每篇文章必须有description字段，否则首页会展示全文</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="4-主题配置-config-next-yml关键项"><a href="#4-主题配置-config-next-yml关键项" class="headerlink" title="4. 主题配置_config.next.yml关键项"></a>4. 主题配置<code>_config.next.yml</code>关键项</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">scheme:</span> <span class="string">Pisces</span>           <span class="comment"># 双栏布局，适合技术博客</span></span><br><span class="line"><span class="attr">theme_color:</span></span><br><span class="line">  <span class="attr">light:</span> <span class="string">&quot;#7c3aed&quot;</span>       <span class="comment"># 浅色主色</span></span><br><span class="line">  <span class="attr">dark:</span> <span class="string">&quot;#a855f7&quot;</span>        <span class="comment"># 深色主色</span></span><br><span class="line"></span><br><span class="line"><span class="attr">font:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="literal">false</span>          <span class="comment"># 关闭Google Fonts，国内加载慢</span></span><br><span class="line"></span><br><span class="line"><span class="attr">local_search:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="literal">true</span>           <span class="comment"># 本地搜索功能</span></span><br><span class="line"></span><br><span class="line"><span class="attr">mermaid:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="literal">true</span>           <span class="comment"># Mermaid图表支持</span></span><br><span class="line"></span><br><span class="line"><span class="attr">darkmode:</span> <span class="literal">false</span>          <span class="comment"># 关闭系统跟随，改用手动切换按钮</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="5-自定义样式和组件注入"><a href="#5-自定义样式和组件注入" class="headerlink" title="5. 自定义样式和组件注入"></a>5. 自定义样式和组件注入</h3><p>NexT支持通过<code>source/_data/</code>目录注入自定义文件，这是最强大的定制方式：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># _config.next.yml</span></span><br><span class="line"><span class="attr">custom_file_path:</span></span><br><span class="line">  <span class="attr">sidebar:</span> <span class="string">source/_data/sidebar.njk</span>    <span class="comment"># 自定义左侧sidebar</span></span><br><span class="line">  <span class="attr">bodyEnd:</span> <span class="string">source/_data/body-end.njk</span>   <span class="comment"># body末尾注入HTML/JS</span></span><br><span class="line">  <span class="attr">variable:</span> <span class="string">source/_data/variables.styl</span> <span class="comment"># 覆盖CSS变量</span></span><br><span class="line">  <span class="attr">style:</span> <span class="string">source/_data/styles.styl</span>      <span class="comment"># 自定义样式</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>深浅色切换</strong>的实现思路：</p>
+<ol>
+<li>关闭NexT自带的<code>darkmode</code>（它基于<code>prefers-color-scheme</code>媒体查询，无切换按钮）</li>
+<li>在<code>body-end.njk</code>中添加切换按钮和JS，通过给<code>&lt;html&gt;</code>添加<code>data-theme=&quot;dark&quot;</code>属性控制</li>
+<li>在<code>styles.styl</code>中用<code>html[data-theme=&quot;dark&quot;]</code>选择器覆盖NexT的CSS变量和自定义组件样式</li>
+<li>主题偏好保存在<code>localStorage</code>，刷新后保持</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 核心切换逻辑</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">applyTheme</span>(<span class="params">dark</span>) &#123;</span><br><span class="line">  <span class="keyword">if</span> (dark) &#123;</span><br><span class="line">    html.<span class="title function_">setAttribute</span>(<span class="string">&#x27;data-theme&#x27;</span>, <span class="string">&#x27;dark&#x27;</span>);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    html.<span class="title function_">removeAttribute</span>(<span class="string">&#x27;data-theme&#x27;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 读取用户偏好</span></span><br><span class="line"><span class="keyword">var</span> saved = <span class="variable language_">localStorage</span>.<span class="title function_">getItem</span>(<span class="string">&#x27;theme&#x27;</span>);</span><br><span class="line"><span class="title function_">applyTheme</span>(saved === <span class="string">&#x27;dark&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 点击切换</span></span><br><span class="line">toggle.<span class="title function_">addEventListener</span>(<span class="string">&#x27;click&#x27;</span>, <span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="keyword">var</span> isDark = html.<span class="title function_">getAttribute</span>(<span class="string">&#x27;data-theme&#x27;</span>) === <span class="string">&#x27;dark&#x27;</span>;</span><br><span class="line">  <span class="title function_">applyTheme</span>(!isDark);</span><br><span class="line">  <span class="variable language_">localStorage</span>.<span class="title function_">setItem</span>(<span class="string">&#x27;theme&#x27;</span>, isDark ? <span class="string">&#x27;light&#x27;</span> : <span class="string">&#x27;dark&#x27;</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight styl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// styles.styl 中的暗色覆盖</span></span><br><span class="line"><span class="selector-tag">html</span><span class="selector-attr">[data-theme=<span class="string">&quot;dark&quot;</span>]</span></span><br><span class="line">  <span class="attr">--body-bg-color</span>: <span class="number">#0a0a0f</span></span><br><span class="line">  <span class="attr">--content-bg-color</span>: <span class="number">#1a1a2e</span></span><br><span class="line">  <span class="attr">--text-color</span>: <span class="number">#e2e8f0</span></span><br><span class="line">  <span class="attr">--link-color</span>: <span class="number">#c084fc</span></span><br><span class="line">  <span class="comment">// ...更多变量</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="6-文章Front-Matter模板"><a href="#6-文章Front-Matter模板" class="headerlink" title="6. 文章Front Matter模板"></a>6. 文章Front Matter模板</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">文章标题</span></span><br><span class="line"><span class="attr">date:</span> <span class="number">2026-06-10</span></span><br><span class="line"><span class="attr">tags:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">标签1</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">标签2</span></span><br><span class="line"><span class="attr">categories:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">分类名</span></span><br><span class="line"><span class="attr">summary:</span> <span class="string">一句话摘要（列表页展示）</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">一句话描述（首页展示，必须有，否则首页会展示全文）</span></span><br><span class="line"><span class="meta">---</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>重要</strong>：<code>description</code>字段是首页展示简介的关键。没有<code>description</code>的文章会在首页展示全文。</p>
+<h3 id="7-GitHub-Actions自动部署"><a href="#7-GitHub-Actions自动部署" class="headerlink" title="7. GitHub Actions自动部署"></a>7. GitHub Actions自动部署</h3><p>在<code>.github/workflows/deploy.yml</code>中配置：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">name:</span> <span class="string">Deploy</span> <span class="string">to</span> <span class="string">GitHub</span> <span class="string">Pages</span></span><br><span class="line"></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">push:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">main</span></span><br><span class="line"></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="attr">deploy:</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">    <span class="attr">permissions:</span></span><br><span class="line">      <span class="attr">contents:</span> <span class="string">write</span></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Checkout</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">actions/checkout@v4</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">submodules:</span> <span class="string">recursive</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Setup</span> <span class="string">Node.js</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">actions/setup-node@v4</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">node-version:</span> <span class="string">&#x27;20&#x27;</span></span><br><span class="line">          <span class="attr">cache:</span> <span class="string">&#x27;npm&#x27;</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Install</span> <span class="string">dependencies</span></span><br><span class="line">        <span class="attr">run:</span> <span class="string">npm</span> <span class="string">install</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Build</span> <span class="string">Hexo</span></span><br><span class="line">        <span class="attr">run:</span> <span class="string">npx</span> <span class="string">hexo</span> <span class="string">clean</span> <span class="string">&amp;&amp;</span> <span class="string">npx</span> <span class="string">hexo</span> <span class="string">generate</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Deploy</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">peaceiris/actions-gh-pages@v4</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">github_token:</span> <span class="string">$&#123;&#123;</span> <span class="string">secrets.GITHUB_TOKEN</span> <span class="string">&#125;&#125;</span></span><br><span class="line">          <span class="attr">publish_dir:</span> <span class="string">./public</span></span><br><span class="line">          <span class="attr">publish_branch:</span> <span class="string">gh-pages</span></span><br></pre></td></tr></table></figure>
+
+<p>部署流程：<code>git push origin main</code> → Actions自动构建 → <code>gh-pages</code>分支更新 → 线上生效。</p>
+<h3 id="8-头像本地化"><a href="#8-头像本地化" class="headerlink" title="8. 头像本地化"></a>8. 头像本地化</h3><p>GitHub头像URL在国内访问不稳定，下载到本地解决：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> -p <span class="built_in">source</span>/images</span><br><span class="line">curl -L -o <span class="built_in">source</span>/images/avatar.png <span class="string">&quot;你的头像URL&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>配置中使用本地路径：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">avatar:</span></span><br><span class="line">  <span class="attr">url:</span> <span class="string">/images/avatar.png</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="实验结论与反思"><a href="#实验结论与反思" class="headerlink" title="实验结论与反思"></a>实验结论与反思</h2><h3 id="踩过的坑"><a href="#踩过的坑" class="headerlink" title="踩过的坑"></a>踩过的坑</h3><table>
+<thead>
+<tr>
+<th>问题</th>
+<th>原因</th>
+<th>解决方案</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>首页展示全文而非简介</td>
+<td>文章缺少<code>description</code>字段</td>
+<td>Front Matter中必须加<code>description</code></td>
+</tr>
+<tr>
+<td>Google Fonts加载极慢</td>
+<td>国内无法访问fonts.googleapis.com</td>
+<td><code>font.enable: false</code>，使用系统字体</td>
+</tr>
+<tr>
+<td>头像加载失败</td>
+<td>GitHub avatars域名国内不稳定</td>
+<td>头像下载到本地<code>source/images/</code></td>
+</tr>
+<tr>
+<td>NexT darkmode无切换按钮</td>
+<td>只支持<code>prefers-color-scheme</code>媒体查询</td>
+<td>自己实现JS切换+CSS变量覆盖</td>
+</tr>
+<tr>
+<td>自定义组件暗色模式下变浅</td>
+<td>CSS变量覆盖不完整</td>
+<td><code>html[data-theme=&quot;dark&quot;]</code>中覆盖<code>.sidebar-inner</code>等所有容器</td>
+</tr>
+<tr>
+<td><code>_data/body-end.njk</code>中使用Hexo变量报错</td>
+<td>某些上下文中<code>site</code>变量不可用</td>
+<td>改用<code>&#123;&#123; site.posts.length &#125;&#125;</code>等Nunjucks模板语法</td>
+</tr>
+</tbody></table>
+<h3 id="项目文件结构"><a href="#项目文件结构" class="headerlink" title="项目文件结构"></a>项目文件结构</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">├── _config.yml              # 站点配置</span><br><span class="line">├── _config.next.yml         # 主题配置</span><br><span class="line">├── .github/workflows/       # CI/CD</span><br><span class="line">│   └── deploy.yml</span><br><span class="line">├── source/</span><br><span class="line">│   ├── _posts/              # 文章</span><br><span class="line">│   ├── _data/               # 自定义注入</span><br><span class="line">│   │   ├── sidebar.njk      # 左侧sidebar</span><br><span class="line">│   │   ├── body-end.njk     # JS/HTML注入</span><br><span class="line">│   │   ├── variables.styl   # CSS变量覆盖</span><br><span class="line">│   │   └── styles.styl      # 自定义样式</span><br><span class="line">│   ├── images/              # 本地图片</span><br><span class="line">│   │   └── avatar.png</span><br><span class="line">│   ├── about/               # 关于页</span><br><span class="line">│   └── categories/          # 分类页</span><br><span class="line">└── package.json</span><br></pre></td></tr></table></figure>
+
+<h2 id="面试关联"><a href="#面试关联" class="headerlink" title="面试关联"></a>面试关联</h2><ol>
+<li><strong>CI&#x2F;CD流程设计？</strong> → GitHub Actions自动构建部署，push触发、多步骤编排、权限控制</li>
+<li><strong>前端主题切换实现？</strong> → CSS变量 + data属性 + localStorage持久化，不需要框架</li>
+<li><strong>静态站点生成原理？</strong> → 模板引擎渲染Markdown为HTML，部署到CDN&#x2F;静态托管</li>
+<li><strong>性能优化实践？</strong> → 字体本地化&#x2F;禁用、头像本地化、关闭不必要的外部CDN</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Hexo/" rel="tag"># Hexo</a>
+              <a href="/tags/GitHub-Pages/" rel="tag"># GitHub Pages</a>
+              <a href="/tags/CI-CD/" rel="tag"># CI/CD</a>
+              <a href="/tags/NexT/" rel="tag"># NexT</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/posts/prompts/%E4%BC%81%E4%B8%9A%E7%9F%A5%E8%AF%86%E5%BA%93%E9%97%AE%E7%AD%94%E5%8A%A9%E6%89%8B/" rel="prev" title="企业知识库问答助手">
+                  <i class="fa fa-angle-left"></i> 企业知识库问答助手
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-robot"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">吴纪辰</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+<!-- Right Sidebar -->
+<div class="right-sidebar" id="right-sidebar">
+  <div class="right-stats-card">
+    <div class="card-title"><i class="fas fa-chart-bar"></i> Site Stats</div>
+    <div class="stats-grid">
+      <div class="stats-item">
+        <div class="stats-num">3</div>
+        <div class="stats-label">Articles</div>
+      </div>
+      <div class="stats-item">
+        <div class="stats-num">3</div>
+        <div class="stats-label">Categories</div>
+      </div>
+      <div class="stats-item">
+        <div class="stats-num">11</div>
+        <div class="stats-label">Tags</div>
+      </div>
+      <div class="stats-item">
+        <div class="stats-num">3</div>
+        <div class="stats-label">Posts</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="right-tree-card">
+    <div class="card-title"><i class="fas fa-sitemap"></i> Content Map</div>
+    <ul class="tree-list">
+      <li class="tree-category">
+        <div class="tree-cat-header" onclick="toggleTree(this)">
+          <i class="tree-icon fas fa-folder"></i>
+          <span class="tree-cat-name">Prompts</span>
+          <span class="tree-cat-count">1</span>
+        </div>
+        <ul class="tree-posts">
+          <li class="tree-post-item"><a href="/posts/prompts/%E4%BC%81%E4%B8%9A%E7%9F%A5%E8%AF%86%E5%BA%93%E9%97%AE%E7%AD%94%E5%8A%A9%E6%89%8B/"><span class="tree-dot"></span>企业知识库问答助手</a></li>
+        </ul>
+      </li>
+      <li class="tree-category">
+        <div class="tree-cat-header" onclick="toggleTree(this)">
+          <i class="tree-icon fas fa-folder"></i>
+          <span class="tree-cat-name">Hexo建站</span>
+          <span class="tree-cat-count">1</span>
+        </div>
+        <ul class="tree-posts">
+          <li class="tree-post-item"><a href="/posts/Hexo+GitHub-Pages%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA%E6%8C%87%E5%8D%97/"><span class="tree-dot"></span>Hexo+GitHub Pages博客搭建指南：从零到自动部署</a></li>
+        </ul>
+      </li>
+      <li class="tree-category">
+        <div class="tree-cat-header" onclick="toggleTree(this)">
+          <i class="tree-icon fas fa-folder"></i>
+          <span class="tree-cat-name">RAG</span>
+          <span class="tree-cat-count">1</span>
+        </div>
+        <ul class="tree-posts">
+          <li class="tree-post-item"><a href="/posts/%E4%BB%8E%E9%9B%B6%E6%89%8B%E5%86%99RAG-%E5%90%91%E9%87%8F%E6%A3%80%E7%B4%A2BM25-RRF%E6%B7%B7%E5%90%88%E6%A3%80%E7%B4%A2%E5%AE%9E%E6%88%98/"><span class="tree-dot"></span>从零手写RAG：向量检索+BM25+RRF混合检索实战</a></li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- Top Nav Bar -->
+<div class="top-nav-bar" id="top-nav-bar" style="display:none;">
+  <div class="nav-brand"><a href="/">AI应用开发工程师成长记录</a></div>
+  <div class="nav-menu">
+    <a class="nav-item" href="/"><i class="fas fa-home"></i> Home</a>
+    <a class="nav-item" href="/archives/"><i class="fas fa-archive"></i> Archives</a>
+    <a class="nav-item" href="/categories/"><i class="fas fa-th"></i> Categories</a>
+    <a class="nav-item" href="/tags/"><i class="fas fa-tags"></i> Tags</a>
+    <a class="nav-item" href="/about/"><i class="fas fa-user"></i> About</a>
+  </div>
+</div>
+
+<!-- Post Filter Bar -->
+<div class="post-filter-bar" id="post-filter-bar" style="display:none;">
+  <span class="filter-label"><i class="fas fa-filter"></i> Filter</span>
+  <span class="filter-tag active" data-filter="all">All</span>
+  <span class="filter-tag" data-filter="Prompts">Prompts</span>
+  <span class="filter-tag" data-filter="Hexo建站">Hexo建站</span>
+  <span class="filter-tag" data-filter="RAG">RAG</span>
+</div>
+
+<!-- Theme Toggle Button -->
+<button class="theme-toggle" id="theme-toggle" title="Toggle light/dark mode">
+  <i class="fas fa-moon" id="theme-icon-moon"></i>
+  <i class="fas fa-sun" id="theme-icon-sun" style="display:none"></i>
+</button>
+
+<script>
+(function() {
+  var html = document.documentElement;
+  var toggle = document.getElementById('theme-toggle');
+  var iconMoon = document.getElementById('theme-icon-moon');
+  var iconSun = document.getElementById('theme-icon-sun');
+
+  function applyTheme(dark) {
+    if (dark) {
+      html.setAttribute('data-theme', 'dark');
+      iconMoon.style.display = 'none';
+      iconSun.style.display = '';
+    } else {
+      html.removeAttribute('data-theme');
+      iconMoon.style.display = '';
+      iconSun.style.display = 'none';
+    }
+  }
+
+  var saved = localStorage.getItem('theme');
+  applyTheme(saved === 'dark');
+
+  toggle.addEventListener('click', function() {
+    var isDark = html.getAttribute('data-theme') === 'dark';
+    applyTheme(!isDark);
+    localStorage.setItem('theme', isDark ? 'light' : 'dark');
+  });
+
+  var rightSidebar = document.getElementById('right-sidebar');
+  var main = document.querySelector('.main');
+  if (rightSidebar && main) {
+    main.appendChild(rightSidebar);
+  }
+
+  var mainInner = document.querySelector('.main-inner');
+  if (mainInner) {
+    var navBar = document.getElementById('top-nav-bar');
+    var filterBar = document.getElementById('post-filter-bar');
+
+    if (navBar) {
+      navBar.style.display = '';
+      mainInner.insertBefore(navBar, mainInner.firstChild);
+      var path = window.location.pathname;
+      navBar.querySelectorAll('.nav-item').forEach(function(item) {
+        if (item.getAttribute('href') === path || (path === '/' && item.getAttribute('href') === '/')) {
+          item.classList.add('nav-active');
+        }
+      });
+    }
+
+    if (mainInner.classList.contains('index') && filterBar) {
+      filterBar.style.display = '';
+      mainInner.insertBefore(filterBar, navBar ? navBar.nextSibling : mainInner.firstChild);
+
+      filterBar.querySelectorAll('.filter-tag').forEach(function(tag) {
+        tag.addEventListener('click', function() {
+          filterBar.querySelectorAll('.filter-tag').forEach(function(t) { t.classList.remove('active'); });
+          this.classList.add('active');
+          var filter = this.getAttribute('data-filter');
+          document.querySelectorAll('.post-block').forEach(function(post) {
+            var cats = (post.querySelector('.post-category') || post.querySelector('.post-meta') || {}).textContent || '';
+            if (filter === 'all' || cats.indexOf(filter) > -1) {
+              post.style.display = '';
+            } else {
+              post.style.display = 'none';
+            }
+          });
+        });
+      });
+    }
+  }
+})();
+
+function toggleTree(header) {
+  var posts = header.nextElementSibling;
+  if (posts) {
+    posts.style.display = posts.style.display === 'none' ? '' : 'none';
+  }
+}
+</script>
+
+</body>
+</html>
