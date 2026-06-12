@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#a855f7"><meta name="generator" content="Hexo 8.1.2">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#a855f7">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"geitehaobu-del.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":280,"width_dual_column":240,"display":"always","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"flat","show_result":true},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":false,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":true,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInUp","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":10,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="基于开源RAG框架深度二次开发，构建支持多格式文档、双LLM后端、网络搜索增强的本地智能问答系统，涵盖模块化架构设计、递归检索、冲突检测等企业级功能。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LocalFileRAG：本地智能文档问答系统实战——从RAG Demo到可部署应用">
+<meta property="og:url" content="https://geitehaobu-del.github.io/posts/LocalFileRAG-%E6%9C%AC%E5%9C%B0%E6%99%BA%E8%83%BD%E6%96%87%E6%A1%A3%E9%97%AE%E7%AD%94%E7%B3%BB%E7%BB%9F%E5%AE%9E%E6%88%98/index.html">
+<meta property="og:site_name" content="吴纪辰的大模型学习路径">
+<meta property="og:description" content="基于开源RAG框架深度二次开发，构建支持多格式文档、双LLM后端、网络搜索增强的本地智能问答系统，涵盖模块化架构设计、递归检索、冲突检测等企业级功能。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-06-11T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-06-12T09:05:10.667Z">
+<meta property="article:author" content="吴纪辰">
+<meta property="article:tag" content="FAISS">
+<meta property="article:tag" content="FastAPI">
+<meta property="article:tag" content="Gradio">
+<meta property="article:tag" content="RAG">
+<meta property="article:tag" content="混合检索">
+<meta property="article:tag" content="递归检索">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://geitehaobu-del.github.io/posts/LocalFileRAG-%E6%9C%AC%E5%9C%B0%E6%99%BA%E8%83%BD%E6%96%87%E6%A1%A3%E9%97%AE%E7%AD%94%E7%B3%BB%E7%BB%9F%E5%AE%9E%E6%88%98/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://geitehaobu-del.github.io/posts/LocalFileRAG-%E6%9C%AC%E5%9C%B0%E6%99%BA%E8%83%BD%E6%96%87%E6%A1%A3%E9%97%AE%E7%AD%94%E7%B3%BB%E7%BB%9F%E5%AE%9E%E6%88%98/","path":"posts/LocalFileRAG-本地智能文档问答系统实战/","title":"LocalFileRAG：本地智能文档问答系统实战——从RAG Demo到可部署应用"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>LocalFileRAG：本地智能文档问答系统实战——从RAG Demo到可部署应用 | 吴纪辰的大模型学习路径</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":"default","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">吴纪辰的大模型学习路径</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">AI应用开发工程师成长记录 | RAG · Agent · 训练微调 · 工程实践</p>
+      <img class="custom-logo-image" src="/%5Bobject%20Object%5D" alt="吴纪辰的大模型学习路径">
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E5%BC%95%E5%85%A5%EF%BC%9A%E5%BD%93RAG%E4%BB%8EDemo%E8%B5%B0%E5%90%91%E5%BA%94%E7%94%A8"><span class="nav-number">1.</span> <span class="nav-text">问题引入：当RAG从Demo走向应用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1"><span class="nav-number">2.</span> <span class="nav-text">系统架构设计</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%9D%97%E5%8C%96%E5%88%86%E5%B1%82"><span class="nav-number">2.1.</span> <span class="nav-text">模块化分层</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%B5%81%E7%A8%8B"><span class="nav-number">2.2.</span> <span class="nav-text">核心流程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF%E7%82%B9"><span class="nav-number">3.</span> <span class="nav-text">关键技术点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%A4%9A%E6%A0%BC%E5%BC%8F%E6%96%87%E6%A1%A3%E8%A7%A3%E6%9E%90%EF%BC%9A%E4%B8%80%E5%A5%97%E6%8E%A5%E5%8F%A3%EF%BC%8C%E4%B8%83%E7%A7%8D%E6%A0%BC%E5%BC%8F"><span class="nav-number">3.1.</span> <span class="nav-text">1. 多格式文档解析：一套接口，七种格式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-FAISS%E7%B4%A2%E5%BC%95%E8%87%AA%E5%8A%A8%E9%80%89%E5%9E%8B%EF%BC%9A%E5%B0%8F%E6%95%B0%E6%8D%AE%E7%94%A8Flat%EF%BC%8C%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%94%A8IVF"><span class="nav-number">3.2.</span> <span class="nav-text">2. FAISS索引自动选型：小数据用Flat，大数据用IVF</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E9%80%92%E5%BD%92%E6%A3%80%E7%B4%A2%EF%BC%9A%E5%A4%8D%E6%9D%82%E9%97%AE%E9%A2%98%E9%9C%80%E8%A6%81%E5%A4%9A%E8%BD%AE%E6%9F%A5"><span class="nav-number">3.3.</span> <span class="nav-text">3. 递归检索：复杂问题需要多轮查</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E7%BD%91%E7%BB%9C%E6%90%9C%E7%B4%A2%E5%A2%9E%E5%BC%BA%EF%BC%88RAG-R%EF%BC%89%EF%BC%9A%E6%9C%AC%E5%9C%B0%E6%9F%A5%E4%B8%8D%E5%88%B0%EF%BC%8C%E4%B8%8A%E7%BD%91%E6%9F%A5"><span class="nav-number">3.4.</span> <span class="nav-text">4. 网络搜索增强（RAG+R）：本地查不到，上网查</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E5%8F%8CLLM%E5%90%8E%E7%AB%AF%E9%80%82%E9%85%8D%EF%BC%9A%E6%9C%AC%E5%9C%B0Ollama-%E4%BA%91%E7%AB%AFSiliconFlow"><span class="nav-number">3.5.</span> <span class="nav-text">5. 双LLM后端适配：本地Ollama + 云端SiliconFlow</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-%E9%87%8D%E6%8E%92%E5%BA%8F%E7%AD%96%E7%95%A5%EF%BC%9ACrossEncoder-vs-LLM"><span class="nav-number">3.6.</span> <span class="nav-text">6. 重排序策略：CrossEncoder vs LLM</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-Prompt%E5%B7%A5%E7%A8%8B%EF%BC%9A%E4%BC%81%E4%B8%9A%E7%9F%A5%E8%AF%86%E5%BA%93%E9%97%AE%E7%AD%94%E6%A8%A1%E6%9D%BF"><span class="nav-number">3.7.</span> <span class="nav-text">7. Prompt工程：企业知识库问答模板</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B7%A5%E7%A8%8B%E5%8C%96%E7%BB%86%E8%8A%82"><span class="nav-number">4.</span> <span class="nav-text">工程化细节</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E7%AE%A1%E7%90%86"><span class="nav-number">4.1.</span> <span class="nav-text">配置管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%94%99%E8%AF%AF%E5%A4%84%E7%90%86%E4%B8%8E%E9%99%8D%E7%BA%A7"><span class="nav-number">4.2.</span> <span class="nav-text">错误处理与降级</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%A5%E5%BF%97%E4%B8%8E%E7%9B%91%E6%8E%A7"><span class="nav-number">4.3.</span> <span class="nav-text">日志与监控</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8EMiniRAG%E7%9A%84%E5%AF%B9%E6%AF%94"><span class="nav-number">5.</span> <span class="nav-text">与MiniRAG的对比</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9D%A2%E8%AF%95%E5%85%B3%E8%81%94"><span class="nav-number">6.</span> <span class="nav-text">面试关联</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BE%85%E6%94%B9%E8%BF%9B%E6%96%B9%E5%90%91"><span class="nav-number">7.</span> <span class="nav-text">待改进方向</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="吴纪辰"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">吴纪辰</p>
+  <div class="site-description" itemprop="description">记录大模型应用开发的学习与实践，涵盖RAG系统、Agent架构、模型微调、工程化部署等技术方向</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">7</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/GeiTeHaoBu-del" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;GeiTeHaoBu-del" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+<div class="left-profile-card">
+  <img class="profile-avatar" src="/images/avatar.png" alt="Jichen Wu" />
+  <div class="profile-name">Jichen Wu</div>
+  <div class="profile-handle"><a href="https://github.com/GeiTeHaoBu-del" target="_blank">@GeiTeHaoBu-del</a></div>
+  <div class="profile-bio">AI Application Developer<br/>Focused on RAG, Agent & LLM Engineering</div>
+  <div class="profile-stats">
+    <div class="stat-item">
+      <div class="stat-num">17</div>
+      <div class="stat-label">Repos</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">0</div>
+      <div class="stat-label">Followers</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">1</div>
+      <div class="stat-label">Following</div>
+    </div>
+  </div>
+  <div class="profile-social">
+    <a href="https://github.com/GeiTeHaoBu-del" target="_blank" title="GitHub"><i class="fab fa-github"></i></a>
+  </div>
+</div>
+
+<div class="left-tech-card">
+  <div class="card-title"><i class="fas fa-code"></i> Tech Stack</div>
+  <div class="tech-tags">
+    <span class="tech-tag">Python</span>
+    <span class="tech-tag">FastAPI</span>
+    <span class="tech-tag">LangChain</span>
+    <span class="tech-tag">LangGraph</span>
+    <span class="tech-tag">FAISS</span>
+    <span class="tech-tag">Gradio</span>
+    <span class="tech-tag">Docker</span>
+    <span class="tech-tag">MySQL</span>
+    <span class="tech-tag">Redis</span>
+    <span class="tech-tag">Vue.js</span>
+  </div>
+</div>
+
+<div class="left-progress-card">
+  <div class="card-title"><i class="fas fa-graduation-cap"></i> Learning Progress</div>
+  <div class="progress-item">
+    <div class="progress-label"><span>MiniRAG</span><span>66%</span></div>
+    <div class="progress-bar"><div class="progress-fill" style="width: 66%"></div></div>
+  </div>
+  <div class="progress-item">
+    <div class="progress-label"><span>Local_Pdf_Chat_RAG</span><span>0%</span></div>
+    <div class="progress-bar"><div class="progress-fill" style="width: 0%"></div></div>
+  </div>
+  <div class="progress-item">
+    <div class="progress-label"><span>ai-agents-from-zero</span><span>0%</span></div>
+    <div class="progress-bar"><div class="progress-fill" style="width: 0%"></div></div>
+  </div>
+  <div class="progress-item">
+    <div class="progress-label"><span>MicroLM</span><span>0%</span></div>
+    <div class="progress-bar"><div class="progress-fill" style="width: 0%"></div></div>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://geitehaobu-del.github.io/posts/LocalFileRAG-%E6%9C%AC%E5%9C%B0%E6%99%BA%E8%83%BD%E6%96%87%E6%A1%A3%E9%97%AE%E7%AD%94%E7%B3%BB%E7%BB%9F%E5%AE%9E%E6%88%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="吴纪辰">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="吴纪辰的大模型学习路径">
+      <meta itemprop="description" content="记录大模型应用开发的学习与实践，涵盖RAG系统、Agent架构、模型微调、工程化部署等技术方向">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="LocalFileRAG：本地智能文档问答系统实战——从RAG Demo到可部署应用 | 吴纪辰的大模型学习路径">
+      <meta itemprop="description" content="基于开源RAG框架深度二次开发，构建支持多格式文档、双LLM后端、网络搜索增强的本地智能问答系统，涵盖模块化架构设计、递归检索、冲突检测等企业级功能。">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          LocalFileRAG：本地智能文档问答系统实战——从RAG Demo到可部署应用
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2026-06-12 00:00:00 / 修改时间：17:05:10" itemprop="dateCreated datePublished" datetime="2026-06-12T00:00:00+08:00">2026-06-12</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/RAG/" itemprop="url" rel="index"><span itemprop="name">RAG</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/RAG/%E5%B7%A5%E7%A8%8B%E5%AE%9E%E8%B7%B5/" itemprop="url" rel="index"><span itemprop="name">工程实践</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+            <div class="post-description">基于开源RAG框架深度二次开发，构建支持多格式文档、双LLM后端、网络搜索增强的本地智能问答系统，涵盖模块化架构设计、递归检索、冲突检测等企业级功能。</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="问题引入：当RAG从Demo走向应用"><a href="#问题引入：当RAG从Demo走向应用" class="headerlink" title="问题引入：当RAG从Demo走向应用"></a>问题引入：当RAG从Demo走向应用</h2><p>上一篇文章实现了RAG的核心检索pipeline。但那个版本是命令行交互的学习Demo——只支持PDF、没有持久化、没有API、不能部署。这篇文章解决一个更实际的问题：<strong>如何把RAG从”能跑”变成”能用”？</strong></p>
+<p>实际落地时，RAG系统面临几个真实挑战：</p>
+<table>
+<thead>
+<tr>
+<th>挑战</th>
+<th>Demo的问题</th>
+<th>应用的解决思路</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>文档格式</td>
+<td>只支持PDF</td>
+<td>需要支持Word&#x2F;Excel&#x2F;PPT&#x2F;TXT&#x2F;Markdown等常见格式</td>
+</tr>
+<tr>
+<td>部署方式</td>
+<td>命令行交互</td>
+<td>需要提供Web UI和REST API两种接入方式</td>
+</tr>
+<tr>
+<td>LLM后端</td>
+<td>单一API</td>
+<td>需要支持本地模型+云端API，自动切换</td>
+</tr>
+<tr>
+<td>检索深度</td>
+<td>单次检索</td>
+<td>复杂问题需要多轮检索才能覆盖全面</td>
+</tr>
+<tr>
+<td>信息时效性</td>
+<td>只能查本地</td>
+<td>需要补充实时网络信息</td>
+</tr>
+<tr>
+<td>结果可信度</td>
+<td>直接输出</td>
+<td>需要标注来源、检测冲突</td>
+</tr>
+</tbody></table>
+<p>本文基于开源RAG学习框架进行深度二次开发，构建一个<strong>可部署的本地智能文档问答系统</strong>。原始框架提供了基础的RAG Pipeline（文档解析→切分→Embedding→检索→生成），我在此基础上做了大量工程化改进。</p>
+<blockquote>
+<p>完整代码见 <a target="_blank" rel="noopener" href="https://github.com/GeiTeHaoBu-del/Local_Pdf_Chat_RAG">Local_Pdf_Chat_RAG</a></p>
+</blockquote>
+<h2 id="系统架构设计"><a href="#系统架构设计" class="headerlink" title="系统架构设计"></a>系统架构设计</h2><h3 id="模块化分层"><a href="#模块化分层" class="headerlink" title="模块化分层"></a>模块化分层</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">Local_Pdf_Chat_RAG/</span><br><span class="line">├── config.py              # 配置中心：环境变量、超参数、LLM自动检测</span><br><span class="line">├── rag_demo.py            # Gradio Web UI主入口</span><br><span class="line">├── api_router.py          # FastAPI REST服务</span><br><span class="line">├── core/                  # RAG核心模块</span><br><span class="line">│   ├── document_loader.py # 多格式文档解析</span><br><span class="line">│   ├── text_splitter.py  # 文本切分</span><br><span class="line">│   ├── embeddings.py     # 向量化（批量API调用）</span><br><span class="line">│   ├── vector_store.py   # FAISS向量存储（自动索引选型）</span><br><span class="line">│   ├── bm25_index.py     # BM25稀疏检索</span><br><span class="line">│   ├── retriever.py      # 混合检索+递归检索</span><br><span class="line">│   ├── reranker.py       # 重排序（CrossEncoder/LLM）</span><br><span class="line">│   └── generator.py      # LLM调用+Prompt构建</span><br><span class="line">├── features/             # 扩展功能</span><br><span class="line">│   ├── web_search.py     # SerpAPI网络搜索</span><br><span class="line">│   ├── conflict_detector.py # 冲突检测</span><br><span class="line">│   └── thinking_chain.py # DeepSeek思维链展示</span><br><span class="line">└── utils/                # 工具模块</span><br><span class="line">    └── network.py        # HTTP Session管理</span><br></pre></td></tr></table></figure>
+
+<h3 id="核心流程"><a href="#核心流程" class="headerlink" title="核心流程"></a>核心流程</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">用户上传文档 → 多格式解析 → 文本切分 → Embedding → 构建FAISS+BM25双索引</span><br><span class="line">                                                              ↓</span><br><span class="line">用户提问 → Query分析 → 递归检索(本地+网络) → 混合排序 → 冲突检测 → LLM生成 → 标注来源</span><br></pre></td></tr></table></figure>
+
+<h2 id="关键技术点"><a href="#关键技术点" class="headerlink" title="关键技术点"></a>关键技术点</h2><h3 id="1-多格式文档解析：一套接口，七种格式"><a href="#1-多格式文档解析：一套接口，七种格式" class="headerlink" title="1. 多格式文档解析：一套接口，七种格式"></a>1. 多格式文档解析：一套接口，七种格式</h3><p>实际场景中，用户上传的文档不只有PDF。我封装了一个统一的<code>extract_text</code>接口，内部根据文件扩展名路由到对应的解析器：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">extract_text</span>(<span class="params">filepath</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;统一文档解析入口&quot;&quot;&quot;</span></span><br><span class="line">    ext = os.path.splitext(filepath)[<span class="number">1</span>].lower()</span><br><span class="line">    handlers = &#123;</span><br><span class="line">        <span class="string">&#x27;.pdf&#x27;</span>: _parse_pdf,      <span class="comment"># pdfminer.six</span></span><br><span class="line">        <span class="string">&#x27;.docx&#x27;</span>: _parse_word,    <span class="comment"># python-docx</span></span><br><span class="line">        <span class="string">&#x27;.xlsx&#x27;</span>: _parse_excel,   <span class="comment"># pandas</span></span><br><span class="line">        <span class="string">&#x27;.pptx&#x27;</span>: _parse_ppt,     <span class="comment"># python-pptx</span></span><br><span class="line">        <span class="string">&#x27;.txt&#x27;</span>: _parse_text,     <span class="comment"># 直接读取</span></span><br><span class="line">        <span class="string">&#x27;.md&#x27;</span>: _parse_markdown,  <span class="comment"># 直接读取</span></span><br><span class="line">        <span class="string">&#x27;.html&#x27;</span>: _parse_html,    <span class="comment"># BeautifulSoup</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> handlers.get(ext, _unsupported)(filepath)</span><br></pre></td></tr></table></figure>
+
+<p><strong>设计考量：</strong> 每种格式的解析逻辑独立封装，新增格式只需注册新的handler，不影响已有代码。异常处理统一：解析失败时返回空字符串，上层决定是否跳过该文件。</p>
+<h3 id="2-FAISS索引自动选型：小数据用Flat，大数据用IVF"><a href="#2-FAISS索引自动选型：小数据用Flat，大数据用IVF" class="headerlink" title="2. FAISS索引自动选型：小数据用Flat，大数据用IVF"></a>2. FAISS索引自动选型：小数据用Flat，大数据用IVF</h3><p>MiniRAG版本用的是最基础的<code>IndexFlatL2</code>，每次检索都要遍历全量计算L2距离。这个版本增加了<strong>根据数据量自动选择索引类型</strong>的逻辑：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">AutoFaissIndex</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">select_index_type</span>(<span class="params">self, num_vectors</span>):</span><br><span class="line">        <span class="keyword">if</span> num_vectors &lt;= <span class="number">10_000</span>:</span><br><span class="line">            <span class="variable language_">self</span>.index_type = <span class="string">&quot;FlatL2&quot;</span>   <span class="comment"># 精确但慢</span></span><br><span class="line">            <span class="variable language_">self</span>.index = IndexFlatL2(<span class="variable language_">self</span>.dimension)</span><br><span class="line">        <span class="keyword">elif</span> num_vectors &lt;= <span class="number">100_000</span>:</span><br><span class="line">            <span class="variable language_">self</span>.index_type = <span class="string">&quot;IVFFlat&quot;</span>  <span class="comment"># 近似但快</span></span><br><span class="line">            nlist = <span class="built_in">min</span>(<span class="number">100</span>, <span class="built_in">int</span>(np.sqrt(num_vectors)))</span><br><span class="line">            quantizer = IndexFlatL2(<span class="variable language_">self</span>.dimension)</span><br><span class="line">            <span class="variable language_">self</span>.index = IndexIVFFlat(quantizer, <span class="variable language_">self</span>.dimension, nlist)</span><br><span class="line">            <span class="variable language_">self</span>.nprobe = <span class="built_in">min</span>(<span class="number">10</span>, <span class="built_in">max</span>(<span class="number">1</span>, <span class="built_in">int</span>(nlist * <span class="number">0.1</span>)))</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="variable language_">self</span>.index_type = <span class="string">&quot;IVFPQ&quot;</span>    <span class="comment"># 压缩索引，适合海量数据</span></span><br><span class="line">            ...</span><br></pre></td></tr></table></figure>
+
+<p><strong>为什么这样设计？</strong> 企业知识库的规模差异很大：小团队可能只有几百份文档，大集团可能有百万级。FlatL2在小数据下精确且实现简单；IVFFlat通过聚类减少搜索范围，适合中等规模；IVFPQ通过乘积量化压缩向量，牺牲少量精度换取大幅速度提升。</p>
+<p><strong>面试追问点：</strong> “nlist和nprobe怎么选？” → nlist决定聚类中心数，通常取<code>sqrt(N)</code>；nprobe决定查询时搜索多少个聚类，越大越精确但越慢，经验值是nlist的5%-10%。</p>
+<h3 id="3-递归检索：复杂问题需要多轮查"><a href="#3-递归检索：复杂问题需要多轮查" class="headerlink" title="3. 递归检索：复杂问题需要多轮查"></a>3. 递归检索：复杂问题需要多轮查</h3><p>单次检索往往无法覆盖复杂问题的全部信息。我实现了一个<strong>递归检索</strong>策略：先用LLM判断当前检索结果是否足够，不够则生成新的查询继续检索。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">recursive_retrieval</span>(<span class="params">initial_query, max_iterations=<span class="number">3</span></span>):</span><br><span class="line">    query = initial_query</span><br><span class="line">    all_contexts = []</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(max_iterations):</span><br><span class="line">        <span class="comment"># 执行混合检索</span></span><br><span class="line">        contexts = hybrid_search(query)</span><br><span class="line">        all_contexts.extend(contexts)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># LLM判断是否需要继续</span></span><br><span class="line">        prompt = <span class="string">f&quot;基于以下信息，判断是否需要进一步查询：<span class="subst">&#123;contexts[:<span class="number">3</span>]&#125;</span>&quot;</span></span><br><span class="line">        decision = call_llm(prompt)</span><br><span class="line">        <span class="keyword">if</span> <span class="string">&quot;不需要&quot;</span> <span class="keyword">in</span> decision:</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        query = decision  <span class="comment"># 用LLM生成的新查询继续</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> all_contexts</span><br></pre></td></tr></table></figure>
+
+<p><strong>一个具体例子：</strong> 用户问”公司2024年的营收和利润分别是多少？”</p>
+<ul>
+<li>第一轮检索”2024年营收” → 找到营收数据</li>
+<li>LLM判断：”已找到营收，但缺少利润信息，需要继续查询”</li>
+<li>第二轮检索”2024年利润” → 找到利润数据</li>
+<li>LLM判断：”信息已完整，无需继续”</li>
+</ul>
+<p><strong>注意事项：</strong> 递归检索有陷入循环的风险，必须设置最大迭代次数（默认3轮），且LLM生成的查询需要长度限制（&gt;100字视为无效）。</p>
+<h3 id="4-网络搜索增强（RAG-R）：本地查不到，上网查"><a href="#4-网络搜索增强（RAG-R）：本地查不到，上网查" class="headerlink" title="4. 网络搜索增强（RAG+R）：本地查不到，上网查"></a>4. 网络搜索增强（RAG+R）：本地查不到，上网查</h3><p>企业知识库有滞后性，最新信息需要靠网络搜索补充。我集成了SerpAPI获取Google搜索结果，与本地文档检索结果融合：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">query_with_augmentation</span>(<span class="params">question, enable_web_search=<span class="literal">False</span></span>):</span><br><span class="line">    local_results = hybrid_search(question)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> enable_web_search:</span><br><span class="line">        web_results = serpapi_search(question)</span><br><span class="line">        <span class="comment"># 网络结果不参与FAISS索引，直接作为文本上下文</span></span><br><span class="line">        local_results.extend(web_results)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> generate_answer(question, local_results)</span><br></pre></td></tr></table></figure>
+
+<p><strong>冲突检测：</strong> 当本地文档和网络搜索结果存在矛盾时（比如同一数据不同来源给出不同数字），系统会标记冲突并提示用户：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">detect_conflicts</span>(<span class="params">sources</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;检测多来源信息冲突&quot;&quot;&quot;</span></span><br><span class="line">    key_facts = &#123;&#125;</span><br><span class="line">    <span class="keyword">for</span> item <span class="keyword">in</span> sources:</span><br><span class="line">        facts = extract_key_facts(item[<span class="string">&#x27;text&#x27;</span>])</span><br><span class="line">        <span class="keyword">for</span> fact, value <span class="keyword">in</span> facts.items():</span><br><span class="line">            <span class="keyword">if</span> fact <span class="keyword">in</span> key_facts <span class="keyword">and</span> key_facts[fact] != value:</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">True</span>  <span class="comment"># 发现冲突</span></span><br><span class="line">            key_facts[fact] = value</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">False</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="5-双LLM后端适配：本地Ollama-云端SiliconFlow"><a href="#5-双LLM后端适配：本地Ollama-云端SiliconFlow" class="headerlink" title="5. 双LLM后端适配：本地Ollama + 云端SiliconFlow"></a>5. 双LLM后端适配：本地Ollama + 云端SiliconFlow</h3><p>不同场景对LLM的需求不同：本地模型免费但需要GPU，云端API方便但按量计费。我实现了<strong>自动检测+手动切换</strong>的双后端机制：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">detect_default_model</span>():</span><br><span class="line">    <span class="string">&quot;&quot;&quot;启动时自动检测可用的LLM后端&quot;&quot;&quot;</span></span><br><span class="line">    <span class="comment"># 优先检查云端API</span></span><br><span class="line">    <span class="keyword">if</span> SILICONFLOW_API_KEY:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;siliconflow&quot;</span></span><br><span class="line">    <span class="comment"># 其次检查本地Ollama</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        response = requests.get(<span class="string">&quot;http://localhost:11434/api/tags&quot;</span>, timeout=<span class="number">3</span>)</span><br><span class="line">        <span class="keyword">if</span> response.status_code == <span class="number">200</span>:</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;ollama&quot;</span></span><br><span class="line">    <span class="keyword">except</span>:</span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">None</span>  <span class="comment"># 都不可用，提示配置</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>运行时切换：</strong> Gradio UI提供下拉框，用户可以随时切换模型，无需重启服务。</p>
+<h3 id="6-重排序策略：CrossEncoder-vs-LLM"><a href="#6-重排序策略：CrossEncoder-vs-LLM" class="headerlink" title="6. 重排序策略：CrossEncoder vs LLM"></a>6. 重排序策略：CrossEncoder vs LLM</h3><p>检索后的精排有两种实现：</p>
+<table>
+<thead>
+<tr>
+<th>策略</th>
+<th>原理</th>
+<th>优点</th>
+<th>缺点</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>CrossEncoder</td>
+<td>拼接query+doc输入模型，输出相关性分数</td>
+<td>精度高，速度快（本地推理）</td>
+<td>模型固定，无法处理复杂判断</td>
+<td>通用场景</td>
+</tr>
+<tr>
+<td>LLM重排序</td>
+<td>让LLM给query-doc对打分</td>
+<td>灵活，可处理复杂相关性定义</td>
+<td>慢，消耗API额度</td>
+<td>高精度要求场景</td>
+</tr>
+</tbody></table>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">rerank_results</span>(<span class="params">query, docs, method=<span class="string">&quot;cross_encoder&quot;</span></span>):</span><br><span class="line">    <span class="keyword">if</span> method == <span class="string">&quot;cross_encoder&quot;</span>:</span><br><span class="line">        <span class="keyword">return</span> rerank_with_cross_encoder(query, docs)</span><br><span class="line">    <span class="keyword">elif</span> method == <span class="string">&quot;llm&quot;</span>:</span><br><span class="line">        <span class="keyword">return</span> rerank_with_llm(query, docs)</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-Prompt工程：企业知识库问答模板"><a href="#7-Prompt工程：企业知识库问答模板" class="headerlink" title="7. Prompt工程：企业知识库问答模板"></a>7. Prompt工程：企业知识库问答模板</h3><p>我设计了一套完整的企业知识库问答Prompt模板（<code>utils/prompt.md</code>），核心原则：</p>
+<ol>
+<li><strong>仅基于提供的参考资料回答</strong>，不使用模型自身知识</li>
+<li><strong>必须标注信息来源</strong>，格式为<code>【来源：《文档名》 章节/页码】</code></li>
+<li><strong>知识库未覆盖时明确告知</strong>，绝不编造</li>
+<li><strong>涉及多个文档时指出冲突</strong>，建议用户确认最新版本</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">prompt_template = <span class="string">&quot;&quot;&quot;你是一个专业的问答助手，基于以下&#123;context_type&#125;回答用户问题。</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">提供的参考内容：</span></span><br><span class="line"><span class="string">&#123;context&#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">用户问题：&#123;question&#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">请遵循以下回答原则：</span></span><br><span class="line"><span class="string">1. 仅基于提供的参考资料回答问题，不要使用你自己的知识</span></span><br><span class="line"><span class="string">2. 如果参考资料中没有足够信息，请诚实告知无法回答</span></span><br><span class="line"><span class="string">3. 回答应该全面、准确、有条理</span></span><br><span class="line"><span class="string">4. 请用中文回答</span></span><br><span class="line"><span class="string">5. 在回答末尾标注信息来源&#123;time_instruction&#125;&#123;conflict_instruction&#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">现在开始回答：&quot;&quot;&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="工程化细节"><a href="#工程化细节" class="headerlink" title="工程化细节"></a>工程化细节</h2><h3 id="配置管理"><a href="#配置管理" class="headerlink" title="配置管理"></a>配置管理</h3><p>所有敏感信息（API Key）和可调参数（chunk_size、top_k等）集中在<code>config.py</code>管理，通过<code>.env</code>文件加载：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># config.py</span></span><br><span class="line">CHUNK_SIZE = <span class="number">400</span>          <span class="comment"># 文本切分大小</span></span><br><span class="line">CHUNK_OVERLAP = <span class="number">40</span>        <span class="comment"># 重叠字符数</span></span><br><span class="line">HYBRID_ALPHA = <span class="number">0.7</span>        <span class="comment"># 语义检索权重</span></span><br><span class="line">RETRIEVAL_TOP_K = <span class="number">10</span>       <span class="comment"># 检索返回数</span></span><br><span class="line">RERANK_TOP_K = <span class="number">5</span>           <span class="comment"># 重排序后保留数</span></span><br><span class="line">MAX_RETRIEVAL_ITERATIONS = <span class="number">3</span>  <span class="comment"># 递归检索最大轮数</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="错误处理与降级"><a href="#错误处理与降级" class="headerlink" title="错误处理与降级"></a>错误处理与降级</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    reranked = rerank_results(query, docs, ids, meta, top_k=RERANK_TOP_K)</span><br><span class="line"><span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">    logging.error(<span class="string">f&quot;重排序失败: <span class="subst">&#123;e&#125;</span>&quot;</span>)</span><br><span class="line">    <span class="comment"># 降级：按原始顺序返回</span></span><br><span class="line">    reranked = [(did, &#123;<span class="string">&#x27;content&#x27;</span>: d, <span class="string">&#x27;metadata&#x27;</span>: m, <span class="string">&#x27;score&#x27;</span>: <span class="number">1.0</span>&#125;)</span><br><span class="line">                <span class="keyword">for</span> did, d, m <span class="keyword">in</span> <span class="built_in">zip</span>(ids, docs, meta)]</span><br></pre></td></tr></table></figure>
+
+<h3 id="日志与监控"><a href="#日志与监控" class="headerlink" title="日志与监控"></a>日志与监控</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">logging.basicConfig(</span><br><span class="line">    level=logging.INFO,</span><br><span class="line">    <span class="built_in">format</span>=<span class="string">&#x27;%(asctime)s - %(name)s - %(levelname)s - %(message)s&#x27;</span></span><br><span class="line">)</span><br><span class="line"><span class="comment"># 关键节点记录：索引构建、检索耗时、LLM调用结果</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="与MiniRAG的对比"><a href="#与MiniRAG的对比" class="headerlink" title="与MiniRAG的对比"></a>与MiniRAG的对比</h2><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>MiniRAG</th>
+<th>LocalPDFChat</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>定位</td>
+<td>学习Demo</td>
+<td>可部署应用</td>
+</tr>
+<tr>
+<td>代码量</td>
+<td>~400行</td>
+<td>~2500行</td>
+</tr>
+<tr>
+<td>文档格式</td>
+<td>PDF</td>
+<td>PDF&#x2F;Word&#x2F;Excel&#x2F;PPT&#x2F;TXT&#x2F;MD&#x2F;HTML</td>
+</tr>
+<tr>
+<td>交互方式</td>
+<td>命令行</td>
+<td>Gradio Web UI + FastAPI</td>
+</tr>
+<tr>
+<td>LLM后端</td>
+<td>单一API</td>
+<td>Ollama本地 + SiliconFlow云端</td>
+</tr>
+<tr>
+<td>索引类型</td>
+<td>FlatL2</td>
+<td>自动选型（FlatL2&#x2F;IVFFlat&#x2F;IVFPQ）</td>
+</tr>
+<tr>
+<td>检索策略</td>
+<td>单次混合检索</td>
+<td>递归检索</td>
+</tr>
+<tr>
+<td>网络增强</td>
+<td>无</td>
+<td>SerpAPI实时搜索</td>
+</tr>
+<tr>
+<td>冲突检测</td>
+<td>无</td>
+<td>有</td>
+</tr>
+<tr>
+<td>思维链展示</td>
+<td>无</td>
+<td>DeepSeek-R1支持</td>
+</tr>
+<tr>
+<td>配置管理</td>
+<td>硬编码</td>
+<td>.env环境变量</td>
+</tr>
+<tr>
+<td>错误处理</td>
+<td>简单try-except</td>
+<td>多级降级策略</td>
+</tr>
+</tbody></table>
+<h2 id="面试关联"><a href="#面试关联" class="headerlink" title="面试关联"></a>面试关联</h2><ol>
+<li><strong>RAG系统怎么设计模块化架构？</strong> → 按数据流分层：解析层→处理层→检索层→生成层，每层独立可替换</li>
+<li><strong>FAISS索引怎么选？</strong> → 小数据FlatL2，中等IVFFlat，海量IVFPQ，根据数据量自动切换</li>
+<li><strong>递归检索的终止条件？</strong> → LLM判断信息是否充足 + 最大迭代次数限制</li>
+<li><strong>本地模型和云端API怎么选？</strong> → 本地免费但需硬件，云端方便但按量计费，根据场景动态切换</li>
+<li><strong>网络搜索结果和本地文档怎么融合？</strong> → 网络结果作为额外上下文拼接，不参与向量索引；冲突时标记并提示用户</li>
+<li><strong>CrossEncoder和LLM重排序的区别？</strong> → 前者精度高速度快适合通用场景，后者灵活但慢适合高精度需求</li>
+<li><strong>怎么保证回答的可信度？</strong> → 标注来源、冲突检测、知识库未覆盖时明确告知</li>
+</ol>
+<h2 id="待改进方向"><a href="#待改进方向" class="headerlink" title="待改进方向"></a>待改进方向</h2><table>
+<thead>
+<tr>
+<th>方向</th>
+<th>思路</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>增量索引更新</td>
+<td>当前每次上传文档重建全量索引，应支持增量添加</td>
+</tr>
+<tr>
+<td>检索效果评估</td>
+<td>缺乏量化指标（Recall、MRR），需要构建测试集</td>
+</tr>
+<tr>
+<td>多模态支持</td>
+<td>扩展图片、表格的检索与理解</td>
+</tr>
+<tr>
+<td>用户反馈闭环</td>
+<td>记录用户点赞&#x2F;点踩，用于优化检索排序</td>
+</tr>
+<tr>
+<td>权限控制</td>
+<td>多租户场景下的文档隔离</td>
+</tr>
+<tr>
+<td>缓存策略</td>
+<td>热门查询结果缓存，减少重复计算</td>
+</tr>
+</tbody></table>
+<hr>
+<p><strong>关于这个项目：</strong> MiniRAG项目框架提供了基础的RAG Pipeline，本项目在此基础上有着大量工程化改进，包括模块化架构、多格式文档解析、递归检索、网络搜索增强、双LLM后端适配、冲突检测等企业级功能。核心目标是理解”从Demo到应用”需要补全哪些工程细节。</p>
+<blockquote>
+<p>完整代码：<a target="_blank" rel="noopener" href="https://github.com/GeiTeHaoBu-del/Local_Pdf_Chat_RAG">Local_Pdf_Chat_RAG</a></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/RAG/" rel="tag"># RAG</a>
+              <a href="/tags/FAISS/" rel="tag"># FAISS</a>
+              <a href="/tags/%E6%B7%B7%E5%90%88%E6%A3%80%E7%B4%A2/" rel="tag"># 混合检索</a>
+              <a href="/tags/FastAPI/" rel="tag"># FastAPI</a>
+              <a href="/tags/Gradio/" rel="tag"># Gradio</a>
+              <a href="/tags/%E9%80%92%E5%BD%92%E6%A3%80%E7%B4%A2/" rel="tag"># 递归检索</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/posts/Hexo+GitHub-Pages%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA%E6%8C%87%E5%8D%97/" rel="prev" title="Hexo+GitHub Pages博客搭建指南：从零到自动部署">
+                  <i class="fa fa-angle-left"></i> Hexo+GitHub Pages博客搭建指南：从零到自动部署
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-robot"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">吴纪辰</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+<!-- Right Sidebar -->
+<div class="right-sidebar" id="right-sidebar">
+  <div class="right-stats-card">
+    <div class="card-title"><i class="fas fa-chart-bar"></i> Site Stats</div>
+    <div class="stats-grid">
+      <div class="stats-item">
+        <div class="stats-num">7</div>
+        <div class="stats-label">Articles</div>
+      </div>
+      <div class="stats-item">
+        <div class="stats-num">6</div>
+        <div class="stats-label">Categories</div>
+      </div>
+      <div class="stats-item">
+        <div class="stats-num">18</div>
+        <div class="stats-label">Tags</div>
+      </div>
+      <div class="stats-item">
+        <div class="stats-num">7</div>
+        <div class="stats-label">Posts</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="right-tree-card">
+    <div class="card-title"><i class="fas fa-sitemap"></i> Content Map</div>
+    <ul class="tree-list">
+      <li class="tree-category">
+        <div class="tree-cat-header" onclick="toggleTree(this)">
+          <i class="tree-icon fas fa-folder"></i>
+          <span class="tree-cat-name">学习日志</span>
+          <span class="tree-cat-count">2</span>
+        </div>
+        <ul class="tree-posts">
+          <li class="tree-post-item"><a href="/posts/26%E5%B9%B406%E6%9C%8809%E6%97%A5%E6%80%BB%E7%BB%93/"><span class="tree-dot"></span>26年06月09日总结</a></li>
+          <li class="tree-post-item"><a href="/posts/26%E5%B9%B406%E6%9C%8810%E6%97%A5%E6%80%BB%E7%BB%93/"><span class="tree-dot"></span>26年06月10日总结</a></li>
+        </ul>
+      </li>
+      <li class="tree-category">
+        <div class="tree-cat-header" onclick="toggleTree(this)">
+          <i class="tree-icon fas fa-folder"></i>
+          <span class="tree-cat-name">Hexo建站</span>
+          <span class="tree-cat-count">1</span>
+        </div>
+        <ul class="tree-posts">
+          <li class="tree-post-item"><a href="/posts/Hexo+GitHub-Pages%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA%E6%8C%87%E5%8D%97/"><span class="tree-dot"></span>Hexo+GitHub Pages博客搭建指南：从零到自动部署</a></li>
+        </ul>
+      </li>
+      <li class="tree-category">
+        <div class="tree-cat-header" onclick="toggleTree(this)">
+          <i class="tree-icon fas fa-folder"></i>
+          <span class="tree-cat-name">工程实践</span>
+          <span class="tree-cat-count">1</span>
+        </div>
+        <ul class="tree-posts">
+          <li class="tree-post-item"><a href="/posts/%E5%BD%93%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%9C%8D%E5%8A%A1%E6%8C%82%E4%BA%86%E6%80%8E%E4%B9%88%E5%8A%9E%EF%BC%9FLLM%E5%A4%9A%E6%A8%A1%E5%9E%8B%E6%95%85%E9%9A%9C%E8%BD%AC%E7%A7%BB%E5%AE%9E%E6%88%98/"><span class="tree-dot"></span>当大模型服务挂了怎么办？LLM多模型故障转移实战</a></li>
+        </ul>
+      </li>
+      <li class="tree-category">
+        <div class="tree-cat-header" onclick="toggleTree(this)">
+          <i class="tree-icon fas fa-folder"></i>
+          <span class="tree-cat-name">Prompts</span>
+          <span class="tree-cat-count">1</span>
+        </div>
+        <ul class="tree-posts">
+          <li class="tree-post-item"><a href="/posts/prompts/%E4%BC%81%E4%B8%9A%E7%9F%A5%E8%AF%86%E5%BA%93%E9%97%AE%E7%AD%94%E5%8A%A9%E6%89%8B/"><span class="tree-dot"></span>企业知识库问答助手</a></li>
+        </ul>
+      </li>
+      <li class="tree-category">
+        <div class="tree-cat-header" onclick="toggleTree(this)">
+          <i class="tree-icon fas fa-folder"></i>
+          <span class="tree-cat-name">RAG</span>
+          <span class="tree-cat-count">2</span>
+        </div>
+        <ul class="tree-posts">
+          <li class="tree-post-item"><a href="/posts/%E4%BB%8E%E9%9B%B6%E6%89%8B%E5%86%99RAG-%E5%90%91%E9%87%8F%E6%A3%80%E7%B4%A2BM25-RRF%E6%B7%B7%E5%90%88%E6%A3%80%E7%B4%A2%E5%AE%9E%E6%88%98/"><span class="tree-dot"></span>从零手写RAG：向量检索+BM25+RRF混合检索实战</a></li>
+          <li class="tree-post-item"><a href="/posts/LocalFileRAG-%E6%9C%AC%E5%9C%B0%E6%99%BA%E8%83%BD%E6%96%87%E6%A1%A3%E9%97%AE%E7%AD%94%E7%B3%BB%E7%BB%9F%E5%AE%9E%E6%88%98/"><span class="tree-dot"></span>LocalFileRAG：本地智能文档问答系统实战——从RAG Demo到可部署应用</a></li>
+        </ul>
+      </li>
+      <li class="tree-category">
+        <div class="tree-cat-header" onclick="toggleTree(this)">
+          <i class="tree-icon fas fa-folder"></i>
+          <span class="tree-cat-name">工程实践</span>
+          <span class="tree-cat-count">1</span>
+        </div>
+        <ul class="tree-posts">
+          <li class="tree-post-item"><a href="/posts/LocalFileRAG-%E6%9C%AC%E5%9C%B0%E6%99%BA%E8%83%BD%E6%96%87%E6%A1%A3%E9%97%AE%E7%AD%94%E7%B3%BB%E7%BB%9F%E5%AE%9E%E6%88%98/"><span class="tree-dot"></span>LocalFileRAG：本地智能文档问答系统实战——从RAG Demo到可部署应用</a></li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- Top Nav Bar -->
+<div class="top-nav-bar" id="top-nav-bar" style="display:none;">
+  <div class="nav-brand"><a href="/">AI应用开发工程师成长记录</a></div>
+  <div class="nav-menu">
+    <a class="nav-item" href="/"><i class="fas fa-home"></i> Home</a>
+    <a class="nav-item" href="/archives/"><i class="fas fa-archive"></i> Archives</a>
+    <a class="nav-item" href="/categories/"><i class="fas fa-th"></i> Categories</a>
+    <a class="nav-item" href="/tags/"><i class="fas fa-tags"></i> Tags</a>
+    <a class="nav-item" href="/about/"><i class="fas fa-user"></i> About</a>
+  </div>
+</div>
+
+<!-- Post Filter Bar -->
+<div class="post-filter-bar" id="post-filter-bar" style="display:none;">
+  <span class="filter-label"><i class="fas fa-filter"></i> Filter</span>
+  <span class="filter-tag active" data-filter="all">All</span>
+  <span class="filter-tag" data-filter="学习日志">学习日志</span>
+  <span class="filter-tag" data-filter="Hexo建站">Hexo建站</span>
+  <span class="filter-tag" data-filter="工程实践">工程实践</span>
+  <span class="filter-tag" data-filter="Prompts">Prompts</span>
+  <span class="filter-tag" data-filter="RAG">RAG</span>
+  <span class="filter-tag" data-filter="工程实践">工程实践</span>
+</div>
+
+<!-- Theme Toggle Button -->
+<button class="theme-toggle" id="theme-toggle" title="Toggle light/dark mode">
+  <i class="fas fa-moon" id="theme-icon-moon"></i>
+  <i class="fas fa-sun" id="theme-icon-sun" style="display:none"></i>
+</button>
+
+<script>
+(function() {
+  var html = document.documentElement;
+  var toggle = document.getElementById('theme-toggle');
+  var iconMoon = document.getElementById('theme-icon-moon');
+  var iconSun = document.getElementById('theme-icon-sun');
+
+  function applyTheme(dark) {
+    if (dark) {
+      html.setAttribute('data-theme', 'dark');
+      iconMoon.style.display = 'none';
+      iconSun.style.display = '';
+    } else {
+      html.removeAttribute('data-theme');
+      iconMoon.style.display = '';
+      iconSun.style.display = 'none';
+    }
+  }
+
+  var saved = localStorage.getItem('theme');
+  applyTheme(saved === 'dark');
+
+  toggle.addEventListener('click', function() {
+    var isDark = html.getAttribute('data-theme') === 'dark';
+    applyTheme(!isDark);
+    localStorage.setItem('theme', isDark ? 'light' : 'dark');
+  });
+
+  var rightSidebar = document.getElementById('right-sidebar');
+  var main = document.querySelector('.main');
+  if (rightSidebar && main) {
+    main.appendChild(rightSidebar);
+  }
+
+  var mainInner = document.querySelector('.main-inner');
+  if (mainInner) {
+    var navBar = document.getElementById('top-nav-bar');
+    var filterBar = document.getElementById('post-filter-bar');
+
+    if (navBar) {
+      navBar.style.display = '';
+      mainInner.insertBefore(navBar, mainInner.firstChild);
+      var path = window.location.pathname;
+      navBar.querySelectorAll('.nav-item').forEach(function(item) {
+        if (item.getAttribute('href') === path || (path === '/' && item.getAttribute('href') === '/')) {
+          item.classList.add('nav-active');
+        }
+      });
+    }
+
+    if (mainInner.classList.contains('index') && filterBar) {
+      filterBar.style.display = '';
+      mainInner.insertBefore(filterBar, navBar ? navBar.nextSibling : mainInner.firstChild);
+
+      filterBar.querySelectorAll('.filter-tag').forEach(function(tag) {
+        tag.addEventListener('click', function() {
+          filterBar.querySelectorAll('.filter-tag').forEach(function(t) { t.classList.remove('active'); });
+          this.classList.add('active');
+          var filter = this.getAttribute('data-filter');
+          document.querySelectorAll('.post-block').forEach(function(post) {
+            var cats = (post.querySelector('.post-category') || post.querySelector('.post-meta') || {}).textContent || '';
+            if (filter === 'all' || cats.indexOf(filter) > -1) {
+              post.style.display = '';
+            } else {
+              post.style.display = 'none';
+            }
+          });
+        });
+      });
+    }
+  }
+})();
+
+function toggleTree(header) {
+  var posts = header.nextElementSibling;
+  if (posts) {
+    posts.style.display = posts.style.display === 'none' ? '' : 'none';
+  }
+}
+</script>
+
+</body>
+</html>

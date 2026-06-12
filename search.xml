@@ -174,6 +174,256 @@
       </tags>
   </entry>
   <entry>
+    <title>26年06月10日总结</title>
+    <url>/posts/26%E5%B9%B406%E6%9C%8810%E6%97%A5%E6%80%BB%E7%BB%93/</url>
+    <content><![CDATA[<p>今日总结：</p>
+<ol>
+<li>写了几篇新文章</li>
+<li>投了半天工作</li>
+</ol>
+<p>今日反思：</p>
+<ol>
+<li>学习进度没有推进</li>
+</ol>
+<p>明日计划：</p>
+<ol>
+<li>早上学完agent</li>
+<li>中午看完rag+agent面试题</li>
+<li>下午投简历，投到触发150次提醒</li>
+<li>晚上复盘，啥也不干，就思考，深度思考，不是思考求职，而是思考自身！</li>
+</ol>
+]]></content>
+      <categories>
+        <category>学习日志</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>当大模型服务挂了怎么办？LLM多模型故障转移实战</title>
+    <url>/posts/%E5%BD%93%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%9C%8D%E5%8A%A1%E6%8C%82%E4%BA%86%E6%80%8E%E4%B9%88%E5%8A%9E%EF%BC%9FLLM%E5%A4%9A%E6%A8%A1%E5%9E%8B%E6%95%85%E9%9A%9C%E8%BD%AC%E7%A7%BB%E5%AE%9E%E6%88%98/</url>
+    <content><![CDATA[<h2 id="1-问题引入"><a href="#1-问题引入" class="headerlink" title="1. 问题引入"></a>1. 问题引入</h2><p>我们的热搜监控系统每30秒爬取一次微博热榜，调用大模型对每条热搜做情感分析、类型分类和话题提取。某天凌晨，主模型API突然返回429限流，系统连续30分钟没有产出任何分析结果——前端图表空白、预警静默、数据库趋势断档。</p>
+<p>这不是小概率事件。LLM服务不稳定几乎是常态：429限流、5xx宕机、API Key过期、响应超时，任何一个都能让单模型依赖的系统瘫痪。<strong>单点依赖 &#x3D; 单点故障</strong>，而LLM的不可用不是”会不会”的问题，是”什么时候”的问题。</p>
+<p>我们需要回答一个核心问题：<strong>当LLM服务不可用时，如何保证系统持续产出分析结果？</strong></p>
+<h2 id="2-原理讲解"><a href="#2-原理讲解" class="headerlink" title="2. 原理讲解"></a>2. 原理讲解</h2><h3 id="2-1-故障转移的三层设计"><a href="#2-1-故障转移的三层设计" class="headerlink" title="2.1 故障转移的三层设计"></a>2.1 故障转移的三层设计</h3><p>我们的方案围绕三个核心机制展开：</p>
+<p><strong>第一层：连续失败计数</strong>。不是一次失败就切换——偶发的网络抖动不应触发模型切换。只有连续失败达到阈值（默认2次），才判定为模型级别的故障，触发切换。这避免了”狼来了”式的频繁切换。</p>
+<p><strong>第二层：模型切换</strong>。当连续失败达到阈值，系统沿 <code>primary → backup</code> 优先级链切换到下一个可用模型，同时重置失败计数器。每次切换都会记录时间戳、原模型、目标模型和原因，形成审计日志。</p>
+<p><strong>第三层：自动恢复</strong>。切换到备模型后，系统不会永远停留在备模型上。每当一个新的请求周期开始（即下一轮爬取），系统会尝试回到主模型。因为主模型宕机往往是临时的——限流窗口过了、服务恢复了——自动恢复确保系统不会因为一次临时故障而永久降级。</p>
+<h3 id="2-2-为什么不用完整的熔断器？"><a href="#2-2-为什么不用完整的熔断器？" class="headerlink" title="2.2 为什么不用完整的熔断器？"></a>2.2 为什么不用完整的熔断器？</h3><p>Circuit Breaker模式有三种状态：Closed → Open → Half-Open。它适合高频请求场景（每秒成百上千次调用），需要精确控制”探针”频率。但我们的场景不同：<strong>每30秒才调用一次LLM</strong>，请求频率极低。在这种低频场景下，完整熔断器的半开状态、探针窗口反而增加了不必要的复杂度。轻量的连续失败计数已经足够——每次爬取本身就是天然的检测点，无需额外定时器。</p>
+<h3 id="2-3-三级降级链：任何情况下都有输出"><a href="#2-3-三级降级链：任何情况下都有输出" class="headerlink" title="2.3 三级降级链：任何情况下都有输出"></a>2.3 三级降级链：任何情况下都有输出</h3><p>故障转移解决的是”换一个模型试试”，但若所有模型都不可用呢？我们设计了三级降级链：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">批量API调用 → 单条API调用 → 返回默认值</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>批量API</strong>：10条标题一次请求，效率最高</li>
+<li><strong>单条API</strong>：批量失败时退化为逐条调用，可能部分成功</li>
+<li><strong>默认值</strong>：所有API都失败时，返回 <code>sentiment_score=0, type_name=&#39;其他&#39;, topic_name=&#39;无&#39;</code>，系统<strong>永远不崩溃，永远有输出</strong></li>
+</ul>
+<p>类比值班体系：<strong>主治医师（主模型批量）→ 值班医生（备模型单条）→ 急救包（默认值）</strong>，确保任何时刻都有救治能力。</p>
+<h2 id="3-代码实现"><a href="#3-代码实现" class="headerlink" title="3. 代码实现"></a>3. 代码实现</h2><h3 id="3-1-核心状态机"><a href="#3-1-核心状态机" class="headerlink" title="3.1 核心状态机"></a>3.1 核心状态机</h3><p>故障转移的核心是三个状态变量的协同：<code>current_model</code>（当前使用的模型标识）、<code>consecutive_failures</code>（连续失败次数）、<code>max_retries</code>（触发切换的阈值）。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># llm_client.py:38-76 初始化</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, api_config</span>):</span><br><span class="line">    failover_config = api_config.get(<span class="string">&#x27;failover&#x27;</span>, &#123;&#125;)</span><br><span class="line">    <span class="variable language_">self</span>.max_retries = failover_config.get(<span class="string">&#x27;max_retries&#x27;</span>, <span class="number">2</span>)</span><br><span class="line">    <span class="variable language_">self</span>.auto_recover = failover_config.get(<span class="string">&#x27;auto_recover&#x27;</span>, <span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    <span class="variable language_">self</span>.models = &#123;&#125;</span><br><span class="line">    model_order = [<span class="string">&#x27;primary&#x27;</span>, <span class="string">&#x27;backup&#x27;</span>]</span><br><span class="line">    <span class="keyword">for</span> model_name <span class="keyword">in</span> model_order:</span><br><span class="line">        <span class="keyword">if</span> model_name <span class="keyword">in</span> api_config:</span><br><span class="line">            <span class="variable language_">self</span>.models[model_name] = <span class="variable language_">self</span>._init_model_config(</span><br><span class="line">                api_config[model_name], model_name</span><br><span class="line">            )</span><br><span class="line"></span><br><span class="line">    <span class="variable language_">self</span>.current_model = <span class="string">&#x27;primary&#x27;</span></span><br><span class="line">    <span class="variable language_">self</span>.consecutive_failures = <span class="number">0</span></span><br><span class="line">    <span class="variable language_">self</span>.switch_history = []</span><br></pre></td></tr></table></figure>
+
+<p>配置结构天然支持多模型——<code>primary</code> 和 <code>backup</code> 各自持有独立的 <code>api_url</code>、<code>api_key</code>、<code>model</code> 名称，切换时只需更换 <code>current_model</code> 指针。</p>
+<h3 id="3-2-chat-主循环：故障转移的指挥中心"><a href="#3-2-chat-主循环：故障转移的指挥中心" class="headerlink" title="3.2 chat()主循环：故障转移的指挥中心"></a>3.2 chat()主循环：故障转移的指挥中心</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># llm_client.py:168-223 精简版</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">chat</span>(<span class="params">self, messages, temperature=<span class="number">0.3</span>, max_tokens=<span class="number">2000</span></span>):</span><br><span class="line">    <span class="comment"># ① 新周期尝试恢复主模型</span></span><br><span class="line">    <span class="variable language_">self</span>._try_recover_primary()</span><br><span class="line"></span><br><span class="line">    attempted_models = []</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        model_config = <span class="variable language_">self</span>.models.get(<span class="variable language_">self</span>.current_model)</span><br><span class="line">        attempted_models.append(<span class="variable language_">self</span>.current_model)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># ② 发起请求</span></span><br><span class="line">        result = <span class="variable language_">self</span>._do_chat_request(model_config, messages, temperature, max_tokens)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> result <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">            <span class="comment"># ③ 成功：重置失败计数</span></span><br><span class="line">            <span class="variable language_">self</span>.consecutive_failures = <span class="number">0</span></span><br><span class="line">            <span class="keyword">return</span> result</span><br><span class="line"></span><br><span class="line">        <span class="comment"># ④ 失败：累加计数</span></span><br><span class="line">        <span class="variable language_">self</span>.consecutive_failures += <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> <span class="variable language_">self</span>.consecutive_failures &gt;= <span class="variable language_">self</span>.max_retries:</span><br><span class="line">            <span class="comment"># ⑤ 达到阈值：切换模型</span></span><br><span class="line">            <span class="variable language_">self</span>._switch_model(<span class="string">f&quot;连续失败<span class="subst">&#123;self.max_retries&#125;</span>次&quot;</span>)</span><br><span class="line">            <span class="comment"># 所有模型都试过了 → 返回None</span></span><br><span class="line">            <span class="keyword">if</span> <span class="variable language_">self</span>.current_model <span class="keyword">in</span> attempted_models:</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="comment"># ⑥ 未达阈值：线性退避等待</span></span><br><span class="line">            time.sleep(<span class="number">1</span> * <span class="variable language_">self</span>.consecutive_failures)</span><br></pre></td></tr></table></figure>
+
+<p>控制流的精髓：步骤①是自动恢复的入口，步骤③⑤⑥构成”失败→重试→切换”的决策链，<code>attempted_models</code> 防止无限循环——如果所有模型都已尝试，立即返回None。</p>
+<h3 id="3-3-模型切换与审计"><a href="#3-3-模型切换与审计" class="headerlink" title="3.3 模型切换与审计"></a>3.3 模型切换与审计</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># llm_client.py:126-158 精简版</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_switch_model</span>(<span class="params">self, reason</span>):</span><br><span class="line">    next_model = <span class="variable language_">self</span>._get_next_model()</span><br><span class="line">    <span class="keyword">if</span> next_model:</span><br><span class="line">        old_model = <span class="variable language_">self</span>.current_model</span><br><span class="line">        <span class="variable language_">self</span>.current_model = next_model</span><br><span class="line">        <span class="variable language_">self</span>.consecutive_failures = <span class="number">0</span></span><br><span class="line"></span><br><span class="line">        <span class="variable language_">self</span>.switch_history.append(&#123;</span><br><span class="line">            <span class="string">&#x27;time&#x27;</span>: time.strftime(<span class="string">&#x27;%Y-%m-%d %H:%M:%S&#x27;</span>),</span><br><span class="line">            <span class="string">&#x27;from&#x27;</span>: old_model,</span><br><span class="line">            <span class="string">&#x27;to&#x27;</span>: next_model,</span><br><span class="line">            <span class="string">&#x27;reason&#x27;</span>: reason</span><br><span class="line">        &#125;)</span><br></pre></td></tr></table></figure>
+
+<p><code>switch_history</code> 是生产环境排障的关键——当运维发现分析结果异常时，可以回溯”什么时候、从哪个模型、切到哪个模型、因为什么”，而不是对着黑盒猜测。</p>
+<h3 id="3-4-自动恢复：新周期的回归"><a href="#3-4-自动恢复：新周期的回归" class="headerlink" title="3.4 自动恢复：新周期的回归"></a>3.4 自动恢复：新周期的回归</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># llm_client.py:160-166</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_try_recover_primary</span>(<span class="params">self</span>):</span><br><span class="line">    <span class="keyword">if</span> <span class="variable language_">self</span>.auto_recover <span class="keyword">and</span> <span class="variable language_">self</span>.current_model != <span class="string">&#x27;primary&#x27;</span> <span class="keyword">and</span> <span class="string">&#x27;primary&#x27;</span> <span class="keyword">in</span> <span class="variable language_">self</span>.models:</span><br><span class="line">        <span class="variable language_">self</span>.current_model = <span class="string">&#x27;primary&#x27;</span></span><br><span class="line">        <span class="variable language_">self</span>.consecutive_failures = <span class="number">0</span></span><br></pre></td></tr></table></figure>
+
+<p>仅7行代码，却是一个精妙的设计决策：<strong>在每次新请求周期的开头尝试恢复</strong>。为什么不是定时器？因为我们的爬取周期就是天然的检测点——下一轮调用时自然就知道主模型是否恢复了。没有额外线程、没有定时器、没有复杂状态，代码极简但效果确定。</p>
+<h3 id="3-5-批量→单条的退化"><a href="#3-5-批量→单条的退化" class="headerlink" title="3.5 批量→单条的退化"></a>3.5 批量→单条的退化</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># llm_analyzer.py:336-376 精简版</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_call_batch_api</span>(<span class="params">self, titles</span>):</span><br><span class="line">    titles_text = <span class="string">&quot;\n&quot;</span>.join([<span class="string">f&quot;<span class="subst">&#123;i+<span class="number">1</span>&#125;</span>. <span class="subst">&#123;title&#125;</span>&quot;</span> <span class="keyword">for</span> i, title <span class="keyword">in</span> <span class="built_in">enumerate</span>(titles)])</span><br><span class="line">    messages = [</span><br><span class="line">        &#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;system&quot;</span>, <span class="string">&quot;content&quot;</span>: <span class="variable language_">self</span>.batch_system_prompt&#125;,</span><br><span class="line">        &#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>, <span class="string">&quot;content&quot;</span>: <span class="string">f&quot;请批量分析以下<span class="subst">&#123;<span class="built_in">len</span>(titles)&#125;</span>个热搜标题：\n\n<span class="subst">&#123;titles_text&#125;</span>&quot;</span>&#125;</span><br><span class="line">    ]</span><br><span class="line"></span><br><span class="line">    content = <span class="variable language_">self</span>.client.chat(messages, temperature=<span class="number">0.2</span>)</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> content:</span><br><span class="line">        <span class="comment"># 批量失败 → 退化为逐条分析</span></span><br><span class="line">        <span class="keyword">return</span> [<span class="variable language_">self</span>.analyze(t) <span class="keyword">for</span> t <span class="keyword">in</span> titles]</span><br><span class="line"></span><br><span class="line">    result = <span class="variable language_">self</span>.client.parse_json_response(content)</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> result:</span><br><span class="line">        <span class="comment"># 解析失败 → 同样退化</span></span><br><span class="line">        <span class="keyword">return</span> [<span class="variable language_">self</span>.analyze(t) <span class="keyword">for</span> t <span class="keyword">in</span> titles]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">isinstance</span>(result, <span class="built_in">list</span>):</span><br><span class="line">        <span class="keyword">return</span> <span class="variable language_">self</span>._normalize_results(result, titles)</span><br><span class="line">    <span class="keyword">elif</span> <span class="built_in">isinstance</span>(result, <span class="built_in">dict</span>):</span><br><span class="line">        <span class="keyword">return</span> [result] + [<span class="variable language_">self</span>._default_result(t) <span class="keyword">for</span> t <span class="keyword">in</span> titles[<span class="number">1</span>:]]</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">return</span> [<span class="variable language_">self</span>._default_result(t) <span class="keyword">for</span> t <span class="keyword">in</span> titles]</span><br></pre></td></tr></table></figure>
+
+<p>退化逻辑的关键：<strong>批量失败不是直接返回默认值，而是降级为单条调用</strong>。单条调用会再次经过 <code>chat()</code> 的故障转移逻辑，这意味着每条标题都有独立的机会通过备模型获得分析结果。只有当单条调用也失败时，才会走到最终的 <code>_default_result()</code> 兜底。</p>
+<h3 id="3-6-最终兜底"><a href="#3-6-最终兜底" class="headerlink" title="3.6 最终兜底"></a>3.6 最终兜底</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># llm_analyzer.py:452-467</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_default_result</span>(<span class="params">self, title</span>):</span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">        <span class="string">&#x27;sentiment_score&#x27;</span>: <span class="number">0.0</span>,</span><br><span class="line">        <span class="string">&#x27;type_name&#x27;</span>: <span class="string">&#x27;其他&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;topic_name&#x27;</span>: <span class="string">&#x27;无&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;keywords&#x27;</span>: []</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>默认值的设计不是”空”或”None”，而是<strong>语义合理的占位值</strong>：情感分数为0（中性）、类型为”其他”、话题为”无”。下游系统无需特殊处理null值，前端图表正常渲染，只是精度降低而非完全中断。</p>
+<h2 id="4-实验结论"><a href="#4-实验结论" class="headerlink" title="4. 实验结论"></a>4. 实验结论</h2><h3 id="4-1-基线性能"><a href="#4-1-基线性能" class="headerlink" title="4.1 基线性能"></a>4.1 基线性能</h3><p>使用50条测试用例（覆盖娱乐&#x2F;社会&#x2F;科技&#x2F;体育&#x2F;时政5类，每类10条），以10条为一组批量调用，禁用缓存：</p>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>结果</th>
+<th>基准线</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>调用成功率</td>
+<td><strong>96%</strong></td>
+<td>≥90%</td>
+</tr>
+<tr>
+<td>批量响应时间（10条）</td>
+<td><strong>8.2s</strong></td>
+<td>≤30s</td>
+</tr>
+<tr>
+<td>情感分析准确率</td>
+<td><strong>88%</strong></td>
+<td>≥70%</td>
+</tr>
+<tr>
+<td>类型分类准确率</td>
+<td><strong>82%</strong></td>
+<td>≥70%</td>
+</tr>
+<tr>
+<td>话题提取成功率</td>
+<td><strong>94%</strong></td>
+<td>≥60%</td>
+</tr>
+</tbody></table>
+<h3 id="4-2-故障注入：主模型429"><a href="#4-2-故障注入：主模型429" class="headerlink" title="4.2 故障注入：主模型429"></a>4.2 故障注入：主模型429</h3><p>通过Mock <code>_do_chat_request</code> 使主模型固定返回None（模拟429限流），观察切换行为：</p>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>触发切换的请求数</td>
+<td><strong>2次</strong>（与max_retries&#x3D;2一致）</td>
+</tr>
+<tr>
+<td>切换后成功率</td>
+<td><strong>恢复至95%</strong></td>
+</tr>
+<tr>
+<td>switch_history记录</td>
+<td><code>{&#39;from&#39;:&#39;primary&#39;,&#39;to&#39;:&#39;backup&#39;,&#39;reason&#39;:&#39;连续失败2次&#39;}</code></td>
+</tr>
+</tbody></table>
+<p><strong>关键发现</strong>：主模型故障后，系统在第2次失败后自动切换到备模型，切换后成功率立即恢复。整个切换过程对调用方完全透明。</p>
+<h3 id="4-3-自动恢复验证"><a href="#4-3-自动恢复验证" class="headerlink" title="4.3 自动恢复验证"></a>4.3 自动恢复验证</h3><p>切换到backup后，恢复主模型可用性：</p>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>恢复到primary的周期数</td>
+<td><strong>1个周期</strong>（下一次爬取即恢复）</td>
+</tr>
+<tr>
+<td>恢复后成功率</td>
+<td><strong>96%</strong>（与基线一致）</td>
+</tr>
+</tbody></table>
+<p>自动恢复机制工作正常：只要主模型恢复，下一个请求周期就会自动切回，无需人工干预。</p>
+<h3 id="4-4-全链路降级测试"><a href="#4-4-全链路降级测试" class="headerlink" title="4.4 全链路降级测试"></a>4.4 全链路降级测试</h3><p>模拟主模型和备模型均不可用：</p>
+<table>
+<thead>
+<tr>
+<th>降级层级</th>
+<th>产出</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>批量API</td>
+<td>失败</td>
+</tr>
+<tr>
+<td>单条API</td>
+<td>失败</td>
+</tr>
+<tr>
+<td>默认值</td>
+<td><strong>100%产出</strong></td>
+</tr>
+</tbody></table>
+<p>系统在所有模型不可用时仍然持续产出默认值结果，<strong>不崩溃、不中断</strong>。数据精度降级，但服务连续性得到保证。</p>
+<h3 id="4-5-缓存对韧性的贡献"><a href="#4-5-缓存对韧性的贡献" class="headerlink" title="4.5 缓存对韧性的贡献"></a>4.5 缓存对韧性的贡献</h3><p>在稳态运行（大部分热搜跨轮次持续存在）下，Redis缓存命中率可达<strong>80%以上</strong>。这意味着即使LLM服务完全不可用，仍有80%的热搜条目能从缓存返回分析结果，只有新上榜的热搜才会使用默认值。缓存是故障转移之外的第二道防线。</p>
+<h2 id="5-面试关联"><a href="#5-面试关联" class="headerlink" title="5. 面试关联"></a>5. 面试关联</h2><ul>
+<li><p><strong>面试题1：”如何设计一个高可用的LLM调用方案？”</strong> → 本文2-3节给出了完整答案：多模型配置 + 连续失败计数切换 + 新周期自动恢复 + 三级降级链，确保任何情况下系统有输出。</p>
+</li>
+<li><p><strong>面试题2：”熔断器模式和你的连续失败计数方案有什么区别？各适合什么场景？”</strong> → 第2节分析了两者差异：熔断器适合高频请求（每秒百次级），需要半开状态精确控制探针频率；连续失败计数适合低频场景（每30秒一次），每次请求本身就是天然检测点，无需额外状态机。</p>
+</li>
+<li><p><strong>面试题3：”系统降级策略怎么设计？如何保证任何情况下都有输出？”</strong> → 第3节的三级降级链是答案核心：批量→单条→默认值。设计原则是<strong>语义合理的占位值优于null</strong>，下游系统无需特殊处理，精度降低但服务不中断。</p>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>工程实践</category>
+      </categories>
+      <tags>
+        <tag>LLM</tag>
+        <tag>故障转移</tag>
+        <tag>Python</tag>
+        <tag>微服务韧性</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>企业知识库问答助手</title>
+    <url>/posts/prompts/%E4%BC%81%E4%B8%9A%E7%9F%A5%E8%AF%86%E5%BA%93%E9%97%AE%E7%AD%94%E5%8A%A9%E6%89%8B/</url>
+    <content><![CDATA[<h1 id="Role-企业知识库问答助手"><a href="#Role-企业知识库问答助手" class="headerlink" title="Role: 企业知识库问答助手"></a>Role: 企业知识库问答助手</h1><h2 id="Profile"><a href="#Profile" class="headerlink" title="Profile"></a>Profile</h2><ul>
+<li>Author: 吴纪辰</li>
+<li>Version: 1.0</li>
+<li>Language: 中文</li>
+<li>Description: 基于企业私有知识库的问答助手，面向内部员工提供专业、严谨、准确的文档查询与业务解答服务，确保回答基于知识库事实而非主观推测</li>
+</ul>
+<h3 id="Skill-1"><a href="#Skill-1" class="headerlink" title="Skill-1"></a>Skill-1</h3><ol>
+<li>根据用户问题，从知识库中检索相关文档片段，基于检索结果进行准确回答</li>
+<li>回答时必须标注信息来源（引用具体文档名称&#x2F;章节&#x2F;页码），确保可溯源、可验证</li>
+<li>若知识库中无相关信息，明确告知用户”当前知识库中未找到相关内容”，绝不编造或推测</li>
+</ol>
+<h3 id="Skill-2"><a href="#Skill-2" class="headerlink" title="Skill-2"></a>Skill-2</h3><ol>
+<li>对用户模糊的问题进行意图澄清，主动追问关键细节（如具体业务场景、时间范围、所属部门等）</li>
+<li>将复杂问题拆解为多个子问题，逐个检索并综合回答</li>
+<li>对涉及多个文档&#x2F;制度的问题，提供交叉对比和综合解读</li>
+</ol>
+<h3 id="Skill-3"><a href="#Skill-3" class="headerlink" title="Skill-3"></a>Skill-3</h3><ol>
+<li>使用专业、严谨、准确的用语，避免口语化表达</li>
+<li>回答结构化：先给出明确结论，再展开详细说明，最后附上引用来源</li>
+<li>涉及流程&#x2F;步骤类问题，使用编号列表清晰呈现</li>
+</ol>
+<h3 id="Skill-4"><a href="#Skill-4" class="headerlink" title="Skill-4"></a>Skill-4</h3><ol>
+<li>识别问题是否涉及敏感信息（薪资、人事、保密条款等），按知识库中的权限标注决定是否回答</li>
+<li>识别问题是否涉及跨部门&#x2F;跨制度冲突，主动提示用户需与相关部门确认</li>
+<li>对政策&#x2F;制度类问题，提醒用户注意文档版本和生效日期，避免引用过期信息</li>
+</ol>
+<h2 id="Rules"><a href="#Rules" class="headerlink" title="Rules"></a>Rules</h2><ol>
+<li>所有回答必须基于知识库检索结果，严禁凭记忆或常识编造内容</li>
+<li>回答必须标注信息来源，格式为：【来源：《文档名》- 章节&#x2F;页码】</li>
+<li>知识库中无相关信息时，必须明确告知”当前知识库未覆盖此内容”，建议用户联系相关部门</li>
+<li>涉及数字、日期、条款等关键信息时，必须与原文完全一致，不做概括或改写</li>
+<li>不确定的信息用”根据《文档名》所述”开头，不使用绝对肯定的表述除非原文明确</li>
+<li>涉及多个文档时，如有冲突或差异，需指出冲突点并建议用户确认最新版本</li>
+<li>不回答超出知识库范围的问题，包括但不限于：个人主观建议、外部行业信息、未收录的政策</li>
+<li>回答长度适中，重要问题详细展开，简单查询直接回答，不做不必要的冗余扩展</li>
+</ol>
+<h2 id="Workflow"><a href="#Workflow" class="headerlink" title="Workflow"></a>Workflow</h2><ol>
+<li>接收用户问题</li>
+<li>分析问题意图，判断是否需要澄清（模糊问题→追问；明确问题→检索）</li>
+<li>从知识库检索相关文档片段</li>
+<li>评估检索结果：<ul>
+<li>有明确结果 → 基于检索内容组织回答，标注来源</li>
+<li>有部分结果 → 回答已知部分，标注缺失部分，建议补充渠道</li>
+<li>无结果 → 明确告知未覆盖，建议联系相关部门</li>
+</ul>
+</li>
+<li>检查回答是否涉及：敏感信息&#x2F;版本时效&#x2F;跨制度冲突 → 添加必要提醒</li>
+<li>组织结构化回答：结论 → 详细说明 → 引用来源 → 必要提醒</li>
+<li>输出回答</li>
+</ol>
+<h2 id="Commands"><a href="#Commands" class="headerlink" title="Commands"></a>Commands</h2><ul>
+<li>&#x2F;来源：追问上一次回答的具体信息来源</li>
+<li>&#x2F;相关：查询与当前问题相关的其他文档或制度</li>
+<li>&#x2F;版本：确认所引用文档的最新版本和生效日期</li>
+<li>&#x2F;澄清：当回答不确定时，请求更详细的问题描述</li>
+</ul>
+<h2 id="Initialization"><a href="#Initialization" class="headerlink" title="Initialization"></a>Initialization</h2><p>作为 <Role>，你必须遵守 <Rules>，用 <Language> 交流。请先向用户问好，简要介绍自己的功能范围，然后等待用户提问。</p>
+<p>介绍示例：<br>“您好，我是企业知识库问答助手，可以帮您查询公司内部文档、规章制度、操作流程等内容。我的回答均基于知识库原文，并会标注信息来源供您验证。如遇知识库未覆盖的内容，我会建议您联系相关部门。请问您想查询什么？”</p>
+]]></content>
+      <categories>
+        <category>Prompts</category>
+      </categories>
+      <tags>
+        <tag>Prompt</tag>
+        <tag>Skill</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>从零手写RAG：向量检索+BM25+RRF混合检索实战</title>
     <url>/posts/%E4%BB%8E%E9%9B%B6%E6%89%8B%E5%86%99RAG-%E5%90%91%E9%87%8F%E6%A3%80%E7%B4%A2BM25-RRF%E6%B7%B7%E5%90%88%E6%A3%80%E7%B4%A2%E5%AE%9E%E6%88%98/</url>
     <content><![CDATA[<h2 id="问题引入：为什么需要混合检索？"><a href="#问题引入：为什么需要混合检索？" class="headerlink" title="问题引入：为什么需要混合检索？"></a>问题引入：为什么需要混合检索？</h2><p>大模型的回答质量，取决于它”看到”了什么。RAG（Retrieval-Augmented Generation）的核心思路很简单：先把相关文档找出来，再让大模型基于文档回答。</p>
@@ -353,229 +603,258 @@
       </tags>
   </entry>
   <entry>
-    <title>企业知识库问答助手</title>
-    <url>/posts/prompts/%E4%BC%81%E4%B8%9A%E7%9F%A5%E8%AF%86%E5%BA%93%E9%97%AE%E7%AD%94%E5%8A%A9%E6%89%8B/</url>
-    <content><![CDATA[<h1 id="Role-企业知识库问答助手"><a href="#Role-企业知识库问答助手" class="headerlink" title="Role: 企业知识库问答助手"></a>Role: 企业知识库问答助手</h1><h2 id="Profile"><a href="#Profile" class="headerlink" title="Profile"></a>Profile</h2><ul>
-<li>Author: 吴纪辰</li>
-<li>Version: 1.0</li>
-<li>Language: 中文</li>
-<li>Description: 基于企业私有知识库的问答助手，面向内部员工提供专业、严谨、准确的文档查询与业务解答服务，确保回答基于知识库事实而非主观推测</li>
-</ul>
-<h3 id="Skill-1"><a href="#Skill-1" class="headerlink" title="Skill-1"></a>Skill-1</h3><ol>
-<li>根据用户问题，从知识库中检索相关文档片段，基于检索结果进行准确回答</li>
-<li>回答时必须标注信息来源（引用具体文档名称&#x2F;章节&#x2F;页码），确保可溯源、可验证</li>
-<li>若知识库中无相关信息，明确告知用户”当前知识库中未找到相关内容”，绝不编造或推测</li>
-</ol>
-<h3 id="Skill-2"><a href="#Skill-2" class="headerlink" title="Skill-2"></a>Skill-2</h3><ol>
-<li>对用户模糊的问题进行意图澄清，主动追问关键细节（如具体业务场景、时间范围、所属部门等）</li>
-<li>将复杂问题拆解为多个子问题，逐个检索并综合回答</li>
-<li>对涉及多个文档&#x2F;制度的问题，提供交叉对比和综合解读</li>
-</ol>
-<h3 id="Skill-3"><a href="#Skill-3" class="headerlink" title="Skill-3"></a>Skill-3</h3><ol>
-<li>使用专业、严谨、准确的用语，避免口语化表达</li>
-<li>回答结构化：先给出明确结论，再展开详细说明，最后附上引用来源</li>
-<li>涉及流程&#x2F;步骤类问题，使用编号列表清晰呈现</li>
-</ol>
-<h3 id="Skill-4"><a href="#Skill-4" class="headerlink" title="Skill-4"></a>Skill-4</h3><ol>
-<li>识别问题是否涉及敏感信息（薪资、人事、保密条款等），按知识库中的权限标注决定是否回答</li>
-<li>识别问题是否涉及跨部门&#x2F;跨制度冲突，主动提示用户需与相关部门确认</li>
-<li>对政策&#x2F;制度类问题，提醒用户注意文档版本和生效日期，避免引用过期信息</li>
-</ol>
-<h2 id="Rules"><a href="#Rules" class="headerlink" title="Rules"></a>Rules</h2><ol>
-<li>所有回答必须基于知识库检索结果，严禁凭记忆或常识编造内容</li>
-<li>回答必须标注信息来源，格式为：【来源：《文档名》- 章节&#x2F;页码】</li>
-<li>知识库中无相关信息时，必须明确告知”当前知识库未覆盖此内容”，建议用户联系相关部门</li>
-<li>涉及数字、日期、条款等关键信息时，必须与原文完全一致，不做概括或改写</li>
-<li>不确定的信息用”根据《文档名》所述”开头，不使用绝对肯定的表述除非原文明确</li>
-<li>涉及多个文档时，如有冲突或差异，需指出冲突点并建议用户确认最新版本</li>
-<li>不回答超出知识库范围的问题，包括但不限于：个人主观建议、外部行业信息、未收录的政策</li>
-<li>回答长度适中，重要问题详细展开，简单查询直接回答，不做不必要的冗余扩展</li>
-</ol>
-<h2 id="Workflow"><a href="#Workflow" class="headerlink" title="Workflow"></a>Workflow</h2><ol>
-<li>接收用户问题</li>
-<li>分析问题意图，判断是否需要澄清（模糊问题→追问；明确问题→检索）</li>
-<li>从知识库检索相关文档片段</li>
-<li>评估检索结果：<ul>
-<li>有明确结果 → 基于检索内容组织回答，标注来源</li>
-<li>有部分结果 → 回答已知部分，标注缺失部分，建议补充渠道</li>
-<li>无结果 → 明确告知未覆盖，建议联系相关部门</li>
-</ul>
-</li>
-<li>检查回答是否涉及：敏感信息&#x2F;版本时效&#x2F;跨制度冲突 → 添加必要提醒</li>
-<li>组织结构化回答：结论 → 详细说明 → 引用来源 → 必要提醒</li>
-<li>输出回答</li>
-</ol>
-<h2 id="Commands"><a href="#Commands" class="headerlink" title="Commands"></a>Commands</h2><ul>
-<li>&#x2F;来源：追问上一次回答的具体信息来源</li>
-<li>&#x2F;相关：查询与当前问题相关的其他文档或制度</li>
-<li>&#x2F;版本：确认所引用文档的最新版本和生效日期</li>
-<li>&#x2F;澄清：当回答不确定时，请求更详细的问题描述</li>
-</ul>
-<h2 id="Initialization"><a href="#Initialization" class="headerlink" title="Initialization"></a>Initialization</h2><p>作为 <Role>，你必须遵守 <Rules>，用 <Language> 交流。请先向用户问好，简要介绍自己的功能范围，然后等待用户提问。</p>
-<p>介绍示例：<br>“您好，我是企业知识库问答助手，可以帮您查询公司内部文档、规章制度、操作流程等内容。我的回答均基于知识库原文，并会标注信息来源供您验证。如遇知识库未覆盖的内容，我会建议您联系相关部门。请问您想查询什么？”</p>
-]]></content>
-      <categories>
-        <category>Prompts</category>
-      </categories>
-      <tags>
-        <tag>Prompt</tag>
-        <tag>Skill</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>当大模型服务挂了怎么办？LLM多模型故障转移实战</title>
-    <url>/posts/%E5%BD%93%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%9C%8D%E5%8A%A1%E6%8C%82%E4%BA%86%E6%80%8E%E4%B9%88%E5%8A%9E%EF%BC%9FLLM%E5%A4%9A%E6%A8%A1%E5%9E%8B%E6%95%85%E9%9A%9C%E8%BD%AC%E7%A7%BB%E5%AE%9E%E6%88%98/</url>
-    <content><![CDATA[<h2 id="1-问题引入"><a href="#1-问题引入" class="headerlink" title="1. 问题引入"></a>1. 问题引入</h2><p>我们的热搜监控系统每30秒爬取一次微博热榜，调用大模型对每条热搜做情感分析、类型分类和话题提取。某天凌晨，主模型API突然返回429限流，系统连续30分钟没有产出任何分析结果——前端图表空白、预警静默、数据库趋势断档。</p>
-<p>这不是小概率事件。LLM服务不稳定几乎是常态：429限流、5xx宕机、API Key过期、响应超时，任何一个都能让单模型依赖的系统瘫痪。<strong>单点依赖 &#x3D; 单点故障</strong>，而LLM的不可用不是”会不会”的问题，是”什么时候”的问题。</p>
-<p>我们需要回答一个核心问题：<strong>当LLM服务不可用时，如何保证系统持续产出分析结果？</strong></p>
-<h2 id="2-原理讲解"><a href="#2-原理讲解" class="headerlink" title="2. 原理讲解"></a>2. 原理讲解</h2><h3 id="2-1-故障转移的三层设计"><a href="#2-1-故障转移的三层设计" class="headerlink" title="2.1 故障转移的三层设计"></a>2.1 故障转移的三层设计</h3><p>我们的方案围绕三个核心机制展开：</p>
-<p><strong>第一层：连续失败计数</strong>。不是一次失败就切换——偶发的网络抖动不应触发模型切换。只有连续失败达到阈值（默认2次），才判定为模型级别的故障，触发切换。这避免了”狼来了”式的频繁切换。</p>
-<p><strong>第二层：模型切换</strong>。当连续失败达到阈值，系统沿 <code>primary → backup</code> 优先级链切换到下一个可用模型，同时重置失败计数器。每次切换都会记录时间戳、原模型、目标模型和原因，形成审计日志。</p>
-<p><strong>第三层：自动恢复</strong>。切换到备模型后，系统不会永远停留在备模型上。每当一个新的请求周期开始（即下一轮爬取），系统会尝试回到主模型。因为主模型宕机往往是临时的——限流窗口过了、服务恢复了——自动恢复确保系统不会因为一次临时故障而永久降级。</p>
-<h3 id="2-2-为什么不用完整的熔断器？"><a href="#2-2-为什么不用完整的熔断器？" class="headerlink" title="2.2 为什么不用完整的熔断器？"></a>2.2 为什么不用完整的熔断器？</h3><p>Circuit Breaker模式有三种状态：Closed → Open → Half-Open。它适合高频请求场景（每秒成百上千次调用），需要精确控制”探针”频率。但我们的场景不同：<strong>每30秒才调用一次LLM</strong>，请求频率极低。在这种低频场景下，完整熔断器的半开状态、探针窗口反而增加了不必要的复杂度。轻量的连续失败计数已经足够——每次爬取本身就是天然的检测点，无需额外定时器。</p>
-<h3 id="2-3-三级降级链：任何情况下都有输出"><a href="#2-3-三级降级链：任何情况下都有输出" class="headerlink" title="2.3 三级降级链：任何情况下都有输出"></a>2.3 三级降级链：任何情况下都有输出</h3><p>故障转移解决的是”换一个模型试试”，但若所有模型都不可用呢？我们设计了三级降级链：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">批量API调用 → 单条API调用 → 返回默认值</span><br></pre></td></tr></table></figure>
+    <title>LocalFileRAG：本地智能文档问答系统实战——从RAG Demo到可部署应用</title>
+    <url>/posts/LocalFileRAG-%E6%9C%AC%E5%9C%B0%E6%99%BA%E8%83%BD%E6%96%87%E6%A1%A3%E9%97%AE%E7%AD%94%E7%B3%BB%E7%BB%9F%E5%AE%9E%E6%88%98/</url>
+    <content><![CDATA[<h2 id="问题引入：当RAG从Demo走向应用"><a href="#问题引入：当RAG从Demo走向应用" class="headerlink" title="问题引入：当RAG从Demo走向应用"></a>问题引入：当RAG从Demo走向应用</h2><p>上一篇文章实现了RAG的核心检索pipeline。但那个版本是命令行交互的学习Demo——只支持PDF、没有持久化、没有API、不能部署。这篇文章解决一个更实际的问题：<strong>如何把RAG从”能跑”变成”能用”？</strong></p>
+<p>实际落地时，RAG系统面临几个真实挑战：</p>
+<table>
+<thead>
+<tr>
+<th>挑战</th>
+<th>Demo的问题</th>
+<th>应用的解决思路</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>文档格式</td>
+<td>只支持PDF</td>
+<td>需要支持Word&#x2F;Excel&#x2F;PPT&#x2F;TXT&#x2F;Markdown等常见格式</td>
+</tr>
+<tr>
+<td>部署方式</td>
+<td>命令行交互</td>
+<td>需要提供Web UI和REST API两种接入方式</td>
+</tr>
+<tr>
+<td>LLM后端</td>
+<td>单一API</td>
+<td>需要支持本地模型+云端API，自动切换</td>
+</tr>
+<tr>
+<td>检索深度</td>
+<td>单次检索</td>
+<td>复杂问题需要多轮检索才能覆盖全面</td>
+</tr>
+<tr>
+<td>信息时效性</td>
+<td>只能查本地</td>
+<td>需要补充实时网络信息</td>
+</tr>
+<tr>
+<td>结果可信度</td>
+<td>直接输出</td>
+<td>需要标注来源、检测冲突</td>
+</tr>
+</tbody></table>
+<p>本文基于开源RAG学习框架进行深度二次开发，构建一个<strong>可部署的本地智能文档问答系统</strong>。原始框架提供了基础的RAG Pipeline（文档解析→切分→Embedding→检索→生成），我在此基础上做了大量工程化改进。</p>
+<blockquote>
+<p>完整代码见 <a href="https://github.com/GeiTeHaoBu-del/Local_Pdf_Chat_RAG">Local_Pdf_Chat_RAG</a></p>
+</blockquote>
+<h2 id="系统架构设计"><a href="#系统架构设计" class="headerlink" title="系统架构设计"></a>系统架构设计</h2><h3 id="模块化分层"><a href="#模块化分层" class="headerlink" title="模块化分层"></a>模块化分层</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Local_Pdf_Chat_RAG/</span><br><span class="line">├── config.py              # 配置中心：环境变量、超参数、LLM自动检测</span><br><span class="line">├── rag_demo.py            # Gradio Web UI主入口</span><br><span class="line">├── api_router.py          # FastAPI REST服务</span><br><span class="line">├── core/                  # RAG核心模块</span><br><span class="line">│   ├── document_loader.py # 多格式文档解析</span><br><span class="line">│   ├── text_splitter.py  # 文本切分</span><br><span class="line">│   ├── embeddings.py     # 向量化（批量API调用）</span><br><span class="line">│   ├── vector_store.py   # FAISS向量存储（自动索引选型）</span><br><span class="line">│   ├── bm25_index.py     # BM25稀疏检索</span><br><span class="line">│   ├── retriever.py      # 混合检索+递归检索</span><br><span class="line">│   ├── reranker.py       # 重排序（CrossEncoder/LLM）</span><br><span class="line">│   └── generator.py      # LLM调用+Prompt构建</span><br><span class="line">├── features/             # 扩展功能</span><br><span class="line">│   ├── web_search.py     # SerpAPI网络搜索</span><br><span class="line">│   ├── conflict_detector.py # 冲突检测</span><br><span class="line">│   └── thinking_chain.py # DeepSeek思维链展示</span><br><span class="line">└── utils/                # 工具模块</span><br><span class="line">    └── network.py        # HTTP Session管理</span><br></pre></td></tr></table></figure>
 
+<h3 id="核心流程"><a href="#核心流程" class="headerlink" title="核心流程"></a>核心流程</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">用户上传文档 → 多格式解析 → 文本切分 → Embedding → 构建FAISS+BM25双索引</span><br><span class="line">                                                              ↓</span><br><span class="line">用户提问 → Query分析 → 递归检索(本地+网络) → 混合排序 → 冲突检测 → LLM生成 → 标注来源</span><br></pre></td></tr></table></figure>
+
+<h2 id="关键技术点"><a href="#关键技术点" class="headerlink" title="关键技术点"></a>关键技术点</h2><h3 id="1-多格式文档解析：一套接口，七种格式"><a href="#1-多格式文档解析：一套接口，七种格式" class="headerlink" title="1. 多格式文档解析：一套接口，七种格式"></a>1. 多格式文档解析：一套接口，七种格式</h3><p>实际场景中，用户上传的文档不只有PDF。我封装了一个统一的<code>extract_text</code>接口，内部根据文件扩展名路由到对应的解析器：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">extract_text</span>(<span class="params">filepath</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;统一文档解析入口&quot;&quot;&quot;</span></span><br><span class="line">    ext = os.path.splitext(filepath)[<span class="number">1</span>].lower()</span><br><span class="line">    handlers = &#123;</span><br><span class="line">        <span class="string">&#x27;.pdf&#x27;</span>: _parse_pdf,      <span class="comment"># pdfminer.six</span></span><br><span class="line">        <span class="string">&#x27;.docx&#x27;</span>: _parse_word,    <span class="comment"># python-docx</span></span><br><span class="line">        <span class="string">&#x27;.xlsx&#x27;</span>: _parse_excel,   <span class="comment"># pandas</span></span><br><span class="line">        <span class="string">&#x27;.pptx&#x27;</span>: _parse_ppt,     <span class="comment"># python-pptx</span></span><br><span class="line">        <span class="string">&#x27;.txt&#x27;</span>: _parse_text,     <span class="comment"># 直接读取</span></span><br><span class="line">        <span class="string">&#x27;.md&#x27;</span>: _parse_markdown,  <span class="comment"># 直接读取</span></span><br><span class="line">        <span class="string">&#x27;.html&#x27;</span>: _parse_html,    <span class="comment"># BeautifulSoup</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> handlers.get(ext, _unsupported)(filepath)</span><br></pre></td></tr></table></figure>
+
+<p><strong>设计考量：</strong> 每种格式的解析逻辑独立封装，新增格式只需注册新的handler，不影响已有代码。异常处理统一：解析失败时返回空字符串，上层决定是否跳过该文件。</p>
+<h3 id="2-FAISS索引自动选型：小数据用Flat，大数据用IVF"><a href="#2-FAISS索引自动选型：小数据用Flat，大数据用IVF" class="headerlink" title="2. FAISS索引自动选型：小数据用Flat，大数据用IVF"></a>2. FAISS索引自动选型：小数据用Flat，大数据用IVF</h3><p>MiniRAG版本用的是最基础的<code>IndexFlatL2</code>，每次检索都要遍历全量计算L2距离。这个版本增加了<strong>根据数据量自动选择索引类型</strong>的逻辑：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">AutoFaissIndex</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">select_index_type</span>(<span class="params">self, num_vectors</span>):</span><br><span class="line">        <span class="keyword">if</span> num_vectors &lt;= <span class="number">10_000</span>:</span><br><span class="line">            <span class="variable language_">self</span>.index_type = <span class="string">&quot;FlatL2&quot;</span>   <span class="comment"># 精确但慢</span></span><br><span class="line">            <span class="variable language_">self</span>.index = IndexFlatL2(<span class="variable language_">self</span>.dimension)</span><br><span class="line">        <span class="keyword">elif</span> num_vectors &lt;= <span class="number">100_000</span>:</span><br><span class="line">            <span class="variable language_">self</span>.index_type = <span class="string">&quot;IVFFlat&quot;</span>  <span class="comment"># 近似但快</span></span><br><span class="line">            nlist = <span class="built_in">min</span>(<span class="number">100</span>, <span class="built_in">int</span>(np.sqrt(num_vectors)))</span><br><span class="line">            quantizer = IndexFlatL2(<span class="variable language_">self</span>.dimension)</span><br><span class="line">            <span class="variable language_">self</span>.index = IndexIVFFlat(quantizer, <span class="variable language_">self</span>.dimension, nlist)</span><br><span class="line">            <span class="variable language_">self</span>.nprobe = <span class="built_in">min</span>(<span class="number">10</span>, <span class="built_in">max</span>(<span class="number">1</span>, <span class="built_in">int</span>(nlist * <span class="number">0.1</span>)))</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="variable language_">self</span>.index_type = <span class="string">&quot;IVFPQ&quot;</span>    <span class="comment"># 压缩索引，适合海量数据</span></span><br><span class="line">            ...</span><br></pre></td></tr></table></figure>
+
+<p><strong>为什么这样设计？</strong> 企业知识库的规模差异很大：小团队可能只有几百份文档，大集团可能有百万级。FlatL2在小数据下精确且实现简单；IVFFlat通过聚类减少搜索范围，适合中等规模；IVFPQ通过乘积量化压缩向量，牺牲少量精度换取大幅速度提升。</p>
+<p><strong>面试追问点：</strong> “nlist和nprobe怎么选？” → nlist决定聚类中心数，通常取<code>sqrt(N)</code>；nprobe决定查询时搜索多少个聚类，越大越精确但越慢，经验值是nlist的5%-10%。</p>
+<h3 id="3-递归检索：复杂问题需要多轮查"><a href="#3-递归检索：复杂问题需要多轮查" class="headerlink" title="3. 递归检索：复杂问题需要多轮查"></a>3. 递归检索：复杂问题需要多轮查</h3><p>单次检索往往无法覆盖复杂问题的全部信息。我实现了一个<strong>递归检索</strong>策略：先用LLM判断当前检索结果是否足够，不够则生成新的查询继续检索。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">recursive_retrieval</span>(<span class="params">initial_query, max_iterations=<span class="number">3</span></span>):</span><br><span class="line">    query = initial_query</span><br><span class="line">    all_contexts = []</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(max_iterations):</span><br><span class="line">        <span class="comment"># 执行混合检索</span></span><br><span class="line">        contexts = hybrid_search(query)</span><br><span class="line">        all_contexts.extend(contexts)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># LLM判断是否需要继续</span></span><br><span class="line">        prompt = <span class="string">f&quot;基于以下信息，判断是否需要进一步查询：<span class="subst">&#123;contexts[:<span class="number">3</span>]&#125;</span>&quot;</span></span><br><span class="line">        decision = call_llm(prompt)</span><br><span class="line">        <span class="keyword">if</span> <span class="string">&quot;不需要&quot;</span> <span class="keyword">in</span> decision:</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        query = decision  <span class="comment"># 用LLM生成的新查询继续</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> all_contexts</span><br></pre></td></tr></table></figure>
+
+<p><strong>一个具体例子：</strong> 用户问”公司2024年的营收和利润分别是多少？”</p>
 <ul>
-<li><strong>批量API</strong>：10条标题一次请求，效率最高</li>
-<li><strong>单条API</strong>：批量失败时退化为逐条调用，可能部分成功</li>
-<li><strong>默认值</strong>：所有API都失败时，返回 <code>sentiment_score=0, type_name=&#39;其他&#39;, topic_name=&#39;无&#39;</code>，系统<strong>永远不崩溃，永远有输出</strong></li>
+<li>第一轮检索”2024年营收” → 找到营收数据</li>
+<li>LLM判断：”已找到营收，但缺少利润信息，需要继续查询”</li>
+<li>第二轮检索”2024年利润” → 找到利润数据</li>
+<li>LLM判断：”信息已完整，无需继续”</li>
 </ul>
-<p>类比值班体系：<strong>主治医师（主模型批量）→ 值班医生（备模型单条）→ 急救包（默认值）</strong>，确保任何时刻都有救治能力。</p>
-<h2 id="3-代码实现"><a href="#3-代码实现" class="headerlink" title="3. 代码实现"></a>3. 代码实现</h2><h3 id="3-1-核心状态机"><a href="#3-1-核心状态机" class="headerlink" title="3.1 核心状态机"></a>3.1 核心状态机</h3><p>故障转移的核心是三个状态变量的协同：<code>current_model</code>（当前使用的模型标识）、<code>consecutive_failures</code>（连续失败次数）、<code>max_retries</code>（触发切换的阈值）。</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># llm_client.py:38-76 初始化</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, api_config</span>):</span><br><span class="line">    failover_config = api_config.get(<span class="string">&#x27;failover&#x27;</span>, &#123;&#125;)</span><br><span class="line">    <span class="variable language_">self</span>.max_retries = failover_config.get(<span class="string">&#x27;max_retries&#x27;</span>, <span class="number">2</span>)</span><br><span class="line">    <span class="variable language_">self</span>.auto_recover = failover_config.get(<span class="string">&#x27;auto_recover&#x27;</span>, <span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    <span class="variable language_">self</span>.models = &#123;&#125;</span><br><span class="line">    model_order = [<span class="string">&#x27;primary&#x27;</span>, <span class="string">&#x27;backup&#x27;</span>]</span><br><span class="line">    <span class="keyword">for</span> model_name <span class="keyword">in</span> model_order:</span><br><span class="line">        <span class="keyword">if</span> model_name <span class="keyword">in</span> api_config:</span><br><span class="line">            <span class="variable language_">self</span>.models[model_name] = <span class="variable language_">self</span>._init_model_config(</span><br><span class="line">                api_config[model_name], model_name</span><br><span class="line">            )</span><br><span class="line"></span><br><span class="line">    <span class="variable language_">self</span>.current_model = <span class="string">&#x27;primary&#x27;</span></span><br><span class="line">    <span class="variable language_">self</span>.consecutive_failures = <span class="number">0</span></span><br><span class="line">    <span class="variable language_">self</span>.switch_history = []</span><br></pre></td></tr></table></figure>
+<p><strong>注意事项：</strong> 递归检索有陷入循环的风险，必须设置最大迭代次数（默认3轮），且LLM生成的查询需要长度限制（&gt;100字视为无效）。</p>
+<h3 id="4-网络搜索增强（RAG-R）：本地查不到，上网查"><a href="#4-网络搜索增强（RAG-R）：本地查不到，上网查" class="headerlink" title="4. 网络搜索增强（RAG+R）：本地查不到，上网查"></a>4. 网络搜索增强（RAG+R）：本地查不到，上网查</h3><p>企业知识库有滞后性，最新信息需要靠网络搜索补充。我集成了SerpAPI获取Google搜索结果，与本地文档检索结果融合：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">query_with_augmentation</span>(<span class="params">question, enable_web_search=<span class="literal">False</span></span>):</span><br><span class="line">    local_results = hybrid_search(question)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> enable_web_search:</span><br><span class="line">        web_results = serpapi_search(question)</span><br><span class="line">        <span class="comment"># 网络结果不参与FAISS索引，直接作为文本上下文</span></span><br><span class="line">        local_results.extend(web_results)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> generate_answer(question, local_results)</span><br></pre></td></tr></table></figure>
 
-<p>配置结构天然支持多模型——<code>primary</code> 和 <code>backup</code> 各自持有独立的 <code>api_url</code>、<code>api_key</code>、<code>model</code> 名称，切换时只需更换 <code>current_model</code> 指针。</p>
-<h3 id="3-2-chat-主循环：故障转移的指挥中心"><a href="#3-2-chat-主循环：故障转移的指挥中心" class="headerlink" title="3.2 chat()主循环：故障转移的指挥中心"></a>3.2 chat()主循环：故障转移的指挥中心</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># llm_client.py:168-223 精简版</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">chat</span>(<span class="params">self, messages, temperature=<span class="number">0.3</span>, max_tokens=<span class="number">2000</span></span>):</span><br><span class="line">    <span class="comment"># ① 新周期尝试恢复主模型</span></span><br><span class="line">    <span class="variable language_">self</span>._try_recover_primary()</span><br><span class="line"></span><br><span class="line">    attempted_models = []</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        model_config = <span class="variable language_">self</span>.models.get(<span class="variable language_">self</span>.current_model)</span><br><span class="line">        attempted_models.append(<span class="variable language_">self</span>.current_model)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># ② 发起请求</span></span><br><span class="line">        result = <span class="variable language_">self</span>._do_chat_request(model_config, messages, temperature, max_tokens)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> result <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">            <span class="comment"># ③ 成功：重置失败计数</span></span><br><span class="line">            <span class="variable language_">self</span>.consecutive_failures = <span class="number">0</span></span><br><span class="line">            <span class="keyword">return</span> result</span><br><span class="line"></span><br><span class="line">        <span class="comment"># ④ 失败：累加计数</span></span><br><span class="line">        <span class="variable language_">self</span>.consecutive_failures += <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> <span class="variable language_">self</span>.consecutive_failures &gt;= <span class="variable language_">self</span>.max_retries:</span><br><span class="line">            <span class="comment"># ⑤ 达到阈值：切换模型</span></span><br><span class="line">            <span class="variable language_">self</span>._switch_model(<span class="string">f&quot;连续失败<span class="subst">&#123;self.max_retries&#125;</span>次&quot;</span>)</span><br><span class="line">            <span class="comment"># 所有模型都试过了 → 返回None</span></span><br><span class="line">            <span class="keyword">if</span> <span class="variable language_">self</span>.current_model <span class="keyword">in</span> attempted_models:</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="comment"># ⑥ 未达阈值：线性退避等待</span></span><br><span class="line">            time.sleep(<span class="number">1</span> * <span class="variable language_">self</span>.consecutive_failures)</span><br></pre></td></tr></table></figure>
+<p><strong>冲突检测：</strong> 当本地文档和网络搜索结果存在矛盾时（比如同一数据不同来源给出不同数字），系统会标记冲突并提示用户：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">detect_conflicts</span>(<span class="params">sources</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;检测多来源信息冲突&quot;&quot;&quot;</span></span><br><span class="line">    key_facts = &#123;&#125;</span><br><span class="line">    <span class="keyword">for</span> item <span class="keyword">in</span> sources:</span><br><span class="line">        facts = extract_key_facts(item[<span class="string">&#x27;text&#x27;</span>])</span><br><span class="line">        <span class="keyword">for</span> fact, value <span class="keyword">in</span> facts.items():</span><br><span class="line">            <span class="keyword">if</span> fact <span class="keyword">in</span> key_facts <span class="keyword">and</span> key_facts[fact] != value:</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">True</span>  <span class="comment"># 发现冲突</span></span><br><span class="line">            key_facts[fact] = value</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">False</span></span><br></pre></td></tr></table></figure>
 
-<p>控制流的精髓：步骤①是自动恢复的入口，步骤③⑤⑥构成”失败→重试→切换”的决策链，<code>attempted_models</code> 防止无限循环——如果所有模型都已尝试，立即返回None。</p>
-<h3 id="3-3-模型切换与审计"><a href="#3-3-模型切换与审计" class="headerlink" title="3.3 模型切换与审计"></a>3.3 模型切换与审计</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># llm_client.py:126-158 精简版</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_switch_model</span>(<span class="params">self, reason</span>):</span><br><span class="line">    next_model = <span class="variable language_">self</span>._get_next_model()</span><br><span class="line">    <span class="keyword">if</span> next_model:</span><br><span class="line">        old_model = <span class="variable language_">self</span>.current_model</span><br><span class="line">        <span class="variable language_">self</span>.current_model = next_model</span><br><span class="line">        <span class="variable language_">self</span>.consecutive_failures = <span class="number">0</span></span><br><span class="line"></span><br><span class="line">        <span class="variable language_">self</span>.switch_history.append(&#123;</span><br><span class="line">            <span class="string">&#x27;time&#x27;</span>: time.strftime(<span class="string">&#x27;%Y-%m-%d %H:%M:%S&#x27;</span>),</span><br><span class="line">            <span class="string">&#x27;from&#x27;</span>: old_model,</span><br><span class="line">            <span class="string">&#x27;to&#x27;</span>: next_model,</span><br><span class="line">            <span class="string">&#x27;reason&#x27;</span>: reason</span><br><span class="line">        &#125;)</span><br></pre></td></tr></table></figure>
+<h3 id="5-双LLM后端适配：本地Ollama-云端SiliconFlow"><a href="#5-双LLM后端适配：本地Ollama-云端SiliconFlow" class="headerlink" title="5. 双LLM后端适配：本地Ollama + 云端SiliconFlow"></a>5. 双LLM后端适配：本地Ollama + 云端SiliconFlow</h3><p>不同场景对LLM的需求不同：本地模型免费但需要GPU，云端API方便但按量计费。我实现了<strong>自动检测+手动切换</strong>的双后端机制：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">detect_default_model</span>():</span><br><span class="line">    <span class="string">&quot;&quot;&quot;启动时自动检测可用的LLM后端&quot;&quot;&quot;</span></span><br><span class="line">    <span class="comment"># 优先检查云端API</span></span><br><span class="line">    <span class="keyword">if</span> SILICONFLOW_API_KEY:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;siliconflow&quot;</span></span><br><span class="line">    <span class="comment"># 其次检查本地Ollama</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        response = requests.get(<span class="string">&quot;http://localhost:11434/api/tags&quot;</span>, timeout=<span class="number">3</span>)</span><br><span class="line">        <span class="keyword">if</span> response.status_code == <span class="number">200</span>:</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;ollama&quot;</span></span><br><span class="line">    <span class="keyword">except</span>:</span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">None</span>  <span class="comment"># 都不可用，提示配置</span></span><br></pre></td></tr></table></figure>
 
-<p><code>switch_history</code> 是生产环境排障的关键——当运维发现分析结果异常时，可以回溯”什么时候、从哪个模型、切到哪个模型、因为什么”，而不是对着黑盒猜测。</p>
-<h3 id="3-4-自动恢复：新周期的回归"><a href="#3-4-自动恢复：新周期的回归" class="headerlink" title="3.4 自动恢复：新周期的回归"></a>3.4 自动恢复：新周期的回归</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># llm_client.py:160-166</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_try_recover_primary</span>(<span class="params">self</span>):</span><br><span class="line">    <span class="keyword">if</span> <span class="variable language_">self</span>.auto_recover <span class="keyword">and</span> <span class="variable language_">self</span>.current_model != <span class="string">&#x27;primary&#x27;</span> <span class="keyword">and</span> <span class="string">&#x27;primary&#x27;</span> <span class="keyword">in</span> <span class="variable language_">self</span>.models:</span><br><span class="line">        <span class="variable language_">self</span>.current_model = <span class="string">&#x27;primary&#x27;</span></span><br><span class="line">        <span class="variable language_">self</span>.consecutive_failures = <span class="number">0</span></span><br></pre></td></tr></table></figure>
-
-<p>仅7行代码，却是一个精妙的设计决策：<strong>在每次新请求周期的开头尝试恢复</strong>。为什么不是定时器？因为我们的爬取周期就是天然的检测点——下一轮调用时自然就知道主模型是否恢复了。没有额外线程、没有定时器、没有复杂状态，代码极简但效果确定。</p>
-<h3 id="3-5-批量→单条的退化"><a href="#3-5-批量→单条的退化" class="headerlink" title="3.5 批量→单条的退化"></a>3.5 批量→单条的退化</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># llm_analyzer.py:336-376 精简版</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_call_batch_api</span>(<span class="params">self, titles</span>):</span><br><span class="line">    titles_text = <span class="string">&quot;\n&quot;</span>.join([<span class="string">f&quot;<span class="subst">&#123;i+<span class="number">1</span>&#125;</span>. <span class="subst">&#123;title&#125;</span>&quot;</span> <span class="keyword">for</span> i, title <span class="keyword">in</span> <span class="built_in">enumerate</span>(titles)])</span><br><span class="line">    messages = [</span><br><span class="line">        &#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;system&quot;</span>, <span class="string">&quot;content&quot;</span>: <span class="variable language_">self</span>.batch_system_prompt&#125;,</span><br><span class="line">        &#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>, <span class="string">&quot;content&quot;</span>: <span class="string">f&quot;请批量分析以下<span class="subst">&#123;<span class="built_in">len</span>(titles)&#125;</span>个热搜标题：\n\n<span class="subst">&#123;titles_text&#125;</span>&quot;</span>&#125;</span><br><span class="line">    ]</span><br><span class="line"></span><br><span class="line">    content = <span class="variable language_">self</span>.client.chat(messages, temperature=<span class="number">0.2</span>)</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> content:</span><br><span class="line">        <span class="comment"># 批量失败 → 退化为逐条分析</span></span><br><span class="line">        <span class="keyword">return</span> [<span class="variable language_">self</span>.analyze(t) <span class="keyword">for</span> t <span class="keyword">in</span> titles]</span><br><span class="line"></span><br><span class="line">    result = <span class="variable language_">self</span>.client.parse_json_response(content)</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> result:</span><br><span class="line">        <span class="comment"># 解析失败 → 同样退化</span></span><br><span class="line">        <span class="keyword">return</span> [<span class="variable language_">self</span>.analyze(t) <span class="keyword">for</span> t <span class="keyword">in</span> titles]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">isinstance</span>(result, <span class="built_in">list</span>):</span><br><span class="line">        <span class="keyword">return</span> <span class="variable language_">self</span>._normalize_results(result, titles)</span><br><span class="line">    <span class="keyword">elif</span> <span class="built_in">isinstance</span>(result, <span class="built_in">dict</span>):</span><br><span class="line">        <span class="keyword">return</span> [result] + [<span class="variable language_">self</span>._default_result(t) <span class="keyword">for</span> t <span class="keyword">in</span> titles[<span class="number">1</span>:]]</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">return</span> [<span class="variable language_">self</span>._default_result(t) <span class="keyword">for</span> t <span class="keyword">in</span> titles]</span><br></pre></td></tr></table></figure>
-
-<p>退化逻辑的关键：<strong>批量失败不是直接返回默认值，而是降级为单条调用</strong>。单条调用会再次经过 <code>chat()</code> 的故障转移逻辑，这意味着每条标题都有独立的机会通过备模型获得分析结果。只有当单条调用也失败时，才会走到最终的 <code>_default_result()</code> 兜底。</p>
-<h3 id="3-6-最终兜底"><a href="#3-6-最终兜底" class="headerlink" title="3.6 最终兜底"></a>3.6 最终兜底</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># llm_analyzer.py:452-467</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_default_result</span>(<span class="params">self, title</span>):</span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">        <span class="string">&#x27;sentiment_score&#x27;</span>: <span class="number">0.0</span>,</span><br><span class="line">        <span class="string">&#x27;type_name&#x27;</span>: <span class="string">&#x27;其他&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;topic_name&#x27;</span>: <span class="string">&#x27;无&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;keywords&#x27;</span>: []</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-<p>默认值的设计不是”空”或”None”，而是<strong>语义合理的占位值</strong>：情感分数为0（中性）、类型为”其他”、话题为”无”。下游系统无需特殊处理null值，前端图表正常渲染，只是精度降低而非完全中断。</p>
-<h2 id="4-实验结论"><a href="#4-实验结论" class="headerlink" title="4. 实验结论"></a>4. 实验结论</h2><h3 id="4-1-基线性能"><a href="#4-1-基线性能" class="headerlink" title="4.1 基线性能"></a>4.1 基线性能</h3><p>使用50条测试用例（覆盖娱乐&#x2F;社会&#x2F;科技&#x2F;体育&#x2F;时政5类，每类10条），以10条为一组批量调用，禁用缓存：</p>
+<p><strong>运行时切换：</strong> Gradio UI提供下拉框，用户可以随时切换模型，无需重启服务。</p>
+<h3 id="6-重排序策略：CrossEncoder-vs-LLM"><a href="#6-重排序策略：CrossEncoder-vs-LLM" class="headerlink" title="6. 重排序策略：CrossEncoder vs LLM"></a>6. 重排序策略：CrossEncoder vs LLM</h3><p>检索后的精排有两种实现：</p>
 <table>
 <thead>
 <tr>
-<th>指标</th>
-<th>结果</th>
-<th>基准线</th>
+<th>策略</th>
+<th>原理</th>
+<th>优点</th>
+<th>缺点</th>
+<th>适用场景</th>
 </tr>
 </thead>
 <tbody><tr>
-<td>调用成功率</td>
-<td><strong>96%</strong></td>
-<td>≥90%</td>
+<td>CrossEncoder</td>
+<td>拼接query+doc输入模型，输出相关性分数</td>
+<td>精度高，速度快（本地推理）</td>
+<td>模型固定，无法处理复杂判断</td>
+<td>通用场景</td>
 </tr>
 <tr>
-<td>批量响应时间（10条）</td>
-<td><strong>8.2s</strong></td>
-<td>≤30s</td>
-</tr>
-<tr>
-<td>情感分析准确率</td>
-<td><strong>88%</strong></td>
-<td>≥70%</td>
-</tr>
-<tr>
-<td>类型分类准确率</td>
-<td><strong>82%</strong></td>
-<td>≥70%</td>
-</tr>
-<tr>
-<td>话题提取成功率</td>
-<td><strong>94%</strong></td>
-<td>≥60%</td>
+<td>LLM重排序</td>
+<td>让LLM给query-doc对打分</td>
+<td>灵活，可处理复杂相关性定义</td>
+<td>慢，消耗API额度</td>
+<td>高精度要求场景</td>
 </tr>
 </tbody></table>
-<h3 id="4-2-故障注入：主模型429"><a href="#4-2-故障注入：主模型429" class="headerlink" title="4.2 故障注入：主模型429"></a>4.2 故障注入：主模型429</h3><p>通过Mock <code>_do_chat_request</code> 使主模型固定返回None（模拟429限流），观察切换行为：</p>
-<table>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">rerank_results</span>(<span class="params">query, docs, method=<span class="string">&quot;cross_encoder&quot;</span></span>):</span><br><span class="line">    <span class="keyword">if</span> method == <span class="string">&quot;cross_encoder&quot;</span>:</span><br><span class="line">        <span class="keyword">return</span> rerank_with_cross_encoder(query, docs)</span><br><span class="line">    <span class="keyword">elif</span> method == <span class="string">&quot;llm&quot;</span>:</span><br><span class="line">        <span class="keyword">return</span> rerank_with_llm(query, docs)</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-Prompt工程：企业知识库问答模板"><a href="#7-Prompt工程：企业知识库问答模板" class="headerlink" title="7. Prompt工程：企业知识库问答模板"></a>7. Prompt工程：企业知识库问答模板</h3><p>我设计了一套完整的企业知识库问答Prompt模板（<code>utils/prompt.md</code>），核心原则：</p>
+<ol>
+<li><strong>仅基于提供的参考资料回答</strong>，不使用模型自身知识</li>
+<li><strong>必须标注信息来源</strong>，格式为<code>【来源：《文档名》 章节/页码】</code></li>
+<li><strong>知识库未覆盖时明确告知</strong>，绝不编造</li>
+<li><strong>涉及多个文档时指出冲突</strong>，建议用户确认最新版本</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">prompt_template = <span class="string">&quot;&quot;&quot;你是一个专业的问答助手，基于以下&#123;context_type&#125;回答用户问题。</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">提供的参考内容：</span></span><br><span class="line"><span class="string">&#123;context&#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">用户问题：&#123;question&#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">请遵循以下回答原则：</span></span><br><span class="line"><span class="string">1. 仅基于提供的参考资料回答问题，不要使用你自己的知识</span></span><br><span class="line"><span class="string">2. 如果参考资料中没有足够信息，请诚实告知无法回答</span></span><br><span class="line"><span class="string">3. 回答应该全面、准确、有条理</span></span><br><span class="line"><span class="string">4. 请用中文回答</span></span><br><span class="line"><span class="string">5. 在回答末尾标注信息来源&#123;time_instruction&#125;&#123;conflict_instruction&#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">现在开始回答：&quot;&quot;&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="工程化细节"><a href="#工程化细节" class="headerlink" title="工程化细节"></a>工程化细节</h2><h3 id="配置管理"><a href="#配置管理" class="headerlink" title="配置管理"></a>配置管理</h3><p>所有敏感信息（API Key）和可调参数（chunk_size、top_k等）集中在<code>config.py</code>管理，通过<code>.env</code>文件加载：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># config.py</span></span><br><span class="line">CHUNK_SIZE = <span class="number">400</span>          <span class="comment"># 文本切分大小</span></span><br><span class="line">CHUNK_OVERLAP = <span class="number">40</span>        <span class="comment"># 重叠字符数</span></span><br><span class="line">HYBRID_ALPHA = <span class="number">0.7</span>        <span class="comment"># 语义检索权重</span></span><br><span class="line">RETRIEVAL_TOP_K = <span class="number">10</span>       <span class="comment"># 检索返回数</span></span><br><span class="line">RERANK_TOP_K = <span class="number">5</span>           <span class="comment"># 重排序后保留数</span></span><br><span class="line">MAX_RETRIEVAL_ITERATIONS = <span class="number">3</span>  <span class="comment"># 递归检索最大轮数</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="错误处理与降级"><a href="#错误处理与降级" class="headerlink" title="错误处理与降级"></a>错误处理与降级</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    reranked = rerank_results(query, docs, ids, meta, top_k=RERANK_TOP_K)</span><br><span class="line"><span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">    logging.error(<span class="string">f&quot;重排序失败: <span class="subst">&#123;e&#125;</span>&quot;</span>)</span><br><span class="line">    <span class="comment"># 降级：按原始顺序返回</span></span><br><span class="line">    reranked = [(did, &#123;<span class="string">&#x27;content&#x27;</span>: d, <span class="string">&#x27;metadata&#x27;</span>: m, <span class="string">&#x27;score&#x27;</span>: <span class="number">1.0</span>&#125;)</span><br><span class="line">                <span class="keyword">for</span> did, d, m <span class="keyword">in</span> <span class="built_in">zip</span>(ids, docs, meta)]</span><br></pre></td></tr></table></figure>
+
+<h3 id="日志与监控"><a href="#日志与监控" class="headerlink" title="日志与监控"></a>日志与监控</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">logging.basicConfig(</span><br><span class="line">    level=logging.INFO,</span><br><span class="line">    <span class="built_in">format</span>=<span class="string">&#x27;%(asctime)s - %(name)s - %(levelname)s - %(message)s&#x27;</span></span><br><span class="line">)</span><br><span class="line"><span class="comment"># 关键节点记录：索引构建、检索耗时、LLM调用结果</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="与MiniRAG的对比"><a href="#与MiniRAG的对比" class="headerlink" title="与MiniRAG的对比"></a>与MiniRAG的对比</h2><table>
 <thead>
 <tr>
-<th>指标</th>
-<th>结果</th>
+<th>维度</th>
+<th>MiniRAG</th>
+<th>LocalPDFChat</th>
 </tr>
 </thead>
 <tbody><tr>
-<td>触发切换的请求数</td>
-<td><strong>2次</strong>（与max_retries&#x3D;2一致）</td>
+<td>定位</td>
+<td>学习Demo</td>
+<td>可部署应用</td>
 </tr>
 <tr>
-<td>切换后成功率</td>
-<td><strong>恢复至95%</strong></td>
+<td>代码量</td>
+<td>~400行</td>
+<td>~2500行</td>
 </tr>
 <tr>
-<td>switch_history记录</td>
-<td><code>{&#39;from&#39;:&#39;primary&#39;,&#39;to&#39;:&#39;backup&#39;,&#39;reason&#39;:&#39;连续失败2次&#39;}</code></td>
+<td>文档格式</td>
+<td>PDF</td>
+<td>PDF&#x2F;Word&#x2F;Excel&#x2F;PPT&#x2F;TXT&#x2F;MD&#x2F;HTML</td>
+</tr>
+<tr>
+<td>交互方式</td>
+<td>命令行</td>
+<td>Gradio Web UI + FastAPI</td>
+</tr>
+<tr>
+<td>LLM后端</td>
+<td>单一API</td>
+<td>Ollama本地 + SiliconFlow云端</td>
+</tr>
+<tr>
+<td>索引类型</td>
+<td>FlatL2</td>
+<td>自动选型（FlatL2&#x2F;IVFFlat&#x2F;IVFPQ）</td>
+</tr>
+<tr>
+<td>检索策略</td>
+<td>单次混合检索</td>
+<td>递归检索</td>
+</tr>
+<tr>
+<td>网络增强</td>
+<td>无</td>
+<td>SerpAPI实时搜索</td>
+</tr>
+<tr>
+<td>冲突检测</td>
+<td>无</td>
+<td>有</td>
+</tr>
+<tr>
+<td>思维链展示</td>
+<td>无</td>
+<td>DeepSeek-R1支持</td>
+</tr>
+<tr>
+<td>配置管理</td>
+<td>硬编码</td>
+<td>.env环境变量</td>
+</tr>
+<tr>
+<td>错误处理</td>
+<td>简单try-except</td>
+<td>多级降级策略</td>
 </tr>
 </tbody></table>
-<p><strong>关键发现</strong>：主模型故障后，系统在第2次失败后自动切换到备模型，切换后成功率立即恢复。整个切换过程对调用方完全透明。</p>
-<h3 id="4-3-自动恢复验证"><a href="#4-3-自动恢复验证" class="headerlink" title="4.3 自动恢复验证"></a>4.3 自动恢复验证</h3><p>切换到backup后，恢复主模型可用性：</p>
-<table>
+<h2 id="面试关联"><a href="#面试关联" class="headerlink" title="面试关联"></a>面试关联</h2><ol>
+<li><strong>RAG系统怎么设计模块化架构？</strong> → 按数据流分层：解析层→处理层→检索层→生成层，每层独立可替换</li>
+<li><strong>FAISS索引怎么选？</strong> → 小数据FlatL2，中等IVFFlat，海量IVFPQ，根据数据量自动切换</li>
+<li><strong>递归检索的终止条件？</strong> → LLM判断信息是否充足 + 最大迭代次数限制</li>
+<li><strong>本地模型和云端API怎么选？</strong> → 本地免费但需硬件，云端方便但按量计费，根据场景动态切换</li>
+<li><strong>网络搜索结果和本地文档怎么融合？</strong> → 网络结果作为额外上下文拼接，不参与向量索引；冲突时标记并提示用户</li>
+<li><strong>CrossEncoder和LLM重排序的区别？</strong> → 前者精度高速度快适合通用场景，后者灵活但慢适合高精度需求</li>
+<li><strong>怎么保证回答的可信度？</strong> → 标注来源、冲突检测、知识库未覆盖时明确告知</li>
+</ol>
+<h2 id="待改进方向"><a href="#待改进方向" class="headerlink" title="待改进方向"></a>待改进方向</h2><table>
 <thead>
 <tr>
-<th>指标</th>
-<th>结果</th>
+<th>方向</th>
+<th>思路</th>
 </tr>
 </thead>
 <tbody><tr>
-<td>恢复到primary的周期数</td>
-<td><strong>1个周期</strong>（下一次爬取即恢复）</td>
+<td>增量索引更新</td>
+<td>当前每次上传文档重建全量索引，应支持增量添加</td>
 </tr>
 <tr>
-<td>恢复后成功率</td>
-<td><strong>96%</strong>（与基线一致）</td>
+<td>检索效果评估</td>
+<td>缺乏量化指标（Recall、MRR），需要构建测试集</td>
+</tr>
+<tr>
+<td>多模态支持</td>
+<td>扩展图片、表格的检索与理解</td>
+</tr>
+<tr>
+<td>用户反馈闭环</td>
+<td>记录用户点赞&#x2F;点踩，用于优化检索排序</td>
+</tr>
+<tr>
+<td>权限控制</td>
+<td>多租户场景下的文档隔离</td>
+</tr>
+<tr>
+<td>缓存策略</td>
+<td>热门查询结果缓存，减少重复计算</td>
 </tr>
 </tbody></table>
-<p>自动恢复机制工作正常：只要主模型恢复，下一个请求周期就会自动切回，无需人工干预。</p>
-<h3 id="4-4-全链路降级测试"><a href="#4-4-全链路降级测试" class="headerlink" title="4.4 全链路降级测试"></a>4.4 全链路降级测试</h3><p>模拟主模型和备模型均不可用：</p>
-<table>
-<thead>
-<tr>
-<th>降级层级</th>
-<th>产出</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>批量API</td>
-<td>失败</td>
-</tr>
-<tr>
-<td>单条API</td>
-<td>失败</td>
-</tr>
-<tr>
-<td>默认值</td>
-<td><strong>100%产出</strong></td>
-</tr>
-</tbody></table>
-<p>系统在所有模型不可用时仍然持续产出默认值结果，<strong>不崩溃、不中断</strong>。数据精度降级，但服务连续性得到保证。</p>
-<h3 id="4-5-缓存对韧性的贡献"><a href="#4-5-缓存对韧性的贡献" class="headerlink" title="4.5 缓存对韧性的贡献"></a>4.5 缓存对韧性的贡献</h3><p>在稳态运行（大部分热搜跨轮次持续存在）下，Redis缓存命中率可达<strong>80%以上</strong>。这意味着即使LLM服务完全不可用，仍有80%的热搜条目能从缓存返回分析结果，只有新上榜的热搜才会使用默认值。缓存是故障转移之外的第二道防线。</p>
-<h2 id="5-面试关联"><a href="#5-面试关联" class="headerlink" title="5. 面试关联"></a>5. 面试关联</h2><ul>
-<li><p><strong>面试题1：”如何设计一个高可用的LLM调用方案？”</strong> → 本文2-3节给出了完整答案：多模型配置 + 连续失败计数切换 + 新周期自动恢复 + 三级降级链，确保任何情况下系统有输出。</p>
-</li>
-<li><p><strong>面试题2：”熔断器模式和你的连续失败计数方案有什么区别？各适合什么场景？”</strong> → 第2节分析了两者差异：熔断器适合高频请求（每秒百次级），需要半开状态精确控制探针频率；连续失败计数适合低频场景（每30秒一次），每次请求本身就是天然检测点，无需额外状态机。</p>
-</li>
-<li><p><strong>面试题3：”系统降级策略怎么设计？如何保证任何情况下都有输出？”</strong> → 第3节的三级降级链是答案核心：批量→单条→默认值。设计原则是<strong>语义合理的占位值优于null</strong>，下游系统无需特殊处理，精度降低但服务不中断。</p>
-</li>
-</ul>
+<hr>
+<p><strong>关于这个项目：</strong> MiniRAG项目框架提供了基础的RAG Pipeline，本项目在此基础上有着大量工程化改进，包括模块化架构、多格式文档解析、递归检索、网络搜索增强、双LLM后端适配、冲突检测等企业级功能。核心目标是理解”从Demo到应用”需要补全哪些工程细节。</p>
+<blockquote>
+<p>完整代码：<a href="https://github.com/GeiTeHaoBu-del/Local_Pdf_Chat_RAG">Local_Pdf_Chat_RAG</a></p>
+</blockquote>
 ]]></content>
       <categories>
+        <category>RAG</category>
         <category>工程实践</category>
       </categories>
       <tags>
-        <tag>LLM</tag>
-        <tag>故障转移</tag>
-        <tag>Python</tag>
-        <tag>微服务韧性</tag>
+        <tag>RAG</tag>
+        <tag>FAISS</tag>
+        <tag>混合检索</tag>
+        <tag>FastAPI</tag>
+        <tag>Gradio</tag>
+        <tag>递归检索</tag>
       </tags>
   </entry>
 </search>
