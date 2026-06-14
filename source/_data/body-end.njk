@@ -1,54 +1,30 @@
-<!-- Right Sidebar -->
+﻿<!-- Right Sidebar -->
 <div class="right-sidebar" id="right-sidebar">
   <div class="right-stats-card">
     <div class="card-title"><i class="fas fa-chart-bar"></i> Site Stats</div>
     <div class="stats-grid">
       <div class="stats-item">
-        <div class="stats-num">{{ site.posts.length }}</div>
+        <div class="stats-num" id="stat-posts">{{ site.posts.length }}</div>
         <div class="stats-label">Articles</div>
       </div>
       <div class="stats-item">
-        <div class="stats-num">{{ site.categories.length }}</div>
+        <div class="stats-num" id="stat-cats">{{ site.categories.length }}</div>
         <div class="stats-label">Categories</div>
       </div>
       <div class="stats-item">
-        <div class="stats-num">{{ site.tags.length }}</div>
+        <div class="stats-num" id="stat-tags">{{ site.tags.length }}</div>
         <div class="stats-label">Tags</div>
       </div>
       <div class="stats-item">
-        <div class="stats-num">{{ site.posts.length }}</div>
-        <div class="stats-label">Posts</div>
+        <div class="stats-num" id="stat-words">--</div>
+        <div class="stats-label">Words</div>
       </div>
     </div>
   </div>
 
   <div class="right-tree-card">
     <div class="card-title"><i class="fas fa-sitemap"></i> Content Map</div>
-    <ul class="tree-list">
-      {%- for cat in site.categories.toArray() %}
-      <li class="tree-category">
-        <div class="tree-cat-header" onclick="toggleTree(this)">
-          <i class="tree-icon fas fa-folder"></i>
-          <span class="tree-cat-name">{{ cat.name }}</span>
-          <span class="tree-cat-count">{{ cat.posts.length }}</span>
-        </div>
-        <ul class="tree-posts">
-          {%- for post in cat.posts.toArray() %}
-          <li class="tree-post-item"><a href="{{ url_for(post.path) }}"><span class="tree-dot"></span>{{ post.title }}</a></li>
-          {%- endfor %}
-        </ul>
-      </li>
-      {%- endfor %}
-      {%- for post in site.posts.toArray() %}
-      {%- if post.categories.length === 0 %}
-      <li class="tree-category">
-        <div class="tree-cat-header" onclick="toggleTree(this)">
-          <i class="tree-icon fas fa-file-alt"></i>
-          <span class="tree-cat-name">{{ post.title }}</span>
-        </div>
-      </li>
-      {%- endif %}
-      {%- endfor %}
+    <ul class="tree-list" id="content-map">
     </ul>
   </div>
 </div>
@@ -69,9 +45,6 @@
 <div class="post-filter-bar" id="post-filter-bar" style="display:none;">
   <span class="filter-label"><i class="fas fa-filter"></i> Filter</span>
   <span class="filter-tag active" data-filter="all">All</span>
-  {%- for cat in site.categories.toArray() %}
-  <span class="filter-tag" data-filter="{{ cat.name }}">{{ cat.name }}</span>
-  {%- endfor %}
 </div>
 
 <!-- Theme Toggle Button -->
@@ -108,6 +81,7 @@
     localStorage.setItem('theme', isDark ? 'light' : 'dark');
   });
 
+  // Move right sidebar into main layout
   var rightSidebar = document.getElementById('right-sidebar');
   var main = document.querySelector('.main');
   if (rightSidebar && main) {
@@ -133,6 +107,62 @@
     if (mainInner.classList.contains('index') && filterBar) {
       filterBar.style.display = '';
       mainInner.insertBefore(filterBar, navBar ? navBar.nextSibling : mainInner.firstChild);
+    }
+  }
+
+  // Build Content Map & Filter Bar from search.xml
+  fetch('/search.xml').then(function(r) { return r.text(); }).then(function(xml) {
+    var parser = new DOMParser();
+    var doc = parser.parseFromString(xml, 'text/xml');
+    var entries = doc.querySelectorAll('entry');
+    var catMap = {};
+    var filterCats = [];
+
+    entries.forEach(function(entry) {
+      var title = entry.querySelector('title').textContent;
+      var link = entry.querySelector('url').textContent.trim();
+      var cats = entry.querySelectorAll('category');
+      cats.forEach(function(c, i) {
+        if (i < cats.length - 1) return; // Only use leaf category
+        var name = c.textContent;
+        if (!catMap[name]) {
+          catMap[name] = [];
+          filterCats.push(name);
+        }
+        catMap[name].push({ title: title, link: link });
+      });
+    });
+
+    // Render Content Map
+    var mapEl = document.getElementById('content-map');
+    if (mapEl) {
+      var mapHTML = '';
+      Object.keys(catMap).forEach(function(cat) {
+        mapHTML += '<li class="tree-category">';
+        mapHTML += '<div class="tree-cat-header" onclick="toggleTree(this)">';
+        mapHTML += '<i class="tree-icon fas fa-folder"></i>';
+        mapHTML += '<span class="tree-cat-name">' + cat + '</span>';
+        mapHTML += '<span class="tree-cat-count">' + catMap[cat].length + '</span>';
+        mapHTML += '</div>';
+        mapHTML += '<ul class="tree-posts">';
+        catMap[cat].forEach(function(post) {
+          mapHTML += '<li class="tree-post-item"><a href="' + post.link + '"><span class="tree-dot"></span>' + post.title + '</a></li>';
+        });
+        mapHTML += '</ul></li>';
+      });
+      mapEl.innerHTML = mapHTML;
+    }
+
+    // Render Filter Bar
+    var filterBar = document.getElementById('post-filter-bar');
+    if (filterBar && mainInner && mainInner.classList.contains('index')) {
+      filterCats.forEach(function(cat) {
+        var span = document.createElement('span');
+        span.className = 'filter-tag';
+        span.setAttribute('data-filter', cat);
+        span.textContent = cat;
+        filterBar.appendChild(span);
+      });
 
       filterBar.querySelectorAll('.filter-tag').forEach(function(tag) {
         tag.addEventListener('click', function() {
@@ -150,6 +180,16 @@
         });
       });
     }
+  }).catch(function() {});
+
+  // Update word count stat
+  var wordEl = document.getElementById('stat-words');
+  if (wordEl && wordEl.textContent === '--') {
+    var total = 0;
+    document.querySelectorAll('.post-body').forEach(function(el) {
+      total += el.textContent.replace(/\s/g, '').length;
+    });
+    if (total > 0) wordEl.textContent = total > 10000 ? (total / 10000).toFixed(1) + 'w' : total;
   }
 })();
 
