@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#2d6a4f"><meta name="generator" content="Hexo 8.1.2">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#2d6a4f">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"geitehaobu-del.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":280,"width_dual_column":240,"display":"always","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"flat","show_result":true},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":false,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":true,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInUp","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":10,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="学习LangChain框架过程中产生的一系列核心问题与深度解答，涵盖模型调用方式、流式输出、异步编程、输出解析器、LCEL链式调用、Memory记忆机制、Tools工具调用等关键知识点。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LangChain学习问答：从模型调用到工具链全解析">
+<meta property="og:url" content="https://geitehaobu-del.github.io/posts/LangChain%E5%AD%A6%E4%B9%A0%E9%97%AE%E7%AD%94-%E4%BB%8E%E6%A8%A1%E5%9E%8B%E8%B0%83%E7%94%A8%E5%88%B0%E5%B7%A5%E5%85%B7%E9%93%BE%E5%85%A8%E8%A7%A3%E6%9E%90/index.html">
+<meta property="og:site_name" content="吴纪辰的大模型学习路径">
+<meta property="og:description" content="学习LangChain框架过程中产生的一系列核心问题与深度解答，涵盖模型调用方式、流式输出、异步编程、输出解析器、LCEL链式调用、Memory记忆机制、Tools工具调用等关键知识点。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-06-13T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-06-14T12:59:36.699Z">
+<meta property="article:author" content="吴纪辰">
+<meta property="article:tag" content="AI应用开发">
+<meta property="article:tag" content="Agent">
+<meta property="article:tag" content="LLM">
+<meta property="article:tag" content="LangChain">
+<meta property="article:tag" content="Python">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://geitehaobu-del.github.io/posts/LangChain%E5%AD%A6%E4%B9%A0%E9%97%AE%E7%AD%94-%E4%BB%8E%E6%A8%A1%E5%9E%8B%E8%B0%83%E7%94%A8%E5%88%B0%E5%B7%A5%E5%85%B7%E9%93%BE%E5%85%A8%E8%A7%A3%E6%9E%90/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://geitehaobu-del.github.io/posts/LangChain%E5%AD%A6%E4%B9%A0%E9%97%AE%E7%AD%94-%E4%BB%8E%E6%A8%A1%E5%9E%8B%E8%B0%83%E7%94%A8%E5%88%B0%E5%B7%A5%E5%85%B7%E9%93%BE%E5%85%A8%E8%A7%A3%E6%9E%90/","path":"posts/LangChain学习问答-从模型调用到工具链全解析/","title":"LangChain学习问答：从模型调用到工具链全解析"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>LangChain学习问答：从模型调用到工具链全解析 | 吴纪辰的大模型学习路径</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":"default","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">吴纪辰的大模型学习路径</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">AI应用开发工程师成长记录 | RAG · Agent · 训练微调 · 工程实践</p>
+      <img class="custom-logo-image" src="/%5Bobject%20Object%5D" alt="吴纪辰的大模型学习路径">
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Q1%EF%BC%9AFastAPI-SSE-Gradio-%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-number">2.</span> <span class="nav-text">Q1：FastAPI &#x2F; SSE &#x2F; Gradio 是什么？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Q2%EF%BC%9ALangChain-%E7%9A%84%E6%9E%B6%E6%9E%84%E5%88%B0%E5%BA%95%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F%E8%B7%9F-Spring-Boot-%E6%AF%94%E5%B7%AE%E5%9C%A8%E5%93%AA%EF%BC%9F"><span class="nav-number">3.</span> <span class="nav-text">Q2：LangChain 的架构到底是什么？跟 Spring Boot 比差在哪？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC-1-%E7%82%B9%E7%A1%AE%E5%AE%9E%E4%B8%8D%E9%9A%BE%E5%AE%9E%E7%8E%B0%EF%BC%8C%E4%BD%86-2%E3%80%813%E3%80%814-%E5%90%88%E5%9C%A8%E4%B8%80%E8%B5%B7%E7%9A%84%E5%B7%A5%E4%BD%9C%E9%87%8F%E5%B0%B1%E4%B8%8D%E5%B0%8F%E4%BA%86%E3%80%82%E6%89%80%E4%BB%A5-LangChain-%E7%9A%84%E4%BB%B7%E5%80%BC%E4%B8%8D%E5%8F%AA%E6%98%AF%E2%80%9D%E7%BB%9F%E4%B8%80%E8%B0%83%E7%94%A8%E2%80%9D%EF%BC%8C%E8%80%8C%E6%98%AF%E8%AE%A9%E6%A8%A1%E5%9E%8B%E8%83%BD%E5%8A%9B%E6%9B%B4%E5%8F%AF%E6%8E%A7%E3%80%81%E6%9B%B4%E5%8F%AF%E7%BB%84%E5%90%88%E3%80%81%E6%9B%B4%E5%8F%AF%E5%B7%A5%E7%A8%8B%E5%8C%96%E3%80%82"><span class="nav-number">4.</span> <span class="nav-text">第 1 点确实不难实现，但 2、3、4 合在一起的工作量就不小了。所以 LangChain 的价值不只是”统一调用”，而是让模型能力更可控、更可组合、更可工程化。</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Q3%EF%BC%9A%E8%B0%83%E7%94%A8%E6%A8%A1%E5%9E%8B%E6%9C%89%E5%93%AA%E4%BA%9B%E6%96%B9%E5%BC%8F%EF%BC%9F%E8%83%BD%E4%B8%8D%E8%83%BD%E7%9B%B4%E6%8E%A5%E7%94%A8-requests-%E6%9E%84%E9%80%A0-HTTP-%E8%AF%B7%E6%B1%82%EF%BC%9F"><span class="nav-number">5.</span> <span class="nav-text">Q3：调用模型有哪些方式？能不能直接用 requests 构造 HTTP 请求？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E5%BC%8F%E4%B8%80%EF%BC%9A%E7%9B%B4%E6%8E%A5%E7%94%A8-requests-%E6%9E%84%E9%80%A0-HTTP-%E8%AF%B7%E6%B1%82"><span class="nav-number">5.1.</span> <span class="nav-text">方式一：直接用 requests 构造 HTTP 请求</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E5%BC%8F%E4%BA%8C%EF%BC%9Aopenai-OpenAI%EF%BC%88OpenAI-%E5%AE%98%E6%96%B9-SDK%EF%BC%89"><span class="nav-number">5.2.</span> <span class="nav-text">方式二：openai.OpenAI（OpenAI 官方 SDK）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E5%BC%8F%E4%B8%89%EF%BC%9Alangchain-openai-ChatOpenAI"><span class="nav-number">5.3.</span> <span class="nav-text">方式三：langchain_openai.ChatOpenAI</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E5%BC%8F%E5%9B%9B%EF%BC%9Ainit-chat-model%EF%BC%88%E6%9C%80%E6%96%B0%E6%8E%A8%E8%8D%90%EF%BC%89"><span class="nav-number">5.4.</span> <span class="nav-text">方式四：init_chat_model（最新推荐）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Q4%EF%BC%9Afor-chunk-in-model-stream-%E4%BD%A0%E5%A5%BD-%E6%98%AF%E4%BB%80%E4%B9%88%E6%84%8F%E6%80%9D%EF%BC%9F"><span class="nav-number">6.</span> <span class="nav-text">Q4：for chunk in model.stream(&quot;你好&quot;) 是什么意思？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Q5%EF%BC%9AChatOpenAI-%E5%92%8C-init-chat-model-%E7%9A%84%E8%B0%83%E7%94%A8%E5%86%99%E6%B3%95%E6%9C%89%E4%BB%80%E4%B9%88%E5%8C%BA%E5%88%AB%EF%BC%9F"><span class="nav-number">7.</span> <span class="nav-text">Q5：ChatOpenAI 和 init_chat_model 的调用写法有什么区别？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Q6%EF%BC%9A%E5%90%8C%E6%AD%A5%E6%96%B9%E6%B3%95%E5%92%8C%E5%BC%82%E6%AD%A5%E6%96%B9%E6%B3%95%E6%9C%89%E4%BB%80%E4%B9%88%E5%8C%BA%E5%88%AB%EF%BC%9F%E5%BC%82%E6%AD%A5%E6%9C%89%E4%BB%80%E4%B9%88%E7%94%A8%EF%BC%9F"><span class="nav-number">8.</span> <span class="nav-text">Q6：同步方法和异步方法有什么区别？异步有什么用？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Q7%EF%BC%9Ainvoke-%E5%92%8C-parse-%E4%B8%A4%E7%A7%8D%E8%A7%A3%E6%9E%90%E6%96%B9%E5%BC%8F%E6%9C%89%E4%BB%80%E4%B9%88%E5%8C%BA%E5%88%AB%EF%BC%9F"><span class="nav-number">9.</span> <span class="nav-text">Q7：invoke 和 parse 两种解析方式有什么区别？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Q8%EF%BC%9ALCEL-%E9%93%BE%E7%9A%84%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA%E7%B1%BB%E5%9E%8B%E6%B5%81%E8%BD%AC%E6%98%AF%E6%80%8E%E6%A0%B7%E7%9A%84%EF%BC%9F"><span class="nav-number">10.</span> <span class="nav-text">Q8：LCEL 链的输入输出类型流转是怎样的？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Q9%EF%BC%9AMemory-%E8%AE%B0%E5%BF%86%E5%88%B0%E5%BA%95%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F%E6%A8%A1%E5%9E%8B%E7%9C%9F%E7%9A%84%E2%80%9D%E8%AE%B0%E4%BD%8F%E2%80%9D%E4%BA%86%E5%90%97%EF%BC%9F"><span class="nav-number">11.</span> <span class="nav-text">Q9：Memory 记忆到底是什么？模型真的”记住”了吗？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Q10%EF%BC%9ATools-%E5%B7%A5%E5%85%B7%E8%B0%83%E7%94%A8%E2%80%94%E2%80%94%E6%A8%A1%E5%9E%8B%E7%9C%9F%E7%9A%84%E4%BC%9A%E8%87%AA%E5%B7%B1%E8%B0%83-API-%E5%90%97%EF%BC%9F"><span class="nav-number">12.</span> <span class="nav-text">Q10：Tools 工具调用——模型真的会自己调 API 吗？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93%EF%BC%9ALangChain-%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86%E7%82%B9%E4%B8%B2%E8%81%94"><span class="nav-number">13.</span> <span class="nav-text">总结：LangChain 核心知识点串联</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="吴纪辰"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">吴纪辰</p>
+  <div class="site-description" itemprop="description">记录大模型应用开发的学习与实践，涵盖RAG系统、Agent架构、模型微调、工程化部署等技术方向</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">21</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/GeiTeHaoBu-del" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;GeiTeHaoBu-del" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+<div class="left-profile-card">
+  <img class="profile-avatar" src="/images/avatar.png" alt="Jichen Wu" />
+  <div class="profile-name">Jichen Wu</div>
+  <div class="profile-handle"><a href="https://github.com/GeiTeHaoBu-del" target="_blank">@GeiTeHaoBu-del</a></div>
+  <div class="profile-bio">AI Application Developer<br/>Focused on RAG, Agent & LLM Engineering</div>
+  <div class="profile-stats">
+    <div class="stat-item">
+      <div class="stat-num">17</div>
+      <div class="stat-label">Repos</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">0</div>
+      <div class="stat-label">Followers</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">1</div>
+      <div class="stat-label">Following</div>
+    </div>
+  </div>
+  <div class="profile-social">
+    <a href="https://github.com/GeiTeHaoBu-del" target="_blank" title="GitHub"><i class="fab fa-github"></i></a>
+  </div>
+</div>
+
+<div class="left-tech-card">
+  <div class="card-title"><i class="fas fa-code"></i> Tech Stack</div>
+  <div class="tech-tags">
+    <span class="tech-tag">Python</span>
+    <span class="tech-tag">FastAPI</span>
+    <span class="tech-tag">LangChain</span>
+    <span class="tech-tag">LangGraph</span>
+    <span class="tech-tag">FAISS</span>
+    <span class="tech-tag">Gradio</span>
+    <span class="tech-tag">Docker</span>
+    <span class="tech-tag">MySQL</span>
+    <span class="tech-tag">Redis</span>
+    <span class="tech-tag">Vue.js</span>
+  </div>
+</div>
+
+<div class="left-progress-card">
+  <div class="card-title"><i class="fas fa-graduation-cap"></i> Learning Progress</div>
+  <div class="progress-item">
+    <div class="progress-label"><span>MiniRAG</span><span>66%</span></div>
+    <div class="progress-bar"><div class="progress-fill" style="width: 66%"></div></div>
+  </div>
+  <div class="progress-item">
+    <div class="progress-label"><span>Local_Pdf_Chat_RAG</span><span>0%</span></div>
+    <div class="progress-bar"><div class="progress-fill" style="width: 0%"></div></div>
+  </div>
+  <div class="progress-item">
+    <div class="progress-label"><span>ai-agents-from-zero</span><span>0%</span></div>
+    <div class="progress-bar"><div class="progress-fill" style="width: 0%"></div></div>
+  </div>
+  <div class="progress-item">
+    <div class="progress-label"><span>MicroLM</span><span>0%</span></div>
+    <div class="progress-bar"><div class="progress-fill" style="width: 0%"></div></div>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://geitehaobu-del.github.io/posts/LangChain%E5%AD%A6%E4%B9%A0%E9%97%AE%E7%AD%94-%E4%BB%8E%E6%A8%A1%E5%9E%8B%E8%B0%83%E7%94%A8%E5%88%B0%E5%B7%A5%E5%85%B7%E9%93%BE%E5%85%A8%E8%A7%A3%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="吴纪辰">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="吴纪辰的大模型学习路径">
+      <meta itemprop="description" content="记录大模型应用开发的学习与实践，涵盖RAG系统、Agent架构、模型微调、工程化部署等技术方向">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="LangChain学习问答：从模型调用到工具链全解析 | 吴纪辰的大模型学习路径">
+      <meta itemprop="description" content="学习LangChain框架过程中产生的一系列核心问题与深度解答，涵盖模型调用方式、流式输出、异步编程、输出解析器、LCEL链式调用、Memory记忆机制、Tools工具调用等关键知识点。">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          LangChain学习问答：从模型调用到工具链全解析
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2026-06-14 00:00:00 / 修改时间：20:59:36" itemprop="dateCreated datePublished" datetime="2026-06-14T00:00:00+08:00">2026-06-14</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/LangChain/" itemprop="url" rel="index"><span itemprop="name">LangChain</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+            <div class="post-description">学习LangChain框架过程中产生的一系列核心问题与深度解答，涵盖模型调用方式、流式输出、异步编程、输出解析器、LCEL链式调用、Memory记忆机制、Tools工具调用等关键知识点。</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>这篇文章整理了学习 LangChain 框架过程中产生的一系列核心问题与解答。每个问题都来自真实的困惑点，回答力求讲透”为什么”而不只是”怎么做”。</p>
+<hr>
+<h2 id="Q1：FastAPI-SSE-Gradio-是什么？"><a href="#Q1：FastAPI-SSE-Gradio-是什么？" class="headerlink" title="Q1：FastAPI &#x2F; SSE &#x2F; Gradio 是什么？"></a>Q1：FastAPI &#x2F; SSE &#x2F; Gradio 是什么？</h2><p>这三个是构建 AI 应用时常用的 Web 技术栈，各有分工：</p>
+<table>
+<thead>
+<tr>
+<th>技术</th>
+<th>定位</th>
+<th>核心作用</th>
+<th>类比</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>FastAPI</strong></td>
+<td>Python Web 框架</td>
+<td>构建 REST API，处理 HTTP 请求</td>
+<td>类似 Java 的 Spring Boot</td>
+</tr>
+<tr>
+<td><strong>SSE</strong></td>
+<td>通信协议</td>
+<td>服务器向客户端单向推送消息流</td>
+<td>类似”广播”，服务器说话客户端听</td>
+</tr>
+<tr>
+<td><strong>Gradio</strong></td>
+<td>UI 快速搭建工具</td>
+<td>几行代码搭建模型演示界面</td>
+<td>类似”可视化壳子”</td>
+</tr>
+</tbody></table>
+<p><strong>FastAPI</strong> 是后端框架，负责接收请求、调用模型、返回结果。它的核心优势是异步原生、自动生成 API 文档、类型校验。</p>
+<p><strong>SSE（Server-Sent Events）</strong> 解决的是一个关键问题：大模型生成文本是逐 token 流出的，如果等全部生成完再返回，用户要盯着空白页面等很久。SSE 让服务器生成一段就推送一段，实现”打字机效果”。注意 SSE 是单向的——只有服务器往客户端推，客户端不能通过 SSE 回话。</p>
+<p><strong>Gradio</strong> 是快速搭建 Demo 界面的工具，适合做内部演示和原型验证，不适合做正式产品。</p>
+<p>三者的关系：FastAPI 搭后端 → SSE 做流式推送 → Gradio 做前端界面（或用 Vue&#x2F;React 替代）。</p>
+<hr>
+<h2 id="Q2：LangChain-的架构到底是什么？跟-Spring-Boot-比差在哪？"><a href="#Q2：LangChain-的架构到底是什么？跟-Spring-Boot-比差在哪？" class="headerlink" title="Q2：LangChain 的架构到底是什么？跟 Spring Boot 比差在哪？"></a>Q2：LangChain 的架构到底是什么？跟 Spring Boot 比差在哪？</h2><p>这是一个非常常见的困惑。先说结论：<strong>LangChain 不是 Spring Boot 那种分层架构框架，它更像 Flask + SQLAlchemy 这种工具包。</strong></p>
+<p>Spring Boot 给你规定了：</p>
+<ul>
+<li>Controller 层 → <code>@RestController</code> 注解</li>
+<li>Service 层 → <code>@Service</code> 注解</li>
+<li>Mapper 层 → MyBatis 的 <code>@Mapper</code> 注解</li>
+<li>每一层都有固定写法模板</li>
+</ul>
+<p>LangChain 没有这种分层约束，它提供的是<strong>六个功能模块</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>模块</th>
+<th>解决什么问题</th>
+<th>核心抽象</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Model I&#x2F;O</td>
+<td>统一不同模型的调用方式</td>
+<td><code>ChatOpenAI</code> &#x2F; <code>init_chat_model</code></td>
+</tr>
+<tr>
+<td>Prompt</td>
+<td>管理提示词模板</td>
+<td><code>ChatPromptTemplate</code> &#x2F; <code>MessagesPlaceholder</code></td>
+</tr>
+<tr>
+<td>Output Parser</td>
+<td>解析模型输出为结构化数据</td>
+<td><code>StrOutputParser</code> &#x2F; <code>JsonOutputParser</code> &#x2F; Pydantic</td>
+</tr>
+<tr>
+<td>LCEL</td>
+<td>链式组合</td>
+<td>&#96;prompt</td>
+</tr>
+<tr>
+<td>Memory</td>
+<td>管理对话历史</td>
+<td><code>RunnableWithMessageHistory</code> &#x2F; <code>RedisChatMessageHistory</code></td>
+</tr>
+<tr>
+<td>Tools</td>
+<td>给模型接外部能力</td>
+<td><code>@tool</code> &#x2F; <code>bind_tools</code></td>
+</tr>
+</tbody></table>
+<p><strong>LangChain 的核心价值（80%）不是”统一调用格式”这么简单，而是：</strong></p>
+<ol>
+<li><strong>统一模型接口</strong>：不同提供商（OpenAI&#x2F;阿里百炼&#x2F;DeepSeek&#x2F;Ollama）的 base_url、参数格式不一样，LangChain 做了适配</li>
+<li><strong>结构化输出解析</strong>：模型返回的是字符串，LangChain 能帮你解析成 JSON &#x2F; Pydantic 对象 &#x2F; TypedDict</li>
+<li><strong>工具调用循环</strong>：模型决定调什么工具 → 程序执行 → 结果回传模型，这套循环 LangChain 帮你封装了</li>
+<li><strong>模型行为归一化</strong>：不同模型的 tool_calls 格式、流式输出格式有差异，LangChain 做了统一</li>
+</ol>
+<h2 id="第-1-点确实不难实现，但-2、3、4-合在一起的工作量就不小了。所以-LangChain-的价值不只是”统一调用”，而是让模型能力更可控、更可组合、更可工程化。"><a href="#第-1-点确实不难实现，但-2、3、4-合在一起的工作量就不小了。所以-LangChain-的价值不只是”统一调用”，而是让模型能力更可控、更可组合、更可工程化。" class="headerlink" title="第 1 点确实不难实现，但 2、3、4 合在一起的工作量就不小了。所以 LangChain 的价值不只是”统一调用”，而是让模型能力更可控、更可组合、更可工程化。"></a>第 1 点确实不难实现，但 2、3、4 合在一起的工作量就不小了。所以 LangChain 的价值不只是”统一调用”，而是<strong>让模型能力更可控、更可组合、更可工程化</strong>。</h2><h2 id="Q3：调用模型有哪些方式？能不能直接用-requests-构造-HTTP-请求？"><a href="#Q3：调用模型有哪些方式？能不能直接用-requests-构造-HTTP-请求？" class="headerlink" title="Q3：调用模型有哪些方式？能不能直接用 requests 构造 HTTP 请求？"></a>Q3：调用模型有哪些方式？能不能直接用 requests 构造 HTTP 请求？</h2><p>可以的，一共有四种方式，从底层到高层排列：</p>
+<h3 id="方式一：直接用-requests-构造-HTTP-请求"><a href="#方式一：直接用-requests-构造-HTTP-请求" class="headerlink" title="方式一：直接用 requests 构造 HTTP 请求"></a>方式一：直接用 requests 构造 HTTP 请求</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line">response = requests.post(</span><br><span class="line">    <span class="string">&quot;https://api.openai.com/v1/chat/completions&quot;</span>,</span><br><span class="line">    headers=&#123;<span class="string">&quot;Authorization&quot;</span>: <span class="string">&quot;Bearer sk-xxx&quot;</span>&#125;,</span><br><span class="line">    json=&#123;</span><br><span class="line">        <span class="string">&quot;model&quot;</span>: <span class="string">&quot;gpt-4o-mini&quot;</span>,</span><br><span class="line">        <span class="string">&quot;messages&quot;</span>: [&#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>, <span class="string">&quot;content&quot;</span>: <span class="string">&quot;你好&quot;</span>&#125;]</span><br><span class="line">    &#125;</span><br><span class="line">)</span><br><span class="line"><span class="built_in">print</span>(response.json()[<span class="string">&quot;choices&quot;</span>][<span class="number">0</span>][<span class="string">&quot;message&quot;</span>][<span class="string">&quot;content&quot;</span>])</span><br></pre></td></tr></table></figure>
+
+<p>最底层，最灵活，但你要自己处理：认证、参数格式、错误处理、重试、流式解析、工具调用格式……工作量很大。</p>
+<h3 id="方式二：openai-OpenAI（OpenAI-官方-SDK）"><a href="#方式二：openai-OpenAI（OpenAI-官方-SDK）" class="headerlink" title="方式二：openai.OpenAI（OpenAI 官方 SDK）"></a>方式二：openai.OpenAI（OpenAI 官方 SDK）</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> openai <span class="keyword">import</span> OpenAI</span><br><span class="line"></span><br><span class="line">client = OpenAI(api_key=<span class="string">&quot;sk-xxx&quot;</span>, base_url=<span class="string">&quot;https://api.openai.com/v1&quot;</span>)</span><br><span class="line">response = client.chat.completions.create(</span><br><span class="line">    model=<span class="string">&quot;gpt-4o-mini&quot;</span>,</span><br><span class="line">    messages=[&#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>, <span class="string">&quot;content&quot;</span>: <span class="string">&quot;你好&quot;</span>&#125;]</span><br><span class="line">)</span><br><span class="line"><span class="built_in">print</span>(response.choices[<span class="number">0</span>].message.content)</span><br></pre></td></tr></table></figure>
+
+<p>OpenAI 官方封装，处理了 HTTP 细节，但只能用 OpenAI 格式的 API。</p>
+<h3 id="方式三：langchain-openai-ChatOpenAI"><a href="#方式三：langchain-openai-ChatOpenAI" class="headerlink" title="方式三：langchain_openai.ChatOpenAI"></a>方式三：langchain_openai.ChatOpenAI</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> langchain_openai <span class="keyword">import</span> ChatOpenAI</span><br><span class="line"></span><br><span class="line">model = ChatOpenAI(model=<span class="string">&quot;gpt-4o-mini&quot;</span>, api_key=<span class="string">&quot;sk-xxx&quot;</span>)</span><br><span class="line">response = model.invoke(<span class="string">&quot;你好&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(response.content)</span><br></pre></td></tr></table></figure>
+
+<p>LangChain 的封装，返回 <code>AIMessage</code> 对象（包含 content、tool_calls、response_metadata 等调试信息），而不仅仅是字符串。可以直接接入 LCEL 链。</p>
+<h3 id="方式四：init-chat-model（最新推荐）"><a href="#方式四：init-chat-model（最新推荐）" class="headerlink" title="方式四：init_chat_model（最新推荐）"></a>方式四：init_chat_model（最新推荐）</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> langchain.chat_models <span class="keyword">import</span> init_chat_model</span><br><span class="line"></span><br><span class="line">model = init_chat_model(<span class="string">&quot;gpt-4o-mini&quot;</span>, model_provider=<span class="string">&quot;openai&quot;</span>)</span><br><span class="line">response = model.invoke(<span class="string">&quot;你好&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>最新写法，通过 <code>model_provider</code> 参数自动选择对应的实现类，不用关心底层用 <code>ChatOpenAI</code> 还是 <code>ChatTongyi</code> 还是 <code>ChatDeepSeek</code>。</p>
+<p><strong>四种方式对比：</strong></p>
+<table>
+<thead>
+<tr>
+<th>方式</th>
+<th>灵活度</th>
+<th>封装度</th>
+<th>调试信息</th>
+<th>适合场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>requests</td>
+<td>最高</td>
+<td>最低</td>
+<td>原始 JSON</td>
+<td>需要极致控制</td>
+</tr>
+<tr>
+<td>openai.OpenAI</td>
+<td>中</td>
+<td>中</td>
+<td>部分封装</td>
+<td>不用 LangChain 的项目</td>
+</tr>
+<tr>
+<td>ChatOpenAI</td>
+<td>中低</td>
+<td>高</td>
+<td>AIMessage 完整信息</td>
+<td>LangChain 项目</td>
+</tr>
+<tr>
+<td>init_chat_model</td>
+<td>中低</td>
+<td>最高</td>
+<td>同 ChatOpenAI</td>
+<td>LangChain 项目（推荐）</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="Q4：for-chunk-in-model-stream-你好-是什么意思？"><a href="#Q4：for-chunk-in-model-stream-你好-是什么意思？" class="headerlink" title="Q4：for chunk in model.stream(&quot;你好&quot;) 是什么意思？"></a>Q4：<code>for chunk in model.stream(&quot;你好&quot;)</code> 是什么意思？</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> chunk <span class="keyword">in</span> model.stream(<span class="string">&quot;你好&quot;</span>):</span><br><span class="line">    <span class="built_in">print</span>(chunk.content, end=<span class="string">&quot;&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>这行代码做了三件事：</p>
+<ol>
+<li><code>model.stream(&quot;你好&quot;)</code> —— 不等模型全部生成完，而是逐 token 返回一个流</li>
+<li><code>for chunk in ...</code> —— 每生成一小段（一个 chunk），就循环一次</li>
+<li><code>print(chunk.content, end=&quot;&quot;)</code> —— 打印这段内容，<code>end=&quot;&quot;</code> 表示不换行，实现”打字机效果”</li>
+</ol>
+<p>和 <code>model.invoke(&quot;你好&quot;)</code> 的区别：</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>行为</th>
+<th>用户体验</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>invoke</code></td>
+<td>等模型全部生成完，一次性返回</td>
+<td>等待时间长，然后内容突然出现</td>
+<td>后端处理、批量任务</td>
+</tr>
+<tr>
+<td><code>stream</code></td>
+<td>逐 token 返回，边生成边输出</td>
+<td>看到内容逐字出现，等待感更短</td>
+<td>聊天界面、实时展示</td>
+</tr>
+</tbody></table>
+<p><strong>SSE 和 stream 的关系</strong>：<code>model.stream()</code> 是模型层面的流式输出；SSE 是网络传输层面的流式推送。在 Web 应用里，通常的链路是：<code>model.stream()</code> 逐 chunk 生成 → 后端通过 SSE 逐 chunk 推送给前端 → 前端逐 chunk 渲染。</p>
+<hr>
+<h2 id="Q5：ChatOpenAI-和-init-chat-model-的调用写法有什么区别？"><a href="#Q5：ChatOpenAI-和-init-chat-model-的调用写法有什么区别？" class="headerlink" title="Q5：ChatOpenAI 和 init_chat_model 的调用写法有什么区别？"></a>Q5：ChatOpenAI 和 init_chat_model 的调用写法有什么区别？</h2><p>核心区别其实不大，主要是<strong>是否需要显式指定实现类</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ChatOpenAI 写法：显式导入具体实现类</span></span><br><span class="line"><span class="keyword">from</span> langchain_openai <span class="keyword">import</span> ChatOpenAI</span><br><span class="line">model = ChatOpenAI(model=<span class="string">&quot;qwen-plus&quot;</span>, api_key=<span class="string">&quot;sk-xxx&quot;</span>, base_url=<span class="string">&quot;https://dashscope.aliyuncs.com/compatible-mode/v1&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># init_chat_model 写法：通过 provider 自动选实现类</span></span><br><span class="line"><span class="keyword">from</span> langchain.chat_models <span class="keyword">import</span> init_chat_model</span><br><span class="line">model = init_chat_model(<span class="string">&quot;qwen-plus&quot;</span>, model_provider=<span class="string">&quot;openai&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>区别就一个：<strong>ChatOpenAI 要求你显式写 <code>from langchain_openai import ChatOpenAI</code>，而 init_chat_model 通过 <code>model_provider</code> 参数帮你选</strong>。</p>
+<p>如果明天你要换阿里百炼，ChatOpenAI 写法要改 import 路径（可能要换成 <code>ChatTongyi</code>），而 init_chat_model 只需改 <code>model_provider=&quot;tongyi&quot;</code>。</p>
+<p>本质上是同一套东西，init_chat_model 只是多了一层自动路由。</p>
+<hr>
+<h2 id="Q6：同步方法和异步方法有什么区别？异步有什么用？"><a href="#Q6：同步方法和异步方法有什么区别？异步有什么用？" class="headerlink" title="Q6：同步方法和异步方法有什么区别？异步有什么用？"></a>Q6：同步方法和异步方法有什么区别？异步有什么用？</h2><p>LangChain 的每个方法基本都有同步和异步两个版本：</p>
+<table>
+<thead>
+<tr>
+<th>同步方法</th>
+<th>异步方法</th>
+<th>区别</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>model.invoke()</code></td>
+<td><code>await model.ainvoke()</code></td>
+<td>一个阻塞等结果，一个不阻塞</td>
+</tr>
+<tr>
+<td><code>model.stream()</code></td>
+<td><code>model.astream()</code></td>
+<td>同理</td>
+</tr>
+<tr>
+<td><code>chain.invoke()</code></td>
+<td><code>await chain.ainvoke()</code></td>
+<td>同理</td>
+</tr>
+</tbody></table>
+<p><strong>同步调用的执行流程：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">调用 model.invoke() → 线程卡住等模型返回 → 拿到结果 → 继续往下执行</span><br></pre></td></tr></table></figure>
+
+<p><strong>异步调用的执行流程：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">调用 await model.ainvoke() → 发出请求但不卡住 → 模型返回时再处理结果 → 等待期间可以干别的事</span><br></pre></td></tr></table></figure>
+
+<p>异步的真正价值体现在<strong>并发场景</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> asyncio</span><br><span class="line"></span><br><span class="line"><span class="comment"># 同时调用 3 个模型，总耗时 ≈ 最慢的那个，而不是三者之和</span></span><br><span class="line">results = <span class="keyword">await</span> asyncio.gather(</span><br><span class="line">    model1.ainvoke(<span class="string">&quot;翻译成英文：你好&quot;</span>),</span><br><span class="line">    model2.ainvoke(<span class="string">&quot;翻译成英文：世界&quot;</span>),</span><br><span class="line">    model3.ainvoke(<span class="string">&quot;翻译成英文：再见&quot;</span>),</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>如果是同步写法，3 个请求要串行等待，总耗时 &#x3D; 3 × 单次耗时。异步写法下，3 个请求同时发出，总耗时 ≈ 1 × 单次耗时。</p>
+<p><strong>什么时候用异步？</strong></p>
+<ul>
+<li>FastAPI 后端（本身就是异步框架）</li>
+<li>需要并发调多个模型 &#x2F; 多个工具</li>
+<li>WebSocket &#x2F; SSE 流式推送场景</li>
+</ul>
+<p><strong>什么时候用同步？</strong></p>
+<ul>
+<li>学习阶段、跑脚本、单次调用</li>
+<li>不需要并发的简单场景</li>
+</ul>
+<hr>
+<h2 id="Q7：invoke-和-parse-两种解析方式有什么区别？"><a href="#Q7：invoke-和-parse-两种解析方式有什么区别？" class="headerlink" title="Q7：invoke 和 parse 两种解析方式有什么区别？"></a>Q7：invoke 和 parse 两种解析方式有什么区别？</h2><p>输出解析器（Output Parser）最常见的两种使用方式：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 方式一：parser.invoke(result) —— Runnable 风格</span></span><br><span class="line">parsed = parser.invoke(model_result)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 方式二：parser.parse(text) —— 直接解析字符串</span></span><br><span class="line">parsed = parser.parse(result.content)</span><br></pre></td></tr></table></figure>
+
+<p><strong>区别的核心在于你手里拿的是什么：</strong></p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>输入类型</th>
+<th>什么时候用</th>
+<th>本质</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>parser.invoke()</code></td>
+<td>LangChain 的 Runnable 对象（如 AIMessage）</td>
+<td>在 LCEL 链里，上一步传下来的就是 Runnable</td>
+<td>走 Runnable 体系，自动处理输入类型转换</td>
+</tr>
+<tr>
+<td><code>parser.parse()</code></td>
+<td>纯字符串</td>
+<td>你已经拿到 <code>result.content</code> 这种字符串了</td>
+<td>直接解析文本，不经过 Runnable 体系</td>
+</tr>
+</tbody></table>
+<p><strong>在 LCEL 链里，用 invoke：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">chain = prompt | model | parser  <span class="comment"># parser 自动通过 invoke 接收 AIMessage</span></span><br><span class="line">result = chain.invoke(&#123;<span class="string">&quot;question&quot;</span>: <span class="string">&quot;你好&quot;</span>&#125;)</span><br></pre></td></tr></table></figure>
+
+<p><strong>手动拿到字符串后，用 parse：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">model_result = model.invoke(prompt.<span class="built_in">format</span>(question=<span class="string">&quot;你好&quot;</span>))</span><br><span class="line">parsed = parser.parse(model_result.content)  <span class="comment"># 手动取 .content 再解析</span></span><br></pre></td></tr></table></figure>
+
+<p>实际开发中，90% 的场景用 <code>invoke</code>（因为在链里），只有少数需要手动处理字符串时才用 <code>parse</code>。</p>
+<hr>
+<h2 id="Q8：LCEL-链的输入输出类型流转是怎样的？"><a href="#Q8：LCEL-链的输入输出类型流转是怎样的？" class="headerlink" title="Q8：LCEL 链的输入输出类型流转是怎样的？"></a>Q8：LCEL 链的输入输出类型流转是怎样的？</h2><p>一条完整的 LCEL 链，最规范易读的流转是：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chain = prompt | model | parser</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>组件</th>
+<th>输入</th>
+<th>输出</th>
+<th>输出类型</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>Prompt 模板</td>
+<td>字典 <code>{&quot;question&quot;: &quot;你好&quot;}</code></td>
+<td>ChatPromptValue</td>
+<td>填好变量的消息列表</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Model</td>
+<td>ChatPromptValue</td>
+<td>AIMessage</td>
+<td>模型的原始响应</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Parser</td>
+<td>AIMessage</td>
+<td>str &#x2F; dict &#x2F; Pydantic 对象</td>
+<td>解析后的结构化数据</td>
+</tr>
+</tbody></table>
+<p><strong>为什么要这样设计？</strong></p>
+<p>如果不用 Prompt 模板，每次调用模型你都要手写：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 不用模板：每次都要手拼消息，容易出错，且不可复用</span></span><br><span class="line">model.invoke([HumanMessage(content=<span class="string">&quot;你是一个温柔的助手。用户问：&quot;</span> + user_input)])</span><br></pre></td></tr></table></figure>
+
+<p>用了模板之后：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 用模板：变量自动填充，模板可复用</span></span><br><span class="line">prompt = ChatPromptTemplate.from_messages([</span><br><span class="line">    (<span class="string">&quot;system&quot;</span>, <span class="string">&quot;你是一个温柔的助手&quot;</span>),</span><br><span class="line">    (<span class="string">&quot;human&quot;</span>, <span class="string">&quot;&#123;question&#125;&quot;</span>)</span><br><span class="line">])</span><br><span class="line">chain = prompt | model | StrOutputParser()</span><br><span class="line">chain.invoke(&#123;<span class="string">&quot;question&quot;</span>: <span class="string">&quot;你好&quot;</span>&#125;)  <span class="comment"># 模板自动填充 &#123;question&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>LCEL 的管道语法 <code>|</code> 本质上是把上一步的输出自动传给下一步作为输入。每个组件都实现了 <code>Runnable</code> 接口，所以能像水管一样串起来。</p>
+<hr>
+<h2 id="Q9：Memory-记忆到底是什么？模型真的”记住”了吗？"><a href="#Q9：Memory-记忆到底是什么？模型真的”记住”了吗？" class="headerlink" title="Q9：Memory 记忆到底是什么？模型真的”记住”了吗？"></a>Q9：Memory 记忆到底是什么？模型真的”记住”了吗？</h2><p><strong>没有。模型没有记住任何东西。</strong></p>
+<p>本章说的”记忆”，本质上是程序做的事：</p>
+<ol>
+<li><strong>读历史</strong> —— 从存储里取出之前的对话消息</li>
+<li><strong>拼入提示</strong> —— 把历史消息通过 <code>MessagesPlaceholder(&quot;history&quot;)</code> 拼进当前 Prompt</li>
+<li><strong>调模型</strong> —— 把”历史 + 当前问题”一起发给模型</li>
+<li><strong>写回历史</strong> —— 把本轮的用户输入和模型回复追加到存储里</li>
+</ol>
+<p>所以模型看起来”记得”，是因为<strong>程序每次都把历史重新带给它</strong>。换个角度说，如果你不给它带历史，它就真的什么都不记得。</p>
+<p><strong>两类核心组件的分工：</strong></p>
+<table>
+<thead>
+<tr>
+<th>组件</th>
+<th>职责</th>
+<th>类比</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>RunnableWithMessageHistory</code></td>
+<td>控制何时读历史、何时写回</td>
+<td>调度员——决定什么时候取文件、什么时候存文件</td>
+</tr>
+<tr>
+<td><code>BaseChatMessageHistory</code> 及其实现类</td>
+<td>控制历史存在哪里</td>
+<td>文件柜——内存版、Redis 版、文件版，只是柜子不同</td>
+</tr>
+</tbody></table>
+<p><strong>存储后端怎么选：</strong></p>
+<table>
+<thead>
+<tr>
+<th>实现</th>
+<th>特点</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>InMemoryChatMessageHistory</code></td>
+<td>进程内存储，重启即丢</td>
+<td>本地学习、单进程演示</td>
+</tr>
+<tr>
+<td><code>RedisChatMessageHistory</code></td>
+<td>持久化、跨进程共享</td>
+<td>生产环境、多实例部署</td>
+</tr>
+</tbody></table>
+<p><strong>session_id 的意义</strong>：不同用户、不同会话需要不同的历史记录，<code>session_id</code> 就是区分的钥匙。如果 session_id 设计不好，A 用户可能看到 B 用户的对话历史。</p>
+<p><strong>和 LangGraph 的关系</strong>：本章用 <code>RunnableWithMessageHistory</code> 讲链级记忆；更复杂的 Agent 状态持久化，后续在 LangGraph 的 thread &#x2F; checkpointer &#x2F; persistence 体系里处理。</p>
+<hr>
+<h2 id="Q10：Tools-工具调用——模型真的会自己调-API-吗？"><a href="#Q10：Tools-工具调用——模型真的会自己调-API-吗？" class="headerlink" title="Q10：Tools 工具调用——模型真的会自己调 API 吗？"></a>Q10：Tools 工具调用——模型真的会自己调 API 吗？</h2><p><strong>不会。模型从来不会自己执行任何工具。</strong></p>
+<p>Tool Calling 的核心分工：</p>
+<table>
+<thead>
+<tr>
+<th>角色</th>
+<th>做什么</th>
+<th>不做什么</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>模型</strong></td>
+<td>判断要不要调工具、调哪个工具、传什么参数</td>
+<td>不真正执行工具</td>
+</tr>
+<tr>
+<td><strong>程序</strong></td>
+<td>执行工具函数、把结果送回模型</td>
+<td>不决定调什么（除非你硬编码）</td>
+</tr>
+</tbody></table>
+<p>完整的工具调用闭环：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">用户提问 → 程序把&quot;问题 + 工具定义&quot;一起给模型</span><br><span class="line">        → 模型返回 AIMessage(tool_calls=[...])，表示&quot;我想调这个工具&quot;</span><br><span class="line">        → 程序读取 tool_calls，真正执行函数</span><br><span class="line">        → 程序把结果包装成 ToolMessage 送回模型</span><br><span class="line">        → 模型基于工具结果生成最终自然语言回复</span><br></pre></td></tr></table></figure>
+
+<p><strong>三个关键对象的含义：</strong></p>
+<table>
+<thead>
+<tr>
+<th>对象</th>
+<th>含义</th>
+<th>类比</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>AIMessage.tool_calls</code></td>
+<td>模型的调用请求</td>
+<td>“我要用螺丝刀，螺丝规格 M6”</td>
+</tr>
+<tr>
+<td>工具执行结果</td>
+<td>程序执行后的真实返回</td>
+<td>实际拧完螺丝后的状态</td>
+</tr>
+<tr>
+<td><code>ToolMessage</code></td>
+<td>把结果送回模型的消息</td>
+<td>“螺丝已拧好，结果如下”</td>
+</tr>
+</tbody></table>
+<p><strong>@tool 装饰器做了什么？</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@tool</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">add_number</span>(<span class="params">a: <span class="built_in">int</span>, b: <span class="built_in">int</span></span>) -&gt; <span class="built_in">int</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;两数相加&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">return</span> a + b</span><br></pre></td></tr></table></figure>
+
+<p><code>@tool</code> 把普通函数变成了 LangChain Tool，自动暴露三个关键信息：</p>
+<ul>
+<li><code>name</code>：工具名（函数名）</li>
+<li><code>description</code>：工具描述（docstring）</li>
+<li><code>args</code>：参数结构（类型注解）</li>
+</ul>
+<p><strong>为什么 Pydantic 要配合 Tool 使用？</strong></p>
+<p>只用函数签名，模型只知道”有两个 int 参数”。加上 Pydantic 的 <code>args_schema</code>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">AddInput</span>(<span class="title class_ inherited__">BaseModel</span>):</span><br><span class="line">    a: <span class="built_in">int</span> = Field(description=<span class="string">&quot;第一个加数&quot;</span>)</span><br><span class="line">    b: <span class="built_in">int</span> = Field(description=<span class="string">&quot;第二个加数&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="meta">@tool(<span class="params">args_schema=AddInput</span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">add_number</span>(<span class="params">a: <span class="built_in">int</span>, b: <span class="built_in">int</span></span>) -&gt; <span class="built_in">int</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;两数相加&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">return</span> a + b</span><br></pre></td></tr></table></figure>
+
+<p>模型就能看到每个参数的含义和说明，传错参数的概率大大降低。Pydantic 让 Tool 从”能跑”变成”像真正的接口定义”。</p>
+<hr>
+<h2 id="总结：LangChain-核心知识点串联"><a href="#总结：LangChain-核心知识点串联" class="headerlink" title="总结：LangChain 核心知识点串联"></a>总结：LangChain 核心知识点串联</h2><p>把上面所有问题串起来，LangChain 的核心数据流就是：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Prompt模板(输入变量) → ChatPromptValue → Model(模型) → AIMessage → Parser(解析器) → 结构化输出</span><br><span class="line">                                     ↑                           |</span><br><span class="line">                                     |---- Memory(历史消息) ------|</span><br><span class="line">                                     |---- Tools(工具定义) -------|</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>Prompt 模板</strong>解决了”同一套框架，不同具体内容”的问题</li>
+<li><strong>Model I&#x2F;O</strong> 统一了不同模型的调用方式</li>
+<li><strong>Parser</strong> 把模型输出从字符串解析成可用的结构化数据</li>
+<li><strong>LCEL</strong> 用管道语法把组件串起来</li>
+<li><strong>Memory</strong> 让多轮对话有了上下文连续性</li>
+<li><strong>Tools</strong> 让模型从”只能说”变成”能做事”</li>
+</ul>
+<p>每一层解决一个具体问题，组合在一起就是 LangChain 的工程价值。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/LangChain/" rel="tag"># LangChain</a>
+              <a href="/tags/Agent/" rel="tag"># Agent</a>
+              <a href="/tags/LLM/" rel="tag"># LLM</a>
+              <a href="/tags/Python/" rel="tag"># Python</a>
+              <a href="/tags/AI%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91/" rel="tag"># AI应用开发</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/posts/LocalFileRAG-%E6%9C%AC%E5%9C%B0%E6%99%BA%E8%83%BD%E6%96%87%E6%A1%A3%E9%97%AE%E7%AD%94%E7%B3%BB%E7%BB%9F%E5%AE%9E%E6%88%98/" rel="prev" title="LocalFileRAG：本地智能文档问答系统实战——从RAG Demo到可部署应用">
+                  <i class="fa fa-angle-left"></i> LocalFileRAG：本地智能文档问答系统实战——从RAG Demo到可部署应用
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-robot"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">吴纪辰</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+﻿<!-- Right Sidebar -->
+<div class="right-sidebar" id="right-sidebar">
+  <div class="right-stats-card">
+    <div class="card-title"><i class="fas fa-chart-bar"></i> Site Stats</div>
+    <div class="stats-grid">
+      <div class="stats-item">
+        <div class="stats-num" id="stat-posts">8</div>
+        <div class="stats-label">Articles</div>
+      </div>
+      <div class="stats-item">
+        <div class="stats-num" id="stat-cats">6</div>
+        <div class="stats-label">Categories</div>
+      </div>
+      <div class="stats-item">
+        <div class="stats-num" id="stat-tags">21</div>
+        <div class="stats-label">Tags</div>
+      </div>
+      <div class="stats-item">
+        <div class="stats-num" id="stat-words">--</div>
+        <div class="stats-label">Words</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="right-tree-card">
+    <div class="card-title"><i class="fas fa-sitemap"></i> Content Map</div>
+    <ul class="tree-list" id="content-map">
+    </ul>
+  </div>
+</div>
+
+<!-- Top Nav Bar -->
+<div class="top-nav-bar" id="top-nav-bar" style="display:none;">
+  <div class="nav-brand"><a href="/">AI应用开发工程师成长记录</a></div>
+  <div class="nav-menu">
+    <a class="nav-item" href="/"><i class="fas fa-home"></i> Home</a>
+    <a class="nav-item" href="/archives/"><i class="fas fa-archive"></i> Archives</a>
+    <a class="nav-item" href="/categories/"><i class="fas fa-th"></i> Categories</a>
+    <a class="nav-item" href="/tags/"><i class="fas fa-tags"></i> Tags</a>
+    <a class="nav-item" href="/about/"><i class="fas fa-user"></i> About</a>
+  </div>
+</div>
+
+<!-- Post Filter Bar -->
+<div class="post-filter-bar" id="post-filter-bar" style="display:none;">
+  <span class="filter-label"><i class="fas fa-filter"></i> Filter</span>
+  <span class="filter-tag active" data-filter="all">All</span>
+</div>
+
+<!-- Theme Toggle Button -->
+<button class="theme-toggle" id="theme-toggle" title="Toggle light/dark mode">
+  <i class="fas fa-moon" id="theme-icon-moon"></i>
+  <i class="fas fa-sun" id="theme-icon-sun" style="display:none"></i>
+</button>
+
+<script>
+(function() {
+  var html = document.documentElement;
+  var toggle = document.getElementById('theme-toggle');
+  var iconMoon = document.getElementById('theme-icon-moon');
+  var iconSun = document.getElementById('theme-icon-sun');
+
+  function applyTheme(dark) {
+    if (dark) {
+      html.setAttribute('data-theme', 'dark');
+      iconMoon.style.display = 'none';
+      iconSun.style.display = '';
+    } else {
+      html.removeAttribute('data-theme');
+      iconMoon.style.display = '';
+      iconSun.style.display = 'none';
+    }
+  }
+
+  var saved = localStorage.getItem('theme');
+  applyTheme(saved === 'dark');
+
+  toggle.addEventListener('click', function() {
+    var isDark = html.getAttribute('data-theme') === 'dark';
+    applyTheme(!isDark);
+    localStorage.setItem('theme', isDark ? 'light' : 'dark');
+  });
+
+  // Move right sidebar into main layout
+  var rightSidebar = document.getElementById('right-sidebar');
+  var main = document.querySelector('.main');
+  if (rightSidebar && main) {
+    main.appendChild(rightSidebar);
+  }
+
+  var mainInner = document.querySelector('.main-inner');
+  if (mainInner) {
+    var navBar = document.getElementById('top-nav-bar');
+    var filterBar = document.getElementById('post-filter-bar');
+
+    if (navBar) {
+      navBar.style.display = '';
+      mainInner.insertBefore(navBar, mainInner.firstChild);
+      var path = window.location.pathname;
+      navBar.querySelectorAll('.nav-item').forEach(function(item) {
+        if (item.getAttribute('href') === path || (path === '/' && item.getAttribute('href') === '/')) {
+          item.classList.add('nav-active');
+        }
+      });
+    }
+
+    if (mainInner.classList.contains('index') && filterBar) {
+      filterBar.style.display = '';
+      mainInner.insertBefore(filterBar, navBar ? navBar.nextSibling : mainInner.firstChild);
+    }
+  }
+
+  // Build Content Map & Filter Bar from search.xml
+  fetch('/search.xml').then(function(r) { return r.text(); }).then(function(xml) {
+    var parser = new DOMParser();
+    var doc = parser.parseFromString(xml, 'text/xml');
+    var entries = doc.querySelectorAll('entry');
+    var catMap = {};
+    var filterCats = [];
+
+    entries.forEach(function(entry) {
+      var title = entry.querySelector('title').textContent;
+      var link = entry.querySelector('url').textContent.trim();
+      var cats = entry.querySelectorAll('category');
+      cats.forEach(function(c, i) {
+        if (i < cats.length - 1) return; // Only use leaf category
+        var name = c.textContent;
+        if (!catMap[name]) {
+          catMap[name] = [];
+          filterCats.push(name);
+        }
+        catMap[name].push({ title: title, link: link });
+      });
+    });
+
+    // Render Content Map
+    var mapEl = document.getElementById('content-map');
+    if (mapEl) {
+      var mapHTML = '';
+      Object.keys(catMap).forEach(function(cat) {
+        mapHTML += '<li class="tree-category">';
+        mapHTML += '<div class="tree-cat-header" onclick="toggleTree(this)">';
+        mapHTML += '<i class="tree-icon fas fa-folder"></i>';
+        mapHTML += '<span class="tree-cat-name">' + cat + '</span>';
+        mapHTML += '<span class="tree-cat-count">' + catMap[cat].length + '</span>';
+        mapHTML += '</div>';
+        mapHTML += '<ul class="tree-posts">';
+        catMap[cat].forEach(function(post) {
+          mapHTML += '<li class="tree-post-item"><a href="' + post.link + '"><span class="tree-dot"></span>' + post.title + '</a></li>';
+        });
+        mapHTML += '</ul></li>';
+      });
+      mapEl.innerHTML = mapHTML;
+    }
+
+    // Render Filter Bar
+    var filterBar = document.getElementById('post-filter-bar');
+    if (filterBar && mainInner && mainInner.classList.contains('index')) {
+      filterCats.forEach(function(cat) {
+        var span = document.createElement('span');
+        span.className = 'filter-tag';
+        span.setAttribute('data-filter', cat);
+        span.textContent = cat;
+        filterBar.appendChild(span);
+      });
+
+      filterBar.querySelectorAll('.filter-tag').forEach(function(tag) {
+        tag.addEventListener('click', function() {
+          filterBar.querySelectorAll('.filter-tag').forEach(function(t) { t.classList.remove('active'); });
+          this.classList.add('active');
+          var filter = this.getAttribute('data-filter');
+          document.querySelectorAll('.post-block').forEach(function(post) {
+            var cats = (post.querySelector('.post-category') || post.querySelector('.post-meta') || {}).textContent || '';
+            if (filter === 'all' || cats.indexOf(filter) > -1) {
+              post.style.display = '';
+            } else {
+              post.style.display = 'none';
+            }
+          });
+        });
+      });
+    }
+  }).catch(function() {});
+
+  // Update word count stat
+  var wordEl = document.getElementById('stat-words');
+  if (wordEl && wordEl.textContent === '--') {
+    var total = 0;
+    document.querySelectorAll('.post-body').forEach(function(el) {
+      total += el.textContent.replace(/\s/g, '').length;
+    });
+    if (total > 0) wordEl.textContent = total > 10000 ? (total / 10000).toFixed(1) + 'w' : total;
+  }
+})();
+
+function toggleTree(header) {
+  var posts = header.nextElementSibling;
+  if (posts) {
+    posts.style.display = posts.style.display === 'none' ? '' : 'none';
+  }
+}
+</script>
+</body>
+</html>

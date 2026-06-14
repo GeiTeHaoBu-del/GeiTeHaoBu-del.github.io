@@ -28,152 +28,6 @@
       </categories>
   </entry>
   <entry>
-    <title>Hexo+GitHub Pages博客搭建指南：从零到自动部署</title>
-    <url>/posts/Hexo+GitHub-Pages%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA%E6%8C%87%E5%8D%97/</url>
-    <content><![CDATA[<h2 id="问题引入：为什么选择Hexo？"><a href="#问题引入：为什么选择Hexo？" class="headerlink" title="问题引入：为什么选择Hexo？"></a>问题引入：为什么选择Hexo？</h2><p>作为AI应用开发方向的学习者，我需要一个技术博客来沉淀项目经历、展示工程能力。Hexo的优势：</p>
-<ul>
-<li><strong>Markdown写作</strong>：技术文章天然适合Markdown，代码块、公式、表格无缝支持</li>
-<li><strong>静态站点</strong>：GitHub Pages免费托管，零服务器成本</li>
-<li><strong>主题生态</strong>：NexT主题成熟稳定，高度可定制</li>
-<li><strong>自动部署</strong>：push代码即可触发GitHub Actions构建发布，全流程自动化</li>
-</ul>
-<p>最终效果：<strong>push一篇Markdown → GitHub Actions自动构建 → 1分钟内线上更新</strong>。</p>
-<h2 id="原理讲解"><a href="#原理讲解" class="headerlink" title="原理讲解"></a>原理讲解</h2><h3 id="Hexo的工作流程"><a href="#Hexo的工作流程" class="headerlink" title="Hexo的工作流程"></a>Hexo的工作流程</h3><p>Hexo是一个基于Node.js的静态站点生成器，核心流程：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Markdown源文件 → Hexo渲染引擎 → HTML静态页面 → 部署到Web服务器</span><br></pre></td></tr></table></figure>
-
-<p>关键概念：</p>
-<table>
-<thead>
-<tr>
-<th>概念</th>
-<th>说明</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>source/_posts/</code></td>
-<td>文章Markdown存放目录</td>
-</tr>
-<tr>
-<td><code>_config.yml</code></td>
-<td>站点配置（标题、URL、部署方式等）</td>
-</tr>
-<tr>
-<td><code>_config.next.yml</code></td>
-<td>主题配置（NexT专用，覆盖默认配置）</td>
-</tr>
-<tr>
-<td><code>source/_data/</code></td>
-<td>自定义数据文件（样式、脚本、模板注入）</td>
-</tr>
-<tr>
-<td><code>themes/</code></td>
-<td>主题目录（npm安装的主题在node_modules中）</td>
-</tr>
-</tbody></table>
-<h3 id="GitHub-Pages-Actions部署原理"><a href="#GitHub-Pages-Actions部署原理" class="headerlink" title="GitHub Pages + Actions部署原理"></a>GitHub Pages + Actions部署原理</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">本地开发(push main) → GitHub Actions触发 → npm install → hexo generate → 产物推送到gh-pages分支 → GitHub Pages提供服务</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li><code>main</code>分支：存放源码（Markdown、配置、样式）</li>
-<li><code>gh-pages</code>分支：存放构建产物（纯HTML&#x2F;CSS&#x2F;JS），由Actions自动推送</li>
-</ul>
-<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><h3 id="1-环境准备"><a href="#1-环境准备" class="headerlink" title="1. 环境准备"></a>1. 环境准备</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 安装Node.js（推荐18+LTS，我用的是20）</span></span><br><span class="line"><span class="comment"># Windows: https://nodejs.org/ 下载安装</span></span><br><span class="line"><span class="comment"># 验证</span></span><br><span class="line">node -v   <span class="comment"># v20.x.x</span></span><br><span class="line">npm -v    <span class="comment"># 10.x.x</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装Hexo CLI</span></span><br><span class="line">npm install -g hexo-cli</span><br><span class="line"></span><br><span class="line"><span class="comment"># 初始化博客</span></span><br><span class="line">hexo init my-blog</span><br><span class="line"><span class="built_in">cd</span> my-blog</span><br><span class="line">npm install</span><br></pre></td></tr></table></figure>
-
-<h3 id="2-安装NexT主题"><a href="#2-安装NexT主题" class="headerlink" title="2. 安装NexT主题"></a>2. 安装NexT主题</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm install hexo-theme-next</span><br></pre></td></tr></table></figure>
-
-<p>然后在<code>_config.yml</code>中设置：</p>
-<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">theme:</span> <span class="string">next</span></span><br></pre></td></tr></table></figure>
-
-<p>NexT的主题配置不要改<code>node_modules/hexo-theme-next/_config.yml</code>，而是在项目根目录创建<code>_config.next.yml</code>，Hexo会自动合并。这样主题升级时不会丢失自定义配置。</p>
-<h3 id="3-站点配置-config-yml关键项"><a href="#3-站点配置-config-yml关键项" class="headerlink" title="3. 站点配置_config.yml关键项"></a>3. 站点配置<code>_config.yml</code>关键项</h3><figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">title:</span> <span class="string">你的博客标题</span></span><br><span class="line"><span class="attr">subtitle:</span> <span class="string">&#x27;副标题&#x27;</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">站点描述，用于SEO</span></span><br><span class="line"><span class="attr">keywords:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">关键词1</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">关键词2</span></span><br><span class="line"><span class="attr">author:</span> <span class="string">你的名字</span></span><br><span class="line"><span class="attr">language:</span> <span class="string">zh-CN</span></span><br><span class="line"><span class="attr">timezone:</span> <span class="string">&#x27;Asia/Shanghai&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="attr">url:</span> <span class="string">https://username.github.io</span></span><br><span class="line"><span class="attr">permalink:</span> <span class="string">posts/:title/</span></span><br><span class="line"></span><br><span class="line"><span class="attr">theme:</span> <span class="string">next</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 每篇文章必须有description字段，否则首页会展示全文</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="4-主题配置-config-next-yml关键项"><a href="#4-主题配置-config-next-yml关键项" class="headerlink" title="4. 主题配置_config.next.yml关键项"></a>4. 主题配置<code>_config.next.yml</code>关键项</h3><figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">scheme:</span> <span class="string">Pisces</span>           <span class="comment"># 双栏布局，适合技术博客</span></span><br><span class="line"><span class="attr">theme_color:</span></span><br><span class="line">  <span class="attr">light:</span> <span class="string">&quot;#7c3aed&quot;</span>       <span class="comment"># 浅色主色</span></span><br><span class="line">  <span class="attr">dark:</span> <span class="string">&quot;#a855f7&quot;</span>        <span class="comment"># 深色主色</span></span><br><span class="line"></span><br><span class="line"><span class="attr">font:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="literal">false</span>          <span class="comment"># 关闭Google Fonts，国内加载慢</span></span><br><span class="line"></span><br><span class="line"><span class="attr">local_search:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="literal">true</span>           <span class="comment"># 本地搜索功能</span></span><br><span class="line"></span><br><span class="line"><span class="attr">mermaid:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="literal">true</span>           <span class="comment"># Mermaid图表支持</span></span><br><span class="line"></span><br><span class="line"><span class="attr">darkmode:</span> <span class="literal">false</span>          <span class="comment"># 关闭系统跟随，改用手动切换按钮</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="5-自定义样式和组件注入"><a href="#5-自定义样式和组件注入" class="headerlink" title="5. 自定义样式和组件注入"></a>5. 自定义样式和组件注入</h3><p>NexT支持通过<code>source/_data/</code>目录注入自定义文件，这是最强大的定制方式：</p>
-<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># _config.next.yml</span></span><br><span class="line"><span class="attr">custom_file_path:</span></span><br><span class="line">  <span class="attr">sidebar:</span> <span class="string">source/_data/sidebar.njk</span>    <span class="comment"># 自定义左侧sidebar</span></span><br><span class="line">  <span class="attr">bodyEnd:</span> <span class="string">source/_data/body-end.njk</span>   <span class="comment"># body末尾注入HTML/JS</span></span><br><span class="line">  <span class="attr">variable:</span> <span class="string">source/_data/variables.styl</span> <span class="comment"># 覆盖CSS变量</span></span><br><span class="line">  <span class="attr">style:</span> <span class="string">source/_data/styles.styl</span>      <span class="comment"># 自定义样式</span></span><br></pre></td></tr></table></figure>
-
-<p><strong>深浅色切换</strong>的实现思路：</p>
-<ol>
-<li>关闭NexT自带的<code>darkmode</code>（它基于<code>prefers-color-scheme</code>媒体查询，无切换按钮）</li>
-<li>在<code>body-end.njk</code>中添加切换按钮和JS，通过给<code>&lt;html&gt;</code>添加<code>data-theme=&quot;dark&quot;</code>属性控制</li>
-<li>在<code>styles.styl</code>中用<code>html[data-theme=&quot;dark&quot;]</code>选择器覆盖NexT的CSS变量和自定义组件样式</li>
-<li>主题偏好保存在<code>localStorage</code>，刷新后保持</li>
-</ol>
-<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 核心切换逻辑</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">applyTheme</span>(<span class="params">dark</span>) &#123;</span><br><span class="line">  <span class="keyword">if</span> (dark) &#123;</span><br><span class="line">    html.<span class="title function_">setAttribute</span>(<span class="string">&#x27;data-theme&#x27;</span>, <span class="string">&#x27;dark&#x27;</span>);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    html.<span class="title function_">removeAttribute</span>(<span class="string">&#x27;data-theme&#x27;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 读取用户偏好</span></span><br><span class="line"><span class="keyword">var</span> saved = <span class="variable language_">localStorage</span>.<span class="title function_">getItem</span>(<span class="string">&#x27;theme&#x27;</span>);</span><br><span class="line"><span class="title function_">applyTheme</span>(saved === <span class="string">&#x27;dark&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 点击切换</span></span><br><span class="line">toggle.<span class="title function_">addEventListener</span>(<span class="string">&#x27;click&#x27;</span>, <span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="keyword">var</span> isDark = html.<span class="title function_">getAttribute</span>(<span class="string">&#x27;data-theme&#x27;</span>) === <span class="string">&#x27;dark&#x27;</span>;</span><br><span class="line">  <span class="title function_">applyTheme</span>(!isDark);</span><br><span class="line">  <span class="variable language_">localStorage</span>.<span class="title function_">setItem</span>(<span class="string">&#x27;theme&#x27;</span>, isDark ? <span class="string">&#x27;light&#x27;</span> : <span class="string">&#x27;dark&#x27;</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight styl"><table><tr><td class="code"><pre><span class="line"><span class="comment">// styles.styl 中的暗色覆盖</span></span><br><span class="line"><span class="selector-tag">html</span><span class="selector-attr">[data-theme=<span class="string">&quot;dark&quot;</span>]</span></span><br><span class="line">  <span class="attr">--body-bg-color</span>: <span class="number">#0a0a0f</span></span><br><span class="line">  <span class="attr">--content-bg-color</span>: <span class="number">#1a1a2e</span></span><br><span class="line">  <span class="attr">--text-color</span>: <span class="number">#e2e8f0</span></span><br><span class="line">  <span class="attr">--link-color</span>: <span class="number">#c084fc</span></span><br><span class="line">  <span class="comment">// ...更多变量</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="6-文章Front-Matter模板"><a href="#6-文章Front-Matter模板" class="headerlink" title="6. 文章Front Matter模板"></a>6. 文章Front Matter模板</h3><figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">文章标题</span></span><br><span class="line"><span class="attr">date:</span> <span class="number">2026-06-10</span></span><br><span class="line"><span class="attr">tags:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">标签1</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">标签2</span></span><br><span class="line"><span class="attr">categories:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">分类名</span></span><br><span class="line"><span class="attr">summary:</span> <span class="string">一句话摘要（列表页展示）</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">一句话描述（首页展示，必须有，否则首页会展示全文）</span></span><br><span class="line"><span class="meta">---</span></span><br></pre></td></tr></table></figure>
-
-<p><strong>重要</strong>：<code>description</code>字段是首页展示简介的关键。没有<code>description</code>的文章会在首页展示全文。</p>
-<h3 id="7-GitHub-Actions自动部署"><a href="#7-GitHub-Actions自动部署" class="headerlink" title="7. GitHub Actions自动部署"></a>7. GitHub Actions自动部署</h3><p>在<code>.github/workflows/deploy.yml</code>中配置：</p>
-<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">name:</span> <span class="string">Deploy</span> <span class="string">to</span> <span class="string">GitHub</span> <span class="string">Pages</span></span><br><span class="line"></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">push:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">main</span></span><br><span class="line"></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="attr">deploy:</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">    <span class="attr">permissions:</span></span><br><span class="line">      <span class="attr">contents:</span> <span class="string">write</span></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Checkout</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">actions/checkout@v4</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">submodules:</span> <span class="string">recursive</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Setup</span> <span class="string">Node.js</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">actions/setup-node@v4</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">node-version:</span> <span class="string">&#x27;20&#x27;</span></span><br><span class="line">          <span class="attr">cache:</span> <span class="string">&#x27;npm&#x27;</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Install</span> <span class="string">dependencies</span></span><br><span class="line">        <span class="attr">run:</span> <span class="string">npm</span> <span class="string">install</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Build</span> <span class="string">Hexo</span></span><br><span class="line">        <span class="attr">run:</span> <span class="string">npx</span> <span class="string">hexo</span> <span class="string">clean</span> <span class="string">&amp;&amp;</span> <span class="string">npx</span> <span class="string">hexo</span> <span class="string">generate</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Deploy</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">peaceiris/actions-gh-pages@v4</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">github_token:</span> <span class="string">$&#123;&#123;</span> <span class="string">secrets.GITHUB_TOKEN</span> <span class="string">&#125;&#125;</span></span><br><span class="line">          <span class="attr">publish_dir:</span> <span class="string">./public</span></span><br><span class="line">          <span class="attr">publish_branch:</span> <span class="string">gh-pages</span></span><br></pre></td></tr></table></figure>
-
-<p>部署流程：<code>git push origin main</code> → Actions自动构建 → <code>gh-pages</code>分支更新 → 线上生效。</p>
-<h3 id="8-头像本地化"><a href="#8-头像本地化" class="headerlink" title="8. 头像本地化"></a>8. 头像本地化</h3><p>GitHub头像URL在国内访问不稳定，下载到本地解决：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> -p <span class="built_in">source</span>/images</span><br><span class="line">curl -L -o <span class="built_in">source</span>/images/avatar.png <span class="string">&quot;你的头像URL&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>配置中使用本地路径：</p>
-<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">avatar:</span></span><br><span class="line">  <span class="attr">url:</span> <span class="string">/images/avatar.png</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="实验结论与反思"><a href="#实验结论与反思" class="headerlink" title="实验结论与反思"></a>实验结论与反思</h2><h3 id="踩过的坑"><a href="#踩过的坑" class="headerlink" title="踩过的坑"></a>踩过的坑</h3><table>
-<thead>
-<tr>
-<th>问题</th>
-<th>原因</th>
-<th>解决方案</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>首页展示全文而非简介</td>
-<td>文章缺少<code>description</code>字段</td>
-<td>Front Matter中必须加<code>description</code></td>
-</tr>
-<tr>
-<td>Google Fonts加载极慢</td>
-<td>国内无法访问fonts.googleapis.com</td>
-<td><code>font.enable: false</code>，使用系统字体</td>
-</tr>
-<tr>
-<td>头像加载失败</td>
-<td>GitHub avatars域名国内不稳定</td>
-<td>头像下载到本地<code>source/images/</code></td>
-</tr>
-<tr>
-<td>NexT darkmode无切换按钮</td>
-<td>只支持<code>prefers-color-scheme</code>媒体查询</td>
-<td>自己实现JS切换+CSS变量覆盖</td>
-</tr>
-<tr>
-<td>自定义组件暗色模式下变浅</td>
-<td>CSS变量覆盖不完整</td>
-<td><code>html[data-theme=&quot;dark&quot;]</code>中覆盖<code>.sidebar-inner</code>等所有容器</td>
-</tr>
-<tr>
-<td><code>_data/body-end.njk</code>中使用Hexo变量报错</td>
-<td>某些上下文中<code>site</code>变量不可用</td>
-<td>改用<code>&#123;&#123; site.posts.length &#125;&#125;</code>等Nunjucks模板语法</td>
-</tr>
-</tbody></table>
-<h3 id="项目文件结构"><a href="#项目文件结构" class="headerlink" title="项目文件结构"></a>项目文件结构</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">├── _config.yml              # 站点配置</span><br><span class="line">├── _config.next.yml         # 主题配置</span><br><span class="line">├── .github/workflows/       # CI/CD</span><br><span class="line">│   └── deploy.yml</span><br><span class="line">├── source/</span><br><span class="line">│   ├── _posts/              # 文章</span><br><span class="line">│   ├── _data/               # 自定义注入</span><br><span class="line">│   │   ├── sidebar.njk      # 左侧sidebar</span><br><span class="line">│   │   ├── body-end.njk     # JS/HTML注入</span><br><span class="line">│   │   ├── variables.styl   # CSS变量覆盖</span><br><span class="line">│   │   └── styles.styl      # 自定义样式</span><br><span class="line">│   ├── images/              # 本地图片</span><br><span class="line">│   │   └── avatar.png</span><br><span class="line">│   ├── about/               # 关于页</span><br><span class="line">│   └── categories/          # 分类页</span><br><span class="line">└── package.json</span><br></pre></td></tr></table></figure>
-
-<h2 id="面试关联"><a href="#面试关联" class="headerlink" title="面试关联"></a>面试关联</h2><ol>
-<li><strong>CI&#x2F;CD流程设计？</strong> → GitHub Actions自动构建部署，push触发、多步骤编排、权限控制</li>
-<li><strong>前端主题切换实现？</strong> → CSS变量 + data属性 + localStorage持久化，不需要框架</li>
-<li><strong>静态站点生成原理？</strong> → 模板引擎渲染Markdown为HTML，部署到CDN&#x2F;静态托管</li>
-<li><strong>性能优化实践？</strong> → 字体本地化&#x2F;禁用、头像本地化、关闭不必要的外部CDN</li>
-</ol>
-]]></content>
-      <categories>
-        <category>Hexo建站</category>
-      </categories>
-      <tags>
-        <tag>Hexo</tag>
-        <tag>GitHub Pages</tag>
-        <tag>CI/CD</tag>
-        <tag>NexT</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>26年06月10日总结</title>
     <url>/posts/26%E5%B9%B406%E6%9C%8810%E6%97%A5%E6%80%BB%E7%BB%93/</url>
     <content><![CDATA[<p>今日总结：</p>
@@ -198,408 +52,456 @@
       </categories>
   </entry>
   <entry>
-    <title>当大模型服务挂了怎么办？LLM多模型故障转移实战</title>
-    <url>/posts/%E5%BD%93%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%9C%8D%E5%8A%A1%E6%8C%82%E4%BA%86%E6%80%8E%E4%B9%88%E5%8A%9E%EF%BC%9FLLM%E5%A4%9A%E6%A8%A1%E5%9E%8B%E6%95%85%E9%9A%9C%E8%BD%AC%E7%A7%BB%E5%AE%9E%E6%88%98/</url>
-    <content><![CDATA[<h2 id="1-问题引入"><a href="#1-问题引入" class="headerlink" title="1. 问题引入"></a>1. 问题引入</h2><p>我们的热搜监控系统每30秒爬取一次微博热榜，调用大模型对每条热搜做情感分析、类型分类和话题提取。某天凌晨，主模型API突然返回429限流，系统连续30分钟没有产出任何分析结果——前端图表空白、预警静默、数据库趋势断档。</p>
-<p>这不是小概率事件。LLM服务不稳定几乎是常态：429限流、5xx宕机、API Key过期、响应超时，任何一个都能让单模型依赖的系统瘫痪。<strong>单点依赖 &#x3D; 单点故障</strong>，而LLM的不可用不是”会不会”的问题，是”什么时候”的问题。</p>
-<p>我们需要回答一个核心问题：<strong>当LLM服务不可用时，如何保证系统持续产出分析结果？</strong></p>
-<h2 id="2-原理讲解"><a href="#2-原理讲解" class="headerlink" title="2. 原理讲解"></a>2. 原理讲解</h2><h3 id="2-1-故障转移的三层设计"><a href="#2-1-故障转移的三层设计" class="headerlink" title="2.1 故障转移的三层设计"></a>2.1 故障转移的三层设计</h3><p>我们的方案围绕三个核心机制展开：</p>
-<p><strong>第一层：连续失败计数</strong>。不是一次失败就切换——偶发的网络抖动不应触发模型切换。只有连续失败达到阈值（默认2次），才判定为模型级别的故障，触发切换。这避免了”狼来了”式的频繁切换。</p>
-<p><strong>第二层：模型切换</strong>。当连续失败达到阈值，系统沿 <code>primary → backup</code> 优先级链切换到下一个可用模型，同时重置失败计数器。每次切换都会记录时间戳、原模型、目标模型和原因，形成审计日志。</p>
-<p><strong>第三层：自动恢复</strong>。切换到备模型后，系统不会永远停留在备模型上。每当一个新的请求周期开始（即下一轮爬取），系统会尝试回到主模型。因为主模型宕机往往是临时的——限流窗口过了、服务恢复了——自动恢复确保系统不会因为一次临时故障而永久降级。</p>
-<h3 id="2-2-为什么不用完整的熔断器？"><a href="#2-2-为什么不用完整的熔断器？" class="headerlink" title="2.2 为什么不用完整的熔断器？"></a>2.2 为什么不用完整的熔断器？</h3><p>Circuit Breaker模式有三种状态：Closed → Open → Half-Open。它适合高频请求场景（每秒成百上千次调用），需要精确控制”探针”频率。但我们的场景不同：<strong>每30秒才调用一次LLM</strong>，请求频率极低。在这种低频场景下，完整熔断器的半开状态、探针窗口反而增加了不必要的复杂度。轻量的连续失败计数已经足够——每次爬取本身就是天然的检测点，无需额外定时器。</p>
-<h3 id="2-3-三级降级链：任何情况下都有输出"><a href="#2-3-三级降级链：任何情况下都有输出" class="headerlink" title="2.3 三级降级链：任何情况下都有输出"></a>2.3 三级降级链：任何情况下都有输出</h3><p>故障转移解决的是”换一个模型试试”，但若所有模型都不可用呢？我们设计了三级降级链：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">批量API调用 → 单条API调用 → 返回默认值</span><br></pre></td></tr></table></figure>
-
+    <title>LangChain学习问答：从模型调用到工具链全解析</title>
+    <url>/posts/LangChain%E5%AD%A6%E4%B9%A0%E9%97%AE%E7%AD%94-%E4%BB%8E%E6%A8%A1%E5%9E%8B%E8%B0%83%E7%94%A8%E5%88%B0%E5%B7%A5%E5%85%B7%E9%93%BE%E5%85%A8%E8%A7%A3%E6%9E%90/</url>
+    <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>这篇文章整理了学习 LangChain 框架过程中产生的一系列核心问题与解答。每个问题都来自真实的困惑点，回答力求讲透”为什么”而不只是”怎么做”。</p>
+<hr>
+<h2 id="Q1：FastAPI-SSE-Gradio-是什么？"><a href="#Q1：FastAPI-SSE-Gradio-是什么？" class="headerlink" title="Q1：FastAPI &#x2F; SSE &#x2F; Gradio 是什么？"></a>Q1：FastAPI &#x2F; SSE &#x2F; Gradio 是什么？</h2><p>这三个是构建 AI 应用时常用的 Web 技术栈，各有分工：</p>
+<table>
+<thead>
+<tr>
+<th>技术</th>
+<th>定位</th>
+<th>核心作用</th>
+<th>类比</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>FastAPI</strong></td>
+<td>Python Web 框架</td>
+<td>构建 REST API，处理 HTTP 请求</td>
+<td>类似 Java 的 Spring Boot</td>
+</tr>
+<tr>
+<td><strong>SSE</strong></td>
+<td>通信协议</td>
+<td>服务器向客户端单向推送消息流</td>
+<td>类似”广播”，服务器说话客户端听</td>
+</tr>
+<tr>
+<td><strong>Gradio</strong></td>
+<td>UI 快速搭建工具</td>
+<td>几行代码搭建模型演示界面</td>
+<td>类似”可视化壳子”</td>
+</tr>
+</tbody></table>
+<p><strong>FastAPI</strong> 是后端框架，负责接收请求、调用模型、返回结果。它的核心优势是异步原生、自动生成 API 文档、类型校验。</p>
+<p><strong>SSE（Server-Sent Events）</strong> 解决的是一个关键问题：大模型生成文本是逐 token 流出的，如果等全部生成完再返回，用户要盯着空白页面等很久。SSE 让服务器生成一段就推送一段，实现”打字机效果”。注意 SSE 是单向的——只有服务器往客户端推，客户端不能通过 SSE 回话。</p>
+<p><strong>Gradio</strong> 是快速搭建 Demo 界面的工具，适合做内部演示和原型验证，不适合做正式产品。</p>
+<p>三者的关系：FastAPI 搭后端 → SSE 做流式推送 → Gradio 做前端界面（或用 Vue&#x2F;React 替代）。</p>
+<hr>
+<h2 id="Q2：LangChain-的架构到底是什么？跟-Spring-Boot-比差在哪？"><a href="#Q2：LangChain-的架构到底是什么？跟-Spring-Boot-比差在哪？" class="headerlink" title="Q2：LangChain 的架构到底是什么？跟 Spring Boot 比差在哪？"></a>Q2：LangChain 的架构到底是什么？跟 Spring Boot 比差在哪？</h2><p>这是一个非常常见的困惑。先说结论：<strong>LangChain 不是 Spring Boot 那种分层架构框架，它更像 Flask + SQLAlchemy 这种工具包。</strong></p>
+<p>Spring Boot 给你规定了：</p>
 <ul>
-<li><strong>批量API</strong>：10条标题一次请求，效率最高</li>
-<li><strong>单条API</strong>：批量失败时退化为逐条调用，可能部分成功</li>
-<li><strong>默认值</strong>：所有API都失败时，返回 <code>sentiment_score=0, type_name=&#39;其他&#39;, topic_name=&#39;无&#39;</code>，系统<strong>永远不崩溃，永远有输出</strong></li>
+<li>Controller 层 → <code>@RestController</code> 注解</li>
+<li>Service 层 → <code>@Service</code> 注解</li>
+<li>Mapper 层 → MyBatis 的 <code>@Mapper</code> 注解</li>
+<li>每一层都有固定写法模板</li>
 </ul>
-<p>类比值班体系：<strong>主治医师（主模型批量）→ 值班医生（备模型单条）→ 急救包（默认值）</strong>，确保任何时刻都有救治能力。</p>
-<h2 id="3-代码实现"><a href="#3-代码实现" class="headerlink" title="3. 代码实现"></a>3. 代码实现</h2><h3 id="3-1-核心状态机"><a href="#3-1-核心状态机" class="headerlink" title="3.1 核心状态机"></a>3.1 核心状态机</h3><p>故障转移的核心是三个状态变量的协同：<code>current_model</code>（当前使用的模型标识）、<code>consecutive_failures</code>（连续失败次数）、<code>max_retries</code>（触发切换的阈值）。</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># llm_client.py:38-76 初始化</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, api_config</span>):</span><br><span class="line">    failover_config = api_config.get(<span class="string">&#x27;failover&#x27;</span>, &#123;&#125;)</span><br><span class="line">    <span class="variable language_">self</span>.max_retries = failover_config.get(<span class="string">&#x27;max_retries&#x27;</span>, <span class="number">2</span>)</span><br><span class="line">    <span class="variable language_">self</span>.auto_recover = failover_config.get(<span class="string">&#x27;auto_recover&#x27;</span>, <span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    <span class="variable language_">self</span>.models = &#123;&#125;</span><br><span class="line">    model_order = [<span class="string">&#x27;primary&#x27;</span>, <span class="string">&#x27;backup&#x27;</span>]</span><br><span class="line">    <span class="keyword">for</span> model_name <span class="keyword">in</span> model_order:</span><br><span class="line">        <span class="keyword">if</span> model_name <span class="keyword">in</span> api_config:</span><br><span class="line">            <span class="variable language_">self</span>.models[model_name] = <span class="variable language_">self</span>._init_model_config(</span><br><span class="line">                api_config[model_name], model_name</span><br><span class="line">            )</span><br><span class="line"></span><br><span class="line">    <span class="variable language_">self</span>.current_model = <span class="string">&#x27;primary&#x27;</span></span><br><span class="line">    <span class="variable language_">self</span>.consecutive_failures = <span class="number">0</span></span><br><span class="line">    <span class="variable language_">self</span>.switch_history = []</span><br></pre></td></tr></table></figure>
-
-<p>配置结构天然支持多模型——<code>primary</code> 和 <code>backup</code> 各自持有独立的 <code>api_url</code>、<code>api_key</code>、<code>model</code> 名称，切换时只需更换 <code>current_model</code> 指针。</p>
-<h3 id="3-2-chat-主循环：故障转移的指挥中心"><a href="#3-2-chat-主循环：故障转移的指挥中心" class="headerlink" title="3.2 chat()主循环：故障转移的指挥中心"></a>3.2 chat()主循环：故障转移的指挥中心</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># llm_client.py:168-223 精简版</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">chat</span>(<span class="params">self, messages, temperature=<span class="number">0.3</span>, max_tokens=<span class="number">2000</span></span>):</span><br><span class="line">    <span class="comment"># ① 新周期尝试恢复主模型</span></span><br><span class="line">    <span class="variable language_">self</span>._try_recover_primary()</span><br><span class="line"></span><br><span class="line">    attempted_models = []</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        model_config = <span class="variable language_">self</span>.models.get(<span class="variable language_">self</span>.current_model)</span><br><span class="line">        attempted_models.append(<span class="variable language_">self</span>.current_model)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># ② 发起请求</span></span><br><span class="line">        result = <span class="variable language_">self</span>._do_chat_request(model_config, messages, temperature, max_tokens)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> result <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">            <span class="comment"># ③ 成功：重置失败计数</span></span><br><span class="line">            <span class="variable language_">self</span>.consecutive_failures = <span class="number">0</span></span><br><span class="line">            <span class="keyword">return</span> result</span><br><span class="line"></span><br><span class="line">        <span class="comment"># ④ 失败：累加计数</span></span><br><span class="line">        <span class="variable language_">self</span>.consecutive_failures += <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> <span class="variable language_">self</span>.consecutive_failures &gt;= <span class="variable language_">self</span>.max_retries:</span><br><span class="line">            <span class="comment"># ⑤ 达到阈值：切换模型</span></span><br><span class="line">            <span class="variable language_">self</span>._switch_model(<span class="string">f&quot;连续失败<span class="subst">&#123;self.max_retries&#125;</span>次&quot;</span>)</span><br><span class="line">            <span class="comment"># 所有模型都试过了 → 返回None</span></span><br><span class="line">            <span class="keyword">if</span> <span class="variable language_">self</span>.current_model <span class="keyword">in</span> attempted_models:</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="comment"># ⑥ 未达阈值：线性退避等待</span></span><br><span class="line">            time.sleep(<span class="number">1</span> * <span class="variable language_">self</span>.consecutive_failures)</span><br></pre></td></tr></table></figure>
-
-<p>控制流的精髓：步骤①是自动恢复的入口，步骤③⑤⑥构成”失败→重试→切换”的决策链，<code>attempted_models</code> 防止无限循环——如果所有模型都已尝试，立即返回None。</p>
-<h3 id="3-3-模型切换与审计"><a href="#3-3-模型切换与审计" class="headerlink" title="3.3 模型切换与审计"></a>3.3 模型切换与审计</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># llm_client.py:126-158 精简版</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_switch_model</span>(<span class="params">self, reason</span>):</span><br><span class="line">    next_model = <span class="variable language_">self</span>._get_next_model()</span><br><span class="line">    <span class="keyword">if</span> next_model:</span><br><span class="line">        old_model = <span class="variable language_">self</span>.current_model</span><br><span class="line">        <span class="variable language_">self</span>.current_model = next_model</span><br><span class="line">        <span class="variable language_">self</span>.consecutive_failures = <span class="number">0</span></span><br><span class="line"></span><br><span class="line">        <span class="variable language_">self</span>.switch_history.append(&#123;</span><br><span class="line">            <span class="string">&#x27;time&#x27;</span>: time.strftime(<span class="string">&#x27;%Y-%m-%d %H:%M:%S&#x27;</span>),</span><br><span class="line">            <span class="string">&#x27;from&#x27;</span>: old_model,</span><br><span class="line">            <span class="string">&#x27;to&#x27;</span>: next_model,</span><br><span class="line">            <span class="string">&#x27;reason&#x27;</span>: reason</span><br><span class="line">        &#125;)</span><br></pre></td></tr></table></figure>
-
-<p><code>switch_history</code> 是生产环境排障的关键——当运维发现分析结果异常时，可以回溯”什么时候、从哪个模型、切到哪个模型、因为什么”，而不是对着黑盒猜测。</p>
-<h3 id="3-4-自动恢复：新周期的回归"><a href="#3-4-自动恢复：新周期的回归" class="headerlink" title="3.4 自动恢复：新周期的回归"></a>3.4 自动恢复：新周期的回归</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># llm_client.py:160-166</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_try_recover_primary</span>(<span class="params">self</span>):</span><br><span class="line">    <span class="keyword">if</span> <span class="variable language_">self</span>.auto_recover <span class="keyword">and</span> <span class="variable language_">self</span>.current_model != <span class="string">&#x27;primary&#x27;</span> <span class="keyword">and</span> <span class="string">&#x27;primary&#x27;</span> <span class="keyword">in</span> <span class="variable language_">self</span>.models:</span><br><span class="line">        <span class="variable language_">self</span>.current_model = <span class="string">&#x27;primary&#x27;</span></span><br><span class="line">        <span class="variable language_">self</span>.consecutive_failures = <span class="number">0</span></span><br></pre></td></tr></table></figure>
-
-<p>仅7行代码，却是一个精妙的设计决策：<strong>在每次新请求周期的开头尝试恢复</strong>。为什么不是定时器？因为我们的爬取周期就是天然的检测点——下一轮调用时自然就知道主模型是否恢复了。没有额外线程、没有定时器、没有复杂状态，代码极简但效果确定。</p>
-<h3 id="3-5-批量→单条的退化"><a href="#3-5-批量→单条的退化" class="headerlink" title="3.5 批量→单条的退化"></a>3.5 批量→单条的退化</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># llm_analyzer.py:336-376 精简版</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_call_batch_api</span>(<span class="params">self, titles</span>):</span><br><span class="line">    titles_text = <span class="string">&quot;\n&quot;</span>.join([<span class="string">f&quot;<span class="subst">&#123;i+<span class="number">1</span>&#125;</span>. <span class="subst">&#123;title&#125;</span>&quot;</span> <span class="keyword">for</span> i, title <span class="keyword">in</span> <span class="built_in">enumerate</span>(titles)])</span><br><span class="line">    messages = [</span><br><span class="line">        &#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;system&quot;</span>, <span class="string">&quot;content&quot;</span>: <span class="variable language_">self</span>.batch_system_prompt&#125;,</span><br><span class="line">        &#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>, <span class="string">&quot;content&quot;</span>: <span class="string">f&quot;请批量分析以下<span class="subst">&#123;<span class="built_in">len</span>(titles)&#125;</span>个热搜标题：\n\n<span class="subst">&#123;titles_text&#125;</span>&quot;</span>&#125;</span><br><span class="line">    ]</span><br><span class="line"></span><br><span class="line">    content = <span class="variable language_">self</span>.client.chat(messages, temperature=<span class="number">0.2</span>)</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> content:</span><br><span class="line">        <span class="comment"># 批量失败 → 退化为逐条分析</span></span><br><span class="line">        <span class="keyword">return</span> [<span class="variable language_">self</span>.analyze(t) <span class="keyword">for</span> t <span class="keyword">in</span> titles]</span><br><span class="line"></span><br><span class="line">    result = <span class="variable language_">self</span>.client.parse_json_response(content)</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> result:</span><br><span class="line">        <span class="comment"># 解析失败 → 同样退化</span></span><br><span class="line">        <span class="keyword">return</span> [<span class="variable language_">self</span>.analyze(t) <span class="keyword">for</span> t <span class="keyword">in</span> titles]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">isinstance</span>(result, <span class="built_in">list</span>):</span><br><span class="line">        <span class="keyword">return</span> <span class="variable language_">self</span>._normalize_results(result, titles)</span><br><span class="line">    <span class="keyword">elif</span> <span class="built_in">isinstance</span>(result, <span class="built_in">dict</span>):</span><br><span class="line">        <span class="keyword">return</span> [result] + [<span class="variable language_">self</span>._default_result(t) <span class="keyword">for</span> t <span class="keyword">in</span> titles[<span class="number">1</span>:]]</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">return</span> [<span class="variable language_">self</span>._default_result(t) <span class="keyword">for</span> t <span class="keyword">in</span> titles]</span><br></pre></td></tr></table></figure>
-
-<p>退化逻辑的关键：<strong>批量失败不是直接返回默认值，而是降级为单条调用</strong>。单条调用会再次经过 <code>chat()</code> 的故障转移逻辑，这意味着每条标题都有独立的机会通过备模型获得分析结果。只有当单条调用也失败时，才会走到最终的 <code>_default_result()</code> 兜底。</p>
-<h3 id="3-6-最终兜底"><a href="#3-6-最终兜底" class="headerlink" title="3.6 最终兜底"></a>3.6 最终兜底</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># llm_analyzer.py:452-467</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_default_result</span>(<span class="params">self, title</span>):</span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">        <span class="string">&#x27;sentiment_score&#x27;</span>: <span class="number">0.0</span>,</span><br><span class="line">        <span class="string">&#x27;type_name&#x27;</span>: <span class="string">&#x27;其他&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;topic_name&#x27;</span>: <span class="string">&#x27;无&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;keywords&#x27;</span>: []</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-<p>默认值的设计不是”空”或”None”，而是<strong>语义合理的占位值</strong>：情感分数为0（中性）、类型为”其他”、话题为”无”。下游系统无需特殊处理null值，前端图表正常渲染，只是精度降低而非完全中断。</p>
-<h2 id="4-实验结论"><a href="#4-实验结论" class="headerlink" title="4. 实验结论"></a>4. 实验结论</h2><h3 id="4-1-基线性能"><a href="#4-1-基线性能" class="headerlink" title="4.1 基线性能"></a>4.1 基线性能</h3><p>使用50条测试用例（覆盖娱乐&#x2F;社会&#x2F;科技&#x2F;体育&#x2F;时政5类，每类10条），以10条为一组批量调用，禁用缓存：</p>
+<p>LangChain 没有这种分层约束，它提供的是<strong>六个功能模块</strong>：</p>
 <table>
 <thead>
 <tr>
-<th>指标</th>
-<th>结果</th>
-<th>基准线</th>
+<th>模块</th>
+<th>解决什么问题</th>
+<th>核心抽象</th>
 </tr>
 </thead>
 <tbody><tr>
-<td>调用成功率</td>
-<td><strong>96%</strong></td>
-<td>≥90%</td>
+<td>Model I&#x2F;O</td>
+<td>统一不同模型的调用方式</td>
+<td><code>ChatOpenAI</code> &#x2F; <code>init_chat_model</code></td>
 </tr>
 <tr>
-<td>批量响应时间（10条）</td>
-<td><strong>8.2s</strong></td>
-<td>≤30s</td>
+<td>Prompt</td>
+<td>管理提示词模板</td>
+<td><code>ChatPromptTemplate</code> &#x2F; <code>MessagesPlaceholder</code></td>
 </tr>
 <tr>
-<td>情感分析准确率</td>
-<td><strong>88%</strong></td>
-<td>≥70%</td>
+<td>Output Parser</td>
+<td>解析模型输出为结构化数据</td>
+<td><code>StrOutputParser</code> &#x2F; <code>JsonOutputParser</code> &#x2F; Pydantic</td>
 </tr>
 <tr>
-<td>类型分类准确率</td>
-<td><strong>82%</strong></td>
-<td>≥70%</td>
+<td>LCEL</td>
+<td>链式组合</td>
+<td>&#96;prompt</td>
 </tr>
 <tr>
-<td>话题提取成功率</td>
-<td><strong>94%</strong></td>
-<td>≥60%</td>
+<td>Memory</td>
+<td>管理对话历史</td>
+<td><code>RunnableWithMessageHistory</code> &#x2F; <code>RedisChatMessageHistory</code></td>
+</tr>
+<tr>
+<td>Tools</td>
+<td>给模型接外部能力</td>
+<td><code>@tool</code> &#x2F; <code>bind_tools</code></td>
 </tr>
 </tbody></table>
-<h3 id="4-2-故障注入：主模型429"><a href="#4-2-故障注入：主模型429" class="headerlink" title="4.2 故障注入：主模型429"></a>4.2 故障注入：主模型429</h3><p>通过Mock <code>_do_chat_request</code> 使主模型固定返回None（模拟429限流），观察切换行为：</p>
-<table>
-<thead>
-<tr>
-<th>指标</th>
-<th>结果</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>触发切换的请求数</td>
-<td><strong>2次</strong>（与max_retries&#x3D;2一致）</td>
-</tr>
-<tr>
-<td>切换后成功率</td>
-<td><strong>恢复至95%</strong></td>
-</tr>
-<tr>
-<td>switch_history记录</td>
-<td><code>{&#39;from&#39;:&#39;primary&#39;,&#39;to&#39;:&#39;backup&#39;,&#39;reason&#39;:&#39;连续失败2次&#39;}</code></td>
-</tr>
-</tbody></table>
-<p><strong>关键发现</strong>：主模型故障后，系统在第2次失败后自动切换到备模型，切换后成功率立即恢复。整个切换过程对调用方完全透明。</p>
-<h3 id="4-3-自动恢复验证"><a href="#4-3-自动恢复验证" class="headerlink" title="4.3 自动恢复验证"></a>4.3 自动恢复验证</h3><p>切换到backup后，恢复主模型可用性：</p>
-<table>
-<thead>
-<tr>
-<th>指标</th>
-<th>结果</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>恢复到primary的周期数</td>
-<td><strong>1个周期</strong>（下一次爬取即恢复）</td>
-</tr>
-<tr>
-<td>恢复后成功率</td>
-<td><strong>96%</strong>（与基线一致）</td>
-</tr>
-</tbody></table>
-<p>自动恢复机制工作正常：只要主模型恢复，下一个请求周期就会自动切回，无需人工干预。</p>
-<h3 id="4-4-全链路降级测试"><a href="#4-4-全链路降级测试" class="headerlink" title="4.4 全链路降级测试"></a>4.4 全链路降级测试</h3><p>模拟主模型和备模型均不可用：</p>
-<table>
-<thead>
-<tr>
-<th>降级层级</th>
-<th>产出</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>批量API</td>
-<td>失败</td>
-</tr>
-<tr>
-<td>单条API</td>
-<td>失败</td>
-</tr>
-<tr>
-<td>默认值</td>
-<td><strong>100%产出</strong></td>
-</tr>
-</tbody></table>
-<p>系统在所有模型不可用时仍然持续产出默认值结果，<strong>不崩溃、不中断</strong>。数据精度降级，但服务连续性得到保证。</p>
-<h3 id="4-5-缓存对韧性的贡献"><a href="#4-5-缓存对韧性的贡献" class="headerlink" title="4.5 缓存对韧性的贡献"></a>4.5 缓存对韧性的贡献</h3><p>在稳态运行（大部分热搜跨轮次持续存在）下，Redis缓存命中率可达<strong>80%以上</strong>。这意味着即使LLM服务完全不可用，仍有80%的热搜条目能从缓存返回分析结果，只有新上榜的热搜才会使用默认值。缓存是故障转移之外的第二道防线。</p>
-<h2 id="5-面试关联"><a href="#5-面试关联" class="headerlink" title="5. 面试关联"></a>5. 面试关联</h2><ul>
-<li><p><strong>面试题1：”如何设计一个高可用的LLM调用方案？”</strong> → 本文2-3节给出了完整答案：多模型配置 + 连续失败计数切换 + 新周期自动恢复 + 三级降级链，确保任何情况下系统有输出。</p>
-</li>
-<li><p><strong>面试题2：”熔断器模式和你的连续失败计数方案有什么区别？各适合什么场景？”</strong> → 第2节分析了两者差异：熔断器适合高频请求（每秒百次级），需要半开状态精确控制探针频率；连续失败计数适合低频场景（每30秒一次），每次请求本身就是天然检测点，无需额外状态机。</p>
-</li>
-<li><p><strong>面试题3：”系统降级策略怎么设计？如何保证任何情况下都有输出？”</strong> → 第3节的三级降级链是答案核心：批量→单条→默认值。设计原则是<strong>语义合理的占位值优于null</strong>，下游系统无需特殊处理，精度降低但服务不中断。</p>
-</li>
-</ul>
-]]></content>
-      <categories>
-        <category>工程实践</category>
-      </categories>
-      <tags>
-        <tag>LLM</tag>
-        <tag>故障转移</tag>
-        <tag>Python</tag>
-        <tag>微服务韧性</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>企业知识库问答助手</title>
-    <url>/posts/prompts/%E4%BC%81%E4%B8%9A%E7%9F%A5%E8%AF%86%E5%BA%93%E9%97%AE%E7%AD%94%E5%8A%A9%E6%89%8B/</url>
-    <content><![CDATA[<h1 id="Role-企业知识库问答助手"><a href="#Role-企业知识库问答助手" class="headerlink" title="Role: 企业知识库问答助手"></a>Role: 企业知识库问答助手</h1><h2 id="Profile"><a href="#Profile" class="headerlink" title="Profile"></a>Profile</h2><ul>
-<li>Author: 吴纪辰</li>
-<li>Version: 1.0</li>
-<li>Language: 中文</li>
-<li>Description: 基于企业私有知识库的问答助手，面向内部员工提供专业、严谨、准确的文档查询与业务解答服务，确保回答基于知识库事实而非主观推测</li>
-</ul>
-<h3 id="Skill-1"><a href="#Skill-1" class="headerlink" title="Skill-1"></a>Skill-1</h3><ol>
-<li>根据用户问题，从知识库中检索相关文档片段，基于检索结果进行准确回答</li>
-<li>回答时必须标注信息来源（引用具体文档名称&#x2F;章节&#x2F;页码），确保可溯源、可验证</li>
-<li>若知识库中无相关信息，明确告知用户”当前知识库中未找到相关内容”，绝不编造或推测</li>
+<p><strong>LangChain 的核心价值（80%）不是”统一调用格式”这么简单，而是：</strong></p>
+<ol>
+<li><strong>统一模型接口</strong>：不同提供商（OpenAI&#x2F;阿里百炼&#x2F;DeepSeek&#x2F;Ollama）的 base_url、参数格式不一样，LangChain 做了适配</li>
+<li><strong>结构化输出解析</strong>：模型返回的是字符串，LangChain 能帮你解析成 JSON &#x2F; Pydantic 对象 &#x2F; TypedDict</li>
+<li><strong>工具调用循环</strong>：模型决定调什么工具 → 程序执行 → 结果回传模型，这套循环 LangChain 帮你封装了</li>
+<li><strong>模型行为归一化</strong>：不同模型的 tool_calls 格式、流式输出格式有差异，LangChain 做了统一</li>
 </ol>
-<h3 id="Skill-2"><a href="#Skill-2" class="headerlink" title="Skill-2"></a>Skill-2</h3><ol>
-<li>对用户模糊的问题进行意图澄清，主动追问关键细节（如具体业务场景、时间范围、所属部门等）</li>
-<li>将复杂问题拆解为多个子问题，逐个检索并综合回答</li>
-<li>对涉及多个文档&#x2F;制度的问题，提供交叉对比和综合解读</li>
-</ol>
-<h3 id="Skill-3"><a href="#Skill-3" class="headerlink" title="Skill-3"></a>Skill-3</h3><ol>
-<li>使用专业、严谨、准确的用语，避免口语化表达</li>
-<li>回答结构化：先给出明确结论，再展开详细说明，最后附上引用来源</li>
-<li>涉及流程&#x2F;步骤类问题，使用编号列表清晰呈现</li>
-</ol>
-<h3 id="Skill-4"><a href="#Skill-4" class="headerlink" title="Skill-4"></a>Skill-4</h3><ol>
-<li>识别问题是否涉及敏感信息（薪资、人事、保密条款等），按知识库中的权限标注决定是否回答</li>
-<li>识别问题是否涉及跨部门&#x2F;跨制度冲突，主动提示用户需与相关部门确认</li>
-<li>对政策&#x2F;制度类问题，提醒用户注意文档版本和生效日期，避免引用过期信息</li>
-</ol>
-<h2 id="Rules"><a href="#Rules" class="headerlink" title="Rules"></a>Rules</h2><ol>
-<li>所有回答必须基于知识库检索结果，严禁凭记忆或常识编造内容</li>
-<li>回答必须标注信息来源，格式为：【来源：《文档名》- 章节&#x2F;页码】</li>
-<li>知识库中无相关信息时，必须明确告知”当前知识库未覆盖此内容”，建议用户联系相关部门</li>
-<li>涉及数字、日期、条款等关键信息时，必须与原文完全一致，不做概括或改写</li>
-<li>不确定的信息用”根据《文档名》所述”开头，不使用绝对肯定的表述除非原文明确</li>
-<li>涉及多个文档时，如有冲突或差异，需指出冲突点并建议用户确认最新版本</li>
-<li>不回答超出知识库范围的问题，包括但不限于：个人主观建议、外部行业信息、未收录的政策</li>
-<li>回答长度适中，重要问题详细展开，简单查询直接回答，不做不必要的冗余扩展</li>
-</ol>
-<h2 id="Workflow"><a href="#Workflow" class="headerlink" title="Workflow"></a>Workflow</h2><ol>
-<li>接收用户问题</li>
-<li>分析问题意图，判断是否需要澄清（模糊问题→追问；明确问题→检索）</li>
-<li>从知识库检索相关文档片段</li>
-<li>评估检索结果：<ul>
-<li>有明确结果 → 基于检索内容组织回答，标注来源</li>
-<li>有部分结果 → 回答已知部分，标注缺失部分，建议补充渠道</li>
-<li>无结果 → 明确告知未覆盖，建议联系相关部门</li>
-</ul>
-</li>
-<li>检查回答是否涉及：敏感信息&#x2F;版本时效&#x2F;跨制度冲突 → 添加必要提醒</li>
-<li>组织结构化回答：结论 → 详细说明 → 引用来源 → 必要提醒</li>
-<li>输出回答</li>
-</ol>
-<h2 id="Commands"><a href="#Commands" class="headerlink" title="Commands"></a>Commands</h2><ul>
-<li>&#x2F;来源：追问上一次回答的具体信息来源</li>
-<li>&#x2F;相关：查询与当前问题相关的其他文档或制度</li>
-<li>&#x2F;版本：确认所引用文档的最新版本和生效日期</li>
-<li>&#x2F;澄清：当回答不确定时，请求更详细的问题描述</li>
-</ul>
-<h2 id="Initialization"><a href="#Initialization" class="headerlink" title="Initialization"></a>Initialization</h2><p>作为 <Role>，你必须遵守 <Rules>，用 <Language> 交流。请先向用户问好，简要介绍自己的功能范围，然后等待用户提问。</p>
-<p>介绍示例：<br>“您好，我是企业知识库问答助手，可以帮您查询公司内部文档、规章制度、操作流程等内容。我的回答均基于知识库原文，并会标注信息来源供您验证。如遇知识库未覆盖的内容，我会建议您联系相关部门。请问您想查询什么？”</p>
-]]></content>
-      <categories>
-        <category>Prompts</category>
-      </categories>
-      <tags>
-        <tag>Prompt</tag>
-        <tag>Skill</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>从零手写RAG：向量检索+BM25+RRF混合检索实战</title>
-    <url>/posts/%E4%BB%8E%E9%9B%B6%E6%89%8B%E5%86%99RAG-%E5%90%91%E9%87%8F%E6%A3%80%E7%B4%A2BM25-RRF%E6%B7%B7%E5%90%88%E6%A3%80%E7%B4%A2%E5%AE%9E%E6%88%98/</url>
-    <content><![CDATA[<h2 id="问题引入：为什么需要混合检索？"><a href="#问题引入：为什么需要混合检索？" class="headerlink" title="问题引入：为什么需要混合检索？"></a>问题引入：为什么需要混合检索？</h2><p>大模型的回答质量，取决于它”看到”了什么。RAG（Retrieval-Augmented Generation）的核心思路很简单：先把相关文档找出来，再让大模型基于文档回答。</p>
-<p>问题出在”找”这一步。我们有两种主流检索方式，各有盲区：</p>
+<h2 id="第-1-点确实不难实现，但-2、3、4-合在一起的工作量就不小了。所以-LangChain-的价值不只是”统一调用”，而是让模型能力更可控、更可组合、更可工程化。"><a href="#第-1-点确实不难实现，但-2、3、4-合在一起的工作量就不小了。所以-LangChain-的价值不只是”统一调用”，而是让模型能力更可控、更可组合、更可工程化。" class="headerlink" title="第 1 点确实不难实现，但 2、3、4 合在一起的工作量就不小了。所以 LangChain 的价值不只是”统一调用”，而是让模型能力更可控、更可组合、更可工程化。"></a>第 1 点确实不难实现，但 2、3、4 合在一起的工作量就不小了。所以 LangChain 的价值不只是”统一调用”，而是<strong>让模型能力更可控、更可组合、更可工程化</strong>。</h2><h2 id="Q3：调用模型有哪些方式？能不能直接用-requests-构造-HTTP-请求？"><a href="#Q3：调用模型有哪些方式？能不能直接用-requests-构造-HTTP-请求？" class="headerlink" title="Q3：调用模型有哪些方式？能不能直接用 requests 构造 HTTP 请求？"></a>Q3：调用模型有哪些方式？能不能直接用 requests 构造 HTTP 请求？</h2><p>可以的，一共有四种方式，从底层到高层排列：</p>
+<h3 id="方式一：直接用-requests-构造-HTTP-请求"><a href="#方式一：直接用-requests-构造-HTTP-请求" class="headerlink" title="方式一：直接用 requests 构造 HTTP 请求"></a>方式一：直接用 requests 构造 HTTP 请求</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line">response = requests.post(</span><br><span class="line">    <span class="string">&quot;https://api.openai.com/v1/chat/completions&quot;</span>,</span><br><span class="line">    headers=&#123;<span class="string">&quot;Authorization&quot;</span>: <span class="string">&quot;Bearer sk-xxx&quot;</span>&#125;,</span><br><span class="line">    json=&#123;</span><br><span class="line">        <span class="string">&quot;model&quot;</span>: <span class="string">&quot;gpt-4o-mini&quot;</span>,</span><br><span class="line">        <span class="string">&quot;messages&quot;</span>: [&#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>, <span class="string">&quot;content&quot;</span>: <span class="string">&quot;你好&quot;</span>&#125;]</span><br><span class="line">    &#125;</span><br><span class="line">)</span><br><span class="line"><span class="built_in">print</span>(response.json()[<span class="string">&quot;choices&quot;</span>][<span class="number">0</span>][<span class="string">&quot;message&quot;</span>][<span class="string">&quot;content&quot;</span>])</span><br></pre></td></tr></table></figure>
+
+<p>最底层，最灵活，但你要自己处理：认证、参数格式、错误处理、重试、流式解析、工具调用格式……工作量很大。</p>
+<h3 id="方式二：openai-OpenAI（OpenAI-官方-SDK）"><a href="#方式二：openai-OpenAI（OpenAI-官方-SDK）" class="headerlink" title="方式二：openai.OpenAI（OpenAI 官方 SDK）"></a>方式二：openai.OpenAI（OpenAI 官方 SDK）</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> openai <span class="keyword">import</span> OpenAI</span><br><span class="line"></span><br><span class="line">client = OpenAI(api_key=<span class="string">&quot;sk-xxx&quot;</span>, base_url=<span class="string">&quot;https://api.openai.com/v1&quot;</span>)</span><br><span class="line">response = client.chat.completions.create(</span><br><span class="line">    model=<span class="string">&quot;gpt-4o-mini&quot;</span>,</span><br><span class="line">    messages=[&#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>, <span class="string">&quot;content&quot;</span>: <span class="string">&quot;你好&quot;</span>&#125;]</span><br><span class="line">)</span><br><span class="line"><span class="built_in">print</span>(response.choices[<span class="number">0</span>].message.content)</span><br></pre></td></tr></table></figure>
+
+<p>OpenAI 官方封装，处理了 HTTP 细节，但只能用 OpenAI 格式的 API。</p>
+<h3 id="方式三：langchain-openai-ChatOpenAI"><a href="#方式三：langchain-openai-ChatOpenAI" class="headerlink" title="方式三：langchain_openai.ChatOpenAI"></a>方式三：langchain_openai.ChatOpenAI</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> langchain_openai <span class="keyword">import</span> ChatOpenAI</span><br><span class="line"></span><br><span class="line">model = ChatOpenAI(model=<span class="string">&quot;gpt-4o-mini&quot;</span>, api_key=<span class="string">&quot;sk-xxx&quot;</span>)</span><br><span class="line">response = model.invoke(<span class="string">&quot;你好&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(response.content)</span><br></pre></td></tr></table></figure>
+
+<p>LangChain 的封装，返回 <code>AIMessage</code> 对象（包含 content、tool_calls、response_metadata 等调试信息），而不仅仅是字符串。可以直接接入 LCEL 链。</p>
+<h3 id="方式四：init-chat-model（最新推荐）"><a href="#方式四：init-chat-model（最新推荐）" class="headerlink" title="方式四：init_chat_model（最新推荐）"></a>方式四：init_chat_model（最新推荐）</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> langchain.chat_models <span class="keyword">import</span> init_chat_model</span><br><span class="line"></span><br><span class="line">model = init_chat_model(<span class="string">&quot;gpt-4o-mini&quot;</span>, model_provider=<span class="string">&quot;openai&quot;</span>)</span><br><span class="line">response = model.invoke(<span class="string">&quot;你好&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>最新写法，通过 <code>model_provider</code> 参数自动选择对应的实现类，不用关心底层用 <code>ChatOpenAI</code> 还是 <code>ChatTongyi</code> 还是 <code>ChatDeepSeek</code>。</p>
+<p><strong>四种方式对比：</strong></p>
 <table>
 <thead>
 <tr>
-<th>检索方式</th>
-<th>擅长</th>
-<th>盲区</th>
+<th>方式</th>
+<th>灵活度</th>
+<th>封装度</th>
+<th>调试信息</th>
+<th>适合场景</th>
 </tr>
 </thead>
 <tbody><tr>
-<td>向量检索</td>
-<td>语义相似——查”注意力机制”能找到含”self-attention”的文档</td>
-<td>精确关键词匹配弱——查”2025年复试细则”可能漏掉</td>
+<td>requests</td>
+<td>最高</td>
+<td>最低</td>
+<td>原始 JSON</td>
+<td>需要极致控制</td>
 </tr>
 <tr>
-<td>BM25检索</td>
-<td>关键词精确匹配——查”复试细则”精准命中</td>
-<td>语义理解弱——查”深度学习入门”找不到含”神经网络基础”的文档</td>
+<td>openai.OpenAI</td>
+<td>中</td>
+<td>中</td>
+<td>部分封装</td>
+<td>不用 LangChain 的项目</td>
+</tr>
+<tr>
+<td>ChatOpenAI</td>
+<td>中低</td>
+<td>高</td>
+<td>AIMessage 完整信息</td>
+<td>LangChain 项目</td>
+</tr>
+<tr>
+<td>init_chat_model</td>
+<td>中低</td>
+<td>最高</td>
+<td>同 ChatOpenAI</td>
+<td>LangChain 项目（推荐）</td>
 </tr>
 </tbody></table>
-<p><strong>单用任一路都有漏检风险，混合检索是互补方案。</strong> 本文用不到300行Python，从零实现一个完整的RAG系统，覆盖：文档切分 → Embedding → BM25 + 向量双路检索 → RRF融合 → CrossEncoder重排序 → LLM生成。</p>
-<blockquote>
-<p>完整代码见 <a href="https://github.com/GeiTeHaoBu-del/MiniRAG">MiniRAG</a></p>
-</blockquote>
-<h2 id="原理讲解"><a href="#原理讲解" class="headerlink" title="原理讲解"></a>原理讲解</h2><h3 id="1-向量检索：语义相似的”GPS定位”"><a href="#1-向量检索：语义相似的”GPS定位”" class="headerlink" title="1. 向量检索：语义相似的”GPS定位”"></a>1. 向量检索：语义相似的”GPS定位”</h3><p>Embedding模型把文本映射为256维向量。语义相近的文本，向量在高维空间中也相近——就像GPS坐标，两个点越近，物理距离越短。</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 智谱 embedding-3：文本 → 256维向量</span></span><br><span class="line">result = embedding_client.embeddings.create(</span><br><span class="line">    model=<span class="string">&quot;embedding-3&quot;</span>,</span><br><span class="line">    <span class="built_in">input</span>=text,</span><br><span class="line">    dimensions=<span class="number">256</span></span><br><span class="line">)</span><br><span class="line">vector = result.data[<span class="number">0</span>].embedding  <span class="comment"># [0.12, -0.34, 0.56, ...]</span></span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="Q4：for-chunk-in-model-stream-你好-是什么意思？"><a href="#Q4：for-chunk-in-model-stream-你好-是什么意思？" class="headerlink" title="Q4：for chunk in model.stream(&quot;你好&quot;) 是什么意思？"></a>Q4：<code>for chunk in model.stream(&quot;你好&quot;)</code> 是什么意思？</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span> chunk <span class="keyword">in</span> model.stream(<span class="string">&quot;你好&quot;</span>):</span><br><span class="line">    <span class="built_in">print</span>(chunk.content, end=<span class="string">&quot;&quot;</span>)</span><br></pre></td></tr></table></figure>
 
-<p>向量检索的三步流程：查询向量化 → L2距离计算 → 取最近邻。</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># FAISS IndexFlatL2：暴力遍历，计算查询向量与所有文档向量的L2距离</span></span><br><span class="line">index = faiss.IndexFlatL2(<span class="number">256</span>)    <span class="comment"># 256维</span></span><br><span class="line">index.add(doc_vectors)            <span class="comment"># 加入所有文档向量</span></span><br><span class="line">D, I = index.search(query_vec, k=<span class="number">10</span>)  <span class="comment"># D=距离, I=索引</span></span><br></pre></td></tr></table></figure>
-
-<p>L2距离公式：$L2 &#x3D; \sqrt{\sum(v1[i] - v2[i])^2}$，距离越小越相似。</p>
-<p><code>IndexFlatL2</code>是暴力遍历，适合小数据量（&lt;10万条）。大数据量场景需要IVF或HNSW索引，这个后续文章再展开。</p>
-<h3 id="2-BM25：关键词匹配的数学升级版"><a href="#2-BM25：关键词匹配的数学升级版" class="headerlink" title="2. BM25：关键词匹配的数学升级版"></a>2. BM25：关键词匹配的数学升级版</h3><p>BM25是TF-IDF的改进版，三个核心要素：</p>
-<ul>
-<li><strong>TF（词频）</strong>：关键词在文档中出现次数越多，分越高——但有饱和机制（k1&#x3D;1.5），出现10次和100次差距不大</li>
-<li><strong>IDF（逆文档频率）</strong>：越稀有的词权重越高，”的”权重低，”Transformer”权重高</li>
-<li><strong>文档长度归一化</strong>（b&#x3D;0.75）：惩罚过长的文档，避免长文档因词多而占便宜</li>
-</ul>
-<p>$$score(D,Q) &#x3D; \sum IDF(q_i) \times \frac{f(q_i,D) \times (k_1+1)}{f(q_i,D) + k_1 \times (1-b+b \times |D|&#x2F;avgdl)}$$</p>
-<p>中文文本需要先分词，这里用jieba：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> jieba</span><br><span class="line"><span class="keyword">from</span> rank_bm25 <span class="keyword">import</span> BM25Okapi</span><br><span class="line"></span><br><span class="line">tokenized_corpus = [jieba.lcut(doc) <span class="keyword">for</span> doc <span class="keyword">in</span> documents]</span><br><span class="line">bm25 = BM25Okapi(tokenized_corpus)           <span class="comment"># k1=1.5, b=0.75</span></span><br><span class="line">scores = bm25.get_scores(jieba.lcut(query))  <span class="comment"># 计算所有文档的BM25分数</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="3-RRF融合：让两路检索”投票”"><a href="#3-RRF融合：让两路检索”投票”" class="headerlink" title="3. RRF融合：让两路检索”投票”"></a>3. RRF融合：让两路检索”投票”</h3><p>BM25分数和L2距离量纲不同、方向不同，不能直接相加。RRF（Reciprocal Rank Fusion）的思路：<strong>不看原始分数，只看排名。</strong></p>
-<p>$$score(d) &#x3D; \sum \frac{1}{k + rank}$$</p>
-<p>k&#x3D;60是原论文推荐值，作用是平滑排名差异。k太小则排名1远优于排名2，k太大则排名差异被抹平。</p>
-<p>举个具体例子：</p>
+<p>这行代码做了三件事：</p>
+<ol>
+<li><code>model.stream(&quot;你好&quot;)</code> —— 不等模型全部生成完，而是逐 token 返回一个流</li>
+<li><code>for chunk in ...</code> —— 每生成一小段（一个 chunk），就循环一次</li>
+<li><code>print(chunk.content, end=&quot;&quot;)</code> —— 打印这段内容，<code>end=&quot;&quot;</code> 表示不换行，实现”打字机效果”</li>
+</ol>
+<p>和 <code>model.invoke(&quot;你好&quot;)</code> 的区别：</p>
 <table>
 <thead>
 <tr>
-<th>文档</th>
-<th>BM25排名</th>
-<th>向量检索排名</th>
-<th>RRF分数</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>文档A</td>
-<td>1</td>
-<td>2</td>
-<td>1&#x2F;61 + 1&#x2F;62 &#x3D; 0.0323</td>
-</tr>
-<tr>
-<td>文档B</td>
-<td>3</td>
-<td>1</td>
-<td>1&#x2F;63 + 1&#x2F;61 &#x3D; 0.0322</td>
-</tr>
-<tr>
-<td>文档C</td>
-<td>2</td>
-<td>未出现</td>
-<td>1&#x2F;62 + 0 &#x3D; 0.0161</td>
-</tr>
-</tbody></table>
-<p>两路都推荐的文档A和B分数最高，只被一路推荐的C明显偏低——这就是”投票”的效果。</p>
-<h3 id="4-CrossEncoder重排序：最后一把精准筛"><a href="#4-CrossEncoder重排序：最后一把精准筛" class="headerlink" title="4. CrossEncoder重排序：最后一把精准筛"></a>4. CrossEncoder重排序：最后一把精准筛</h3><p>向量检索是Bi-Encoder：query和doc分别编码，速度快但精度有限。CrossEncoder把query和doc拼接后一起输入模型，精度高但速度慢。</p>
-<p>策略：先用双路检索+RRF从大量文档中粗筛出5条，再用CrossEncoder精排取3条，送入LLM。</p>
-<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><h3 id="Pipeline总览"><a href="#Pipeline总览" class="headerlink" title="Pipeline总览"></a>Pipeline总览</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">用户输入 → Query Rewrite → BM25检索(10条) + 向量检索(10条)</span><br><span class="line">                              ↓</span><br><span class="line">                        RRF融合(5条) → CrossEncoder重排序(3条) → LLM生成</span><br></pre></td></tr></table></figure>
-
-<h3 id="1-文档切分与Embedding"><a href="#1-文档切分与Embedding" class="headerlink" title="1. 文档切分与Embedding"></a>1. 文档切分与Embedding</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">read_pdf_file</span>(<span class="params">file_path, chunk_size=<span class="number">0</span>, overlap=<span class="number">0</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;PDF文本提取 + 滑动窗口切分&quot;&quot;&quot;</span></span><br><span class="line">    reader = PdfReader(file_path)</span><br><span class="line">    text = <span class="string">&quot;&quot;</span>.join(page.extract_text() <span class="keyword">for</span> page <span class="keyword">in</span> reader.pages)</span><br><span class="line">    <span class="keyword">if</span> chunk_size == <span class="number">0</span>:</span><br><span class="line">        <span class="keyword">return</span> text</span><br><span class="line">    chunks = []</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">len</span>(text), chunk_size - overlap):</span><br><span class="line">        chunks.append(text[i:i + chunk_size])</span><br><span class="line">    <span class="keyword">return</span> chunks</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">embedding_invoke</span>(<span class="params">text, config</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;调用智谱embedding-3获取256维向量&quot;&quot;&quot;</span></span><br><span class="line">    result = embedding_client.embeddings.create(</span><br><span class="line">        model=config.embedding_name,</span><br><span class="line">        <span class="built_in">input</span>=text,</span><br><span class="line">        dimensions=config.embedding_dim</span><br><span class="line">    )</span><br><span class="line">    <span class="keyword">return</span> result.data[<span class="number">0</span>].embedding</span><br></pre></td></tr></table></figure>
-
-<p>切分策略是固定长度滑动窗口（chunk_size&#x3D;1000, overlap&#x3D;200），优点是简单可控，缺点是可能在句子中间截断。改进方案后续会讨论。</p>
-<h3 id="2-BM25检索"><a href="#2-BM25检索" class="headerlink" title="2. BM25检索"></a>2. BM25检索</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">BM25_search</span>(<span class="params">user_query, database_content, config</span>):</span><br><span class="line">    tokenized_query = jieba.lcut(user_query)</span><br><span class="line">    tokenized_corpus = [</span><br><span class="line">        jieba.lcut(doc[<span class="string">&quot;content&quot;</span>])</span><br><span class="line">        <span class="keyword">for</span> doc <span class="keyword">in</span> database_content.values()</span><br><span class="line">    ]</span><br><span class="line">    bm25 = BM25Okapi(tokenized_corpus)</span><br><span class="line">    scores = bm25.get_scores(tokenized_query)</span><br><span class="line">    top_k_indices = np.argsort(scores)[-config.bm25_top_k:][::-<span class="number">1</span>]</span><br><span class="line">    <span class="keyword">return</span> top_k_indices, scores[top_k_indices]</span><br></pre></td></tr></table></figure>
-
-<h3 id="3-向量检索"><a href="#3-向量检索" class="headerlink" title="3. 向量检索"></a>3. 向量检索</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">embedding_search</span>(<span class="params">user_query, database_index, config</span>):</span><br><span class="line">    query_embedding = embedding_invoke(user_query, config)</span><br><span class="line">    query_vec = np.array([query_embedding], dtype=np.float32)</span><br><span class="line">    index = faiss.IndexFlatL2(config.embedding_dim)</span><br><span class="line">    index.add(database_index)</span><br><span class="line">    D, I = index.search(query_vec, config.embedding_top_k)</span><br><span class="line">    <span class="keyword">return</span> D, I</span><br></pre></td></tr></table></figure>
-
-<h3 id="4-RRF融合"><a href="#4-RRF融合" class="headerlink" title="4. RRF融合"></a>4. RRF融合</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">RRF</span>(<span class="params">bm25_result, embedding_result</span>):</span><br><span class="line">    k = <span class="number">60</span></span><br><span class="line">    scores = &#123;&#125;</span><br><span class="line">    <span class="keyword">for</span> rank, index <span class="keyword">in</span> <span class="built_in">enumerate</span>(bm25_result):</span><br><span class="line">        scores[index] = scores.get(index, <span class="number">0</span>) + <span class="number">1</span> / (k + rank + <span class="number">1</span>)</span><br><span class="line">    <span class="keyword">for</span> rank, index <span class="keyword">in</span> <span class="built_in">enumerate</span>(embedding_result[<span class="number">0</span>]):</span><br><span class="line">        scores[index] = scores.get(index, <span class="number">0</span>) + <span class="number">1</span> / (k + rank + <span class="number">1</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">sorted</span>(scores.items(), key=<span class="keyword">lambda</span> x: x[<span class="number">1</span>], reverse=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
-
-<h3 id="5-CrossEncoder重排序"><a href="#5-CrossEncoder重排序" class="headerlink" title="5. CrossEncoder重排序"></a>5. CrossEncoder重排序</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> FlagEmbedding <span class="keyword">import</span> FlagReranker</span><br><span class="line"></span><br><span class="line">reranker = FlagReranker(<span class="string">&quot;BAAI/bge-reranker-v2-m3&quot;</span>, use_fp16=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">ReRanker_search</span>(<span class="params">user_query, database_content, fusion_scores, config</span>):</span><br><span class="line">    top_docs = fusion_scores[:config.rrf_top_k]</span><br><span class="line">    results = []</span><br><span class="line">    <span class="keyword">for</span> index, rrf_score <span class="keyword">in</span> top_docs:</span><br><span class="line">        doc_text = database_content[index][<span class="string">&quot;content&quot;</span>]</span><br><span class="line">        score = reranker.compute_score([user_query, doc_text])</span><br><span class="line">        results.append((index, score))</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">sorted</span>(results, key=<span class="keyword">lambda</span> x: x[<span class="number">1</span>], reverse=<span class="literal">True</span>)[:config.reranker_top_k]</span><br></pre></td></tr></table></figure>
-
-<p><code>bge-reranker-v2-m3</code>是24层的XLMRoberta CrossEncoder，支持中英文，FP16推理。它对(query, doc)拼接输入，输出一个相关性分数，比Bi-Encoder更精准但更慢。</p>
-<h3 id="6-Query-Rewriting与LLM生成"><a href="#6-Query-Rewriting与LLM生成" class="headerlink" title="6. Query Rewriting与LLM生成"></a>6. Query Rewriting与LLM生成</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">rewrite_query</span>(<span class="params">messages, current_message, config</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;用LLM+对话历史改写查询，解决代词指代问题&quot;&quot;&quot;</span></span><br><span class="line">    rewritten = llm_invoke(</span><br><span class="line">        rewrite_prompt.<span class="built_in">format</span>(history=messages, question=current_message),</span><br><span class="line">        config</span><br><span class="line">    )</span><br><span class="line">    <span class="keyword">return</span> rewritten</span><br></pre></td></tr></table></figure>
-
-<p>Query Rewriting的价值：用户追问”它的参数怎么调？”时，LLM结合历史对话将其改写为”BM25的k1参数怎么调？”，这样检索才能命中相关文档。</p>
-<p>最终用改写后的查询走完检索pipeline，取top-3文档拼接上下文，送入LLM生成回答。</p>
-<h2 id="实验结论与反思"><a href="#实验结论与反思" class="headerlink" title="实验结论与反思"></a>实验结论与反思</h2><h3 id="检索漏斗效果"><a href="#检索漏斗效果" class="headerlink" title="检索漏斗效果"></a>检索漏斗效果</h3><p>本系统的检索漏斗：10+10 → RRF 5 → Reranker 3 → LLM。逐级减少候选数，逐级增加计算成本——这是RAG系统的经典设计模式。</p>
-<h3 id="待改进点"><a href="#待改进点" class="headerlink" title="待改进点"></a>待改进点</h3><table>
-<thead>
-<tr>
-<th>问题</th>
-<th>原因</th>
-<th>改进方向</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>切分可能在句中截断</td>
-<td>固定长度切分，不感知句子边界</td>
-<td>递归切分 &#x2F; 语义切分</td>
-</tr>
-<tr>
-<td>BM25和FAISS索引每次重建</td>
-<td>未持久化</td>
-<td>预构建并保存索引</td>
-</tr>
-<tr>
-<td>检索效果无量化评估</td>
-<td>未做对比实验</td>
-<td>设计三路检索对比实验</td>
-</tr>
-<tr>
-<td>只支持PDF</td>
-<td>文档加载器单一</td>
-<td>扩展DOCX&#x2F;TXT&#x2F;MD等格式</td>
-</tr>
-<tr>
-<td>API Key硬编码</td>
-<td>安全隐患</td>
-<td>环境变量 &#x2F; .env文件</td>
-</tr>
-</tbody></table>
-<h3 id="对比实验方案（后续可做）"><a href="#对比实验方案（后续可做）" class="headerlink" title="对比实验方案（后续可做）"></a>对比实验方案（后续可做）</h3><p>用同一批查询，对比三种检索策略的召回率：</p>
-<table>
-<thead>
-<tr>
-<th>策略</th>
 <th>方法</th>
-<th>预期</th>
+<th>行为</th>
+<th>用户体验</th>
+<th>适用场景</th>
 </tr>
 </thead>
 <tbody><tr>
-<td>纯向量</td>
-<td>FAISS top-10</td>
-<td>语义相关但关键词弱</td>
+<td><code>invoke</code></td>
+<td>等模型全部生成完，一次性返回</td>
+<td>等待时间长，然后内容突然出现</td>
+<td>后端处理、批量任务</td>
 </tr>
 <tr>
-<td>纯BM25</td>
-<td>BM25 top-10</td>
-<td>关键词精准但语义弱</td>
-</tr>
-<tr>
-<td>混合+RRF+Reranker</td>
-<td>完整pipeline</td>
-<td>综合最优</td>
+<td><code>stream</code></td>
+<td>逐 token 返回，边生成边输出</td>
+<td>看到内容逐字出现，等待感更短</td>
+<td>聊天界面、实时展示</td>
 </tr>
 </tbody></table>
-<p>评估指标：Recall@5、MRR、人工判断相关性。建议用5-10个测试查询，每个查询标注3-5个相关文档，计算各策略的召回率。</p>
-<h2 id="面试关联"><a href="#面试关联" class="headerlink" title="面试关联"></a>面试关联</h2><ol>
-<li><strong>RAG的工作流程？</strong> → 检索+增强+生成三阶段，本文实现了完整的五步pipeline</li>
-<li><strong>为什么需要混合检索？</strong> → 向量检索和BM25互补，单用任一路有盲区</li>
-<li><strong>RRF的原理？</strong> → 只用排名不用原始分数，解决量纲不一致问题</li>
-<li><strong>CrossEncoder vs Bi-Encoder？</strong> → 前者精度高速度慢（适合精排），后者速度快精度低（适合粗筛）</li>
-<li><strong>为什么需要Query Rewriting？</strong> → 追问场景下代词指代问题，改写后才能检索到正确文档</li>
+<p><strong>SSE 和 stream 的关系</strong>：<code>model.stream()</code> 是模型层面的流式输出；SSE 是网络传输层面的流式推送。在 Web 应用里，通常的链路是：<code>model.stream()</code> 逐 chunk 生成 → 后端通过 SSE 逐 chunk 推送给前端 → 前端逐 chunk 渲染。</p>
+<hr>
+<h2 id="Q5：ChatOpenAI-和-init-chat-model-的调用写法有什么区别？"><a href="#Q5：ChatOpenAI-和-init-chat-model-的调用写法有什么区别？" class="headerlink" title="Q5：ChatOpenAI 和 init_chat_model 的调用写法有什么区别？"></a>Q5：ChatOpenAI 和 init_chat_model 的调用写法有什么区别？</h2><p>核心区别其实不大，主要是<strong>是否需要显式指定实现类</strong>：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># ChatOpenAI 写法：显式导入具体实现类</span></span><br><span class="line"><span class="keyword">from</span> langchain_openai <span class="keyword">import</span> ChatOpenAI</span><br><span class="line">model = ChatOpenAI(model=<span class="string">&quot;qwen-plus&quot;</span>, api_key=<span class="string">&quot;sk-xxx&quot;</span>, base_url=<span class="string">&quot;https://dashscope.aliyuncs.com/compatible-mode/v1&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># init_chat_model 写法：通过 provider 自动选实现类</span></span><br><span class="line"><span class="keyword">from</span> langchain.chat_models <span class="keyword">import</span> init_chat_model</span><br><span class="line">model = init_chat_model(<span class="string">&quot;qwen-plus&quot;</span>, model_provider=<span class="string">&quot;openai&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>区别就一个：<strong>ChatOpenAI 要求你显式写 <code>from langchain_openai import ChatOpenAI</code>，而 init_chat_model 通过 <code>model_provider</code> 参数帮你选</strong>。</p>
+<p>如果明天你要换阿里百炼，ChatOpenAI 写法要改 import 路径（可能要换成 <code>ChatTongyi</code>），而 init_chat_model 只需改 <code>model_provider=&quot;tongyi&quot;</code>。</p>
+<p>本质上是同一套东西，init_chat_model 只是多了一层自动路由。</p>
+<hr>
+<h2 id="Q6：同步方法和异步方法有什么区别？异步有什么用？"><a href="#Q6：同步方法和异步方法有什么区别？异步有什么用？" class="headerlink" title="Q6：同步方法和异步方法有什么区别？异步有什么用？"></a>Q6：同步方法和异步方法有什么区别？异步有什么用？</h2><p>LangChain 的每个方法基本都有同步和异步两个版本：</p>
+<table>
+<thead>
+<tr>
+<th>同步方法</th>
+<th>异步方法</th>
+<th>区别</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>model.invoke()</code></td>
+<td><code>await model.ainvoke()</code></td>
+<td>一个阻塞等结果，一个不阻塞</td>
+</tr>
+<tr>
+<td><code>model.stream()</code></td>
+<td><code>model.astream()</code></td>
+<td>同理</td>
+</tr>
+<tr>
+<td><code>chain.invoke()</code></td>
+<td><code>await chain.ainvoke()</code></td>
+<td>同理</td>
+</tr>
+</tbody></table>
+<p><strong>同步调用的执行流程：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">调用 model.invoke() → 线程卡住等模型返回 → 拿到结果 → 继续往下执行</span><br></pre></td></tr></table></figure>
+
+<p><strong>异步调用的执行流程：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">调用 await model.ainvoke() → 发出请求但不卡住 → 模型返回时再处理结果 → 等待期间可以干别的事</span><br></pre></td></tr></table></figure>
+
+<p>异步的真正价值体现在<strong>并发场景</strong>：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> asyncio</span><br><span class="line"></span><br><span class="line"><span class="comment"># 同时调用 3 个模型，总耗时 ≈ 最慢的那个，而不是三者之和</span></span><br><span class="line">results = <span class="keyword">await</span> asyncio.gather(</span><br><span class="line">    model1.ainvoke(<span class="string">&quot;翻译成英文：你好&quot;</span>),</span><br><span class="line">    model2.ainvoke(<span class="string">&quot;翻译成英文：世界&quot;</span>),</span><br><span class="line">    model3.ainvoke(<span class="string">&quot;翻译成英文：再见&quot;</span>),</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>如果是同步写法，3 个请求要串行等待，总耗时 &#x3D; 3 × 单次耗时。异步写法下，3 个请求同时发出，总耗时 ≈ 1 × 单次耗时。</p>
+<p><strong>什么时候用异步？</strong></p>
+<ul>
+<li>FastAPI 后端（本身就是异步框架）</li>
+<li>需要并发调多个模型 &#x2F; 多个工具</li>
+<li>WebSocket &#x2F; SSE 流式推送场景</li>
+</ul>
+<p><strong>什么时候用同步？</strong></p>
+<ul>
+<li>学习阶段、跑脚本、单次调用</li>
+<li>不需要并发的简单场景</li>
+</ul>
+<hr>
+<h2 id="Q7：invoke-和-parse-两种解析方式有什么区别？"><a href="#Q7：invoke-和-parse-两种解析方式有什么区别？" class="headerlink" title="Q7：invoke 和 parse 两种解析方式有什么区别？"></a>Q7：invoke 和 parse 两种解析方式有什么区别？</h2><p>输出解析器（Output Parser）最常见的两种使用方式：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 方式一：parser.invoke(result) —— Runnable 风格</span></span><br><span class="line">parsed = parser.invoke(model_result)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 方式二：parser.parse(text) —— 直接解析字符串</span></span><br><span class="line">parsed = parser.parse(result.content)</span><br></pre></td></tr></table></figure>
+
+<p><strong>区别的核心在于你手里拿的是什么：</strong></p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>输入类型</th>
+<th>什么时候用</th>
+<th>本质</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>parser.invoke()</code></td>
+<td>LangChain 的 Runnable 对象（如 AIMessage）</td>
+<td>在 LCEL 链里，上一步传下来的就是 Runnable</td>
+<td>走 Runnable 体系，自动处理输入类型转换</td>
+</tr>
+<tr>
+<td><code>parser.parse()</code></td>
+<td>纯字符串</td>
+<td>你已经拿到 <code>result.content</code> 这种字符串了</td>
+<td>直接解析文本，不经过 Runnable 体系</td>
+</tr>
+</tbody></table>
+<p><strong>在 LCEL 链里，用 invoke：</strong></p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">chain = prompt | model | parser  <span class="comment"># parser 自动通过 invoke 接收 AIMessage</span></span><br><span class="line">result = chain.invoke(&#123;<span class="string">&quot;question&quot;</span>: <span class="string">&quot;你好&quot;</span>&#125;)</span><br></pre></td></tr></table></figure>
+
+<p><strong>手动拿到字符串后，用 parse：</strong></p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">model_result = model.invoke(prompt.<span class="built_in">format</span>(question=<span class="string">&quot;你好&quot;</span>))</span><br><span class="line">parsed = parser.parse(model_result.content)  <span class="comment"># 手动取 .content 再解析</span></span><br></pre></td></tr></table></figure>
+
+<p>实际开发中，90% 的场景用 <code>invoke</code>（因为在链里），只有少数需要手动处理字符串时才用 <code>parse</code>。</p>
+<hr>
+<h2 id="Q8：LCEL-链的输入输出类型流转是怎样的？"><a href="#Q8：LCEL-链的输入输出类型流转是怎样的？" class="headerlink" title="Q8：LCEL 链的输入输出类型流转是怎样的？"></a>Q8：LCEL 链的输入输出类型流转是怎样的？</h2><p>一条完整的 LCEL 链，最规范易读的流转是：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">chain = prompt | model | parser</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>组件</th>
+<th>输入</th>
+<th>输出</th>
+<th>输出类型</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>Prompt 模板</td>
+<td>字典 <code>{&quot;question&quot;: &quot;你好&quot;}</code></td>
+<td>ChatPromptValue</td>
+<td>填好变量的消息列表</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Model</td>
+<td>ChatPromptValue</td>
+<td>AIMessage</td>
+<td>模型的原始响应</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Parser</td>
+<td>AIMessage</td>
+<td>str &#x2F; dict &#x2F; Pydantic 对象</td>
+<td>解析后的结构化数据</td>
+</tr>
+</tbody></table>
+<p><strong>为什么要这样设计？</strong></p>
+<p>如果不用 Prompt 模板，每次调用模型你都要手写：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 不用模板：每次都要手拼消息，容易出错，且不可复用</span></span><br><span class="line">model.invoke([HumanMessage(content=<span class="string">&quot;你是一个温柔的助手。用户问：&quot;</span> + user_input)])</span><br></pre></td></tr></table></figure>
+
+<p>用了模板之后：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 用模板：变量自动填充，模板可复用</span></span><br><span class="line">prompt = ChatPromptTemplate.from_messages([</span><br><span class="line">    (<span class="string">&quot;system&quot;</span>, <span class="string">&quot;你是一个温柔的助手&quot;</span>),</span><br><span class="line">    (<span class="string">&quot;human&quot;</span>, <span class="string">&quot;&#123;question&#125;&quot;</span>)</span><br><span class="line">])</span><br><span class="line">chain = prompt | model | StrOutputParser()</span><br><span class="line">chain.invoke(&#123;<span class="string">&quot;question&quot;</span>: <span class="string">&quot;你好&quot;</span>&#125;)  <span class="comment"># 模板自动填充 &#123;question&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>LCEL 的管道语法 <code>|</code> 本质上是把上一步的输出自动传给下一步作为输入。每个组件都实现了 <code>Runnable</code> 接口，所以能像水管一样串起来。</p>
+<hr>
+<h2 id="Q9：Memory-记忆到底是什么？模型真的”记住”了吗？"><a href="#Q9：Memory-记忆到底是什么？模型真的”记住”了吗？" class="headerlink" title="Q9：Memory 记忆到底是什么？模型真的”记住”了吗？"></a>Q9：Memory 记忆到底是什么？模型真的”记住”了吗？</h2><p><strong>没有。模型没有记住任何东西。</strong></p>
+<p>本章说的”记忆”，本质上是程序做的事：</p>
+<ol>
+<li><strong>读历史</strong> —— 从存储里取出之前的对话消息</li>
+<li><strong>拼入提示</strong> —— 把历史消息通过 <code>MessagesPlaceholder(&quot;history&quot;)</code> 拼进当前 Prompt</li>
+<li><strong>调模型</strong> —— 把”历史 + 当前问题”一起发给模型</li>
+<li><strong>写回历史</strong> —— 把本轮的用户输入和模型回复追加到存储里</li>
 </ol>
+<p>所以模型看起来”记得”，是因为<strong>程序每次都把历史重新带给它</strong>。换个角度说，如果你不给它带历史，它就真的什么都不记得。</p>
+<p><strong>两类核心组件的分工：</strong></p>
+<table>
+<thead>
+<tr>
+<th>组件</th>
+<th>职责</th>
+<th>类比</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>RunnableWithMessageHistory</code></td>
+<td>控制何时读历史、何时写回</td>
+<td>调度员——决定什么时候取文件、什么时候存文件</td>
+</tr>
+<tr>
+<td><code>BaseChatMessageHistory</code> 及其实现类</td>
+<td>控制历史存在哪里</td>
+<td>文件柜——内存版、Redis 版、文件版，只是柜子不同</td>
+</tr>
+</tbody></table>
+<p><strong>存储后端怎么选：</strong></p>
+<table>
+<thead>
+<tr>
+<th>实现</th>
+<th>特点</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>InMemoryChatMessageHistory</code></td>
+<td>进程内存储，重启即丢</td>
+<td>本地学习、单进程演示</td>
+</tr>
+<tr>
+<td><code>RedisChatMessageHistory</code></td>
+<td>持久化、跨进程共享</td>
+<td>生产环境、多实例部署</td>
+</tr>
+</tbody></table>
+<p><strong>session_id 的意义</strong>：不同用户、不同会话需要不同的历史记录，<code>session_id</code> 就是区分的钥匙。如果 session_id 设计不好，A 用户可能看到 B 用户的对话历史。</p>
+<p><strong>和 LangGraph 的关系</strong>：本章用 <code>RunnableWithMessageHistory</code> 讲链级记忆；更复杂的 Agent 状态持久化，后续在 LangGraph 的 thread &#x2F; checkpointer &#x2F; persistence 体系里处理。</p>
+<hr>
+<h2 id="Q10：Tools-工具调用——模型真的会自己调-API-吗？"><a href="#Q10：Tools-工具调用——模型真的会自己调-API-吗？" class="headerlink" title="Q10：Tools 工具调用——模型真的会自己调 API 吗？"></a>Q10：Tools 工具调用——模型真的会自己调 API 吗？</h2><p><strong>不会。模型从来不会自己执行任何工具。</strong></p>
+<p>Tool Calling 的核心分工：</p>
+<table>
+<thead>
+<tr>
+<th>角色</th>
+<th>做什么</th>
+<th>不做什么</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>模型</strong></td>
+<td>判断要不要调工具、调哪个工具、传什么参数</td>
+<td>不真正执行工具</td>
+</tr>
+<tr>
+<td><strong>程序</strong></td>
+<td>执行工具函数、把结果送回模型</td>
+<td>不决定调什么（除非你硬编码）</td>
+</tr>
+</tbody></table>
+<p>完整的工具调用闭环：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">用户提问 → 程序把&quot;问题 + 工具定义&quot;一起给模型</span><br><span class="line">        → 模型返回 AIMessage(tool_calls=[...])，表示&quot;我想调这个工具&quot;</span><br><span class="line">        → 程序读取 tool_calls，真正执行函数</span><br><span class="line">        → 程序把结果包装成 ToolMessage 送回模型</span><br><span class="line">        → 模型基于工具结果生成最终自然语言回复</span><br></pre></td></tr></table></figure>
+
+<p><strong>三个关键对象的含义：</strong></p>
+<table>
+<thead>
+<tr>
+<th>对象</th>
+<th>含义</th>
+<th>类比</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>AIMessage.tool_calls</code></td>
+<td>模型的调用请求</td>
+<td>“我要用螺丝刀，螺丝规格 M6”</td>
+</tr>
+<tr>
+<td>工具执行结果</td>
+<td>程序执行后的真实返回</td>
+<td>实际拧完螺丝后的状态</td>
+</tr>
+<tr>
+<td><code>ToolMessage</code></td>
+<td>把结果送回模型的消息</td>
+<td>“螺丝已拧好，结果如下”</td>
+</tr>
+</tbody></table>
+<p><strong>@tool 装饰器做了什么？</strong></p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="meta">@tool</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">add_number</span>(<span class="params">a: <span class="built_in">int</span>, b: <span class="built_in">int</span></span>) -&gt; <span class="built_in">int</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;两数相加&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">return</span> a + b</span><br></pre></td></tr></table></figure>
+
+<p><code>@tool</code> 把普通函数变成了 LangChain Tool，自动暴露三个关键信息：</p>
+<ul>
+<li><code>name</code>：工具名（函数名）</li>
+<li><code>description</code>：工具描述（docstring）</li>
+<li><code>args</code>：参数结构（类型注解）</li>
+</ul>
+<p><strong>为什么 Pydantic 要配合 Tool 使用？</strong></p>
+<p>只用函数签名，模型只知道”有两个 int 参数”。加上 Pydantic 的 <code>args_schema</code>：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">AddInput</span>(<span class="title class_ inherited__">BaseModel</span>):</span><br><span class="line">    a: <span class="built_in">int</span> = Field(description=<span class="string">&quot;第一个加数&quot;</span>)</span><br><span class="line">    b: <span class="built_in">int</span> = Field(description=<span class="string">&quot;第二个加数&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="meta">@tool(<span class="params">args_schema=AddInput</span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">add_number</span>(<span class="params">a: <span class="built_in">int</span>, b: <span class="built_in">int</span></span>) -&gt; <span class="built_in">int</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;两数相加&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">return</span> a + b</span><br></pre></td></tr></table></figure>
+
+<p>模型就能看到每个参数的含义和说明，传错参数的概率大大降低。Pydantic 让 Tool 从”能跑”变成”像真正的接口定义”。</p>
+<hr>
+<h2 id="总结：LangChain-核心知识点串联"><a href="#总结：LangChain-核心知识点串联" class="headerlink" title="总结：LangChain 核心知识点串联"></a>总结：LangChain 核心知识点串联</h2><p>把上面所有问题串起来，LangChain 的核心数据流就是：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Prompt模板(输入变量) → ChatPromptValue → Model(模型) → AIMessage → Parser(解析器) → 结构化输出</span><br><span class="line">                                     ↑                           |</span><br><span class="line">                                     |---- Memory(历史消息) ------|</span><br><span class="line">                                     |---- Tools(工具定义) -------|</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>Prompt 模板</strong>解决了”同一套框架，不同具体内容”的问题</li>
+<li><strong>Model I&#x2F;O</strong> 统一了不同模型的调用方式</li>
+<li><strong>Parser</strong> 把模型输出从字符串解析成可用的结构化数据</li>
+<li><strong>LCEL</strong> 用管道语法把组件串起来</li>
+<li><strong>Memory</strong> 让多轮对话有了上下文连续性</li>
+<li><strong>Tools</strong> 让模型从”只能说”变成”能做事”</li>
+</ul>
+<p>每一层解决一个具体问题，组合在一起就是 LangChain 的工程价值。</p>
 ]]></content>
       <categories>
-        <category>RAG</category>
+        <category>LangChain</category>
       </categories>
       <tags>
-        <tag>RAG</tag>
-        <tag>FAISS</tag>
-        <tag>BM25</tag>
-        <tag>RRF</tag>
-        <tag>混合检索</tag>
+        <tag>LangChain</tag>
+        <tag>Agent</tag>
+        <tag>LLM</tag>
+        <tag>Python</tag>
+        <tag>AI应用开发</tag>
       </tags>
   </entry>
   <entry>
@@ -846,15 +748,565 @@
 ]]></content>
       <categories>
         <category>RAG</category>
-        <category>工程实践</category>
+      </categories>
+      <tags>
+        <tag>RAG</tag>
+        <tag>FAISS</tag>
+        <tag>FastAPI</tag>
+        <tag>Gradio</tag>
+        <tag>混合检索</tag>
+        <tag>递归检索</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>从零手写RAG：向量检索+BM25+RRF混合检索实战</title>
+    <url>/posts/%E4%BB%8E%E9%9B%B6%E6%89%8B%E5%86%99RAG-%E5%90%91%E9%87%8F%E6%A3%80%E7%B4%A2BM25-RRF%E6%B7%B7%E5%90%88%E6%A3%80%E7%B4%A2%E5%AE%9E%E6%88%98/</url>
+    <content><![CDATA[<h2 id="问题引入：为什么需要混合检索？"><a href="#问题引入：为什么需要混合检索？" class="headerlink" title="问题引入：为什么需要混合检索？"></a>问题引入：为什么需要混合检索？</h2><p>大模型的回答质量，取决于它”看到”了什么。RAG（Retrieval-Augmented Generation）的核心思路很简单：先把相关文档找出来，再让大模型基于文档回答。</p>
+<p>问题出在”找”这一步。我们有两种主流检索方式，各有盲区：</p>
+<table>
+<thead>
+<tr>
+<th>检索方式</th>
+<th>擅长</th>
+<th>盲区</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>向量检索</td>
+<td>语义相似——查”注意力机制”能找到含”self-attention”的文档</td>
+<td>精确关键词匹配弱——查”2025年复试细则”可能漏掉</td>
+</tr>
+<tr>
+<td>BM25检索</td>
+<td>关键词精确匹配——查”复试细则”精准命中</td>
+<td>语义理解弱——查”深度学习入门”找不到含”神经网络基础”的文档</td>
+</tr>
+</tbody></table>
+<p><strong>单用任一路都有漏检风险，混合检索是互补方案。</strong> 本文用不到300行Python，从零实现一个完整的RAG系统，覆盖：文档切分 → Embedding → BM25 + 向量双路检索 → RRF融合 → CrossEncoder重排序 → LLM生成。</p>
+<blockquote>
+<p>完整代码见 <a href="https://github.com/GeiTeHaoBu-del/MiniRAG">MiniRAG</a></p>
+</blockquote>
+<h2 id="原理讲解"><a href="#原理讲解" class="headerlink" title="原理讲解"></a>原理讲解</h2><h3 id="1-向量检索：语义相似的”GPS定位”"><a href="#1-向量检索：语义相似的”GPS定位”" class="headerlink" title="1. 向量检索：语义相似的”GPS定位”"></a>1. 向量检索：语义相似的”GPS定位”</h3><p>Embedding模型把文本映射为256维向量。语义相近的文本，向量在高维空间中也相近——就像GPS坐标，两个点越近，物理距离越短。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 智谱 embedding-3：文本 → 256维向量</span></span><br><span class="line">result = embedding_client.embeddings.create(</span><br><span class="line">    model=<span class="string">&quot;embedding-3&quot;</span>,</span><br><span class="line">    <span class="built_in">input</span>=text,</span><br><span class="line">    dimensions=<span class="number">256</span></span><br><span class="line">)</span><br><span class="line">vector = result.data[<span class="number">0</span>].embedding  <span class="comment"># [0.12, -0.34, 0.56, ...]</span></span><br></pre></td></tr></table></figure>
+
+<p>向量检索的三步流程：查询向量化 → L2距离计算 → 取最近邻。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># FAISS IndexFlatL2：暴力遍历，计算查询向量与所有文档向量的L2距离</span></span><br><span class="line">index = faiss.IndexFlatL2(<span class="number">256</span>)    <span class="comment"># 256维</span></span><br><span class="line">index.add(doc_vectors)            <span class="comment"># 加入所有文档向量</span></span><br><span class="line">D, I = index.search(query_vec, k=<span class="number">10</span>)  <span class="comment"># D=距离, I=索引</span></span><br></pre></td></tr></table></figure>
+
+<p>L2距离公式：$L2 &#x3D; \sqrt{\sum(v1[i] - v2[i])^2}$，距离越小越相似。</p>
+<p><code>IndexFlatL2</code>是暴力遍历，适合小数据量（&lt;10万条）。大数据量场景需要IVF或HNSW索引，这个后续文章再展开。</p>
+<h3 id="2-BM25：关键词匹配的数学升级版"><a href="#2-BM25：关键词匹配的数学升级版" class="headerlink" title="2. BM25：关键词匹配的数学升级版"></a>2. BM25：关键词匹配的数学升级版</h3><p>BM25是TF-IDF的改进版，三个核心要素：</p>
+<ul>
+<li><strong>TF（词频）</strong>：关键词在文档中出现次数越多，分越高——但有饱和机制（k1&#x3D;1.5），出现10次和100次差距不大</li>
+<li><strong>IDF（逆文档频率）</strong>：越稀有的词权重越高，”的”权重低，”Transformer”权重高</li>
+<li><strong>文档长度归一化</strong>（b&#x3D;0.75）：惩罚过长的文档，避免长文档因词多而占便宜</li>
+</ul>
+<p>$$score(D,Q) &#x3D; \sum IDF(q_i) \times \frac{f(q_i,D) \times (k_1+1)}{f(q_i,D) + k_1 \times (1-b+b \times |D|&#x2F;avgdl)}$$</p>
+<p>中文文本需要先分词，这里用jieba：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> jieba</span><br><span class="line"><span class="keyword">from</span> rank_bm25 <span class="keyword">import</span> BM25Okapi</span><br><span class="line"></span><br><span class="line">tokenized_corpus = [jieba.lcut(doc) <span class="keyword">for</span> doc <span class="keyword">in</span> documents]</span><br><span class="line">bm25 = BM25Okapi(tokenized_corpus)           <span class="comment"># k1=1.5, b=0.75</span></span><br><span class="line">scores = bm25.get_scores(jieba.lcut(query))  <span class="comment"># 计算所有文档的BM25分数</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-RRF融合：让两路检索”投票”"><a href="#3-RRF融合：让两路检索”投票”" class="headerlink" title="3. RRF融合：让两路检索”投票”"></a>3. RRF融合：让两路检索”投票”</h3><p>BM25分数和L2距离量纲不同、方向不同，不能直接相加。RRF（Reciprocal Rank Fusion）的思路：<strong>不看原始分数，只看排名。</strong></p>
+<p>$$score(d) &#x3D; \sum \frac{1}{k + rank}$$</p>
+<p>k&#x3D;60是原论文推荐值，作用是平滑排名差异。k太小则排名1远优于排名2，k太大则排名差异被抹平。</p>
+<p>举个具体例子：</p>
+<table>
+<thead>
+<tr>
+<th>文档</th>
+<th>BM25排名</th>
+<th>向量检索排名</th>
+<th>RRF分数</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>文档A</td>
+<td>1</td>
+<td>2</td>
+<td>1&#x2F;61 + 1&#x2F;62 &#x3D; 0.0323</td>
+</tr>
+<tr>
+<td>文档B</td>
+<td>3</td>
+<td>1</td>
+<td>1&#x2F;63 + 1&#x2F;61 &#x3D; 0.0322</td>
+</tr>
+<tr>
+<td>文档C</td>
+<td>2</td>
+<td>未出现</td>
+<td>1&#x2F;62 + 0 &#x3D; 0.0161</td>
+</tr>
+</tbody></table>
+<p>两路都推荐的文档A和B分数最高，只被一路推荐的C明显偏低——这就是”投票”的效果。</p>
+<h3 id="4-CrossEncoder重排序：最后一把精准筛"><a href="#4-CrossEncoder重排序：最后一把精准筛" class="headerlink" title="4. CrossEncoder重排序：最后一把精准筛"></a>4. CrossEncoder重排序：最后一把精准筛</h3><p>向量检索是Bi-Encoder：query和doc分别编码，速度快但精度有限。CrossEncoder把query和doc拼接后一起输入模型，精度高但速度慢。</p>
+<p>策略：先用双路检索+RRF从大量文档中粗筛出5条，再用CrossEncoder精排取3条，送入LLM。</p>
+<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><h3 id="Pipeline总览"><a href="#Pipeline总览" class="headerlink" title="Pipeline总览"></a>Pipeline总览</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">用户输入 → Query Rewrite → BM25检索(10条) + 向量检索(10条)</span><br><span class="line">                              ↓</span><br><span class="line">                        RRF融合(5条) → CrossEncoder重排序(3条) → LLM生成</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-文档切分与Embedding"><a href="#1-文档切分与Embedding" class="headerlink" title="1. 文档切分与Embedding"></a>1. 文档切分与Embedding</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">read_pdf_file</span>(<span class="params">file_path, chunk_size=<span class="number">0</span>, overlap=<span class="number">0</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;PDF文本提取 + 滑动窗口切分&quot;&quot;&quot;</span></span><br><span class="line">    reader = PdfReader(file_path)</span><br><span class="line">    text = <span class="string">&quot;&quot;</span>.join(page.extract_text() <span class="keyword">for</span> page <span class="keyword">in</span> reader.pages)</span><br><span class="line">    <span class="keyword">if</span> chunk_size == <span class="number">0</span>:</span><br><span class="line">        <span class="keyword">return</span> text</span><br><span class="line">    chunks = []</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">len</span>(text), chunk_size - overlap):</span><br><span class="line">        chunks.append(text[i:i + chunk_size])</span><br><span class="line">    <span class="keyword">return</span> chunks</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">embedding_invoke</span>(<span class="params">text, config</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;调用智谱embedding-3获取256维向量&quot;&quot;&quot;</span></span><br><span class="line">    result = embedding_client.embeddings.create(</span><br><span class="line">        model=config.embedding_name,</span><br><span class="line">        <span class="built_in">input</span>=text,</span><br><span class="line">        dimensions=config.embedding_dim</span><br><span class="line">    )</span><br><span class="line">    <span class="keyword">return</span> result.data[<span class="number">0</span>].embedding</span><br></pre></td></tr></table></figure>
+
+<p>切分策略是固定长度滑动窗口（chunk_size&#x3D;1000, overlap&#x3D;200），优点是简单可控，缺点是可能在句子中间截断。改进方案后续会讨论。</p>
+<h3 id="2-BM25检索"><a href="#2-BM25检索" class="headerlink" title="2. BM25检索"></a>2. BM25检索</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">BM25_search</span>(<span class="params">user_query, database_content, config</span>):</span><br><span class="line">    tokenized_query = jieba.lcut(user_query)</span><br><span class="line">    tokenized_corpus = [</span><br><span class="line">        jieba.lcut(doc[<span class="string">&quot;content&quot;</span>])</span><br><span class="line">        <span class="keyword">for</span> doc <span class="keyword">in</span> database_content.values()</span><br><span class="line">    ]</span><br><span class="line">    bm25 = BM25Okapi(tokenized_corpus)</span><br><span class="line">    scores = bm25.get_scores(tokenized_query)</span><br><span class="line">    top_k_indices = np.argsort(scores)[-config.bm25_top_k:][::-<span class="number">1</span>]</span><br><span class="line">    <span class="keyword">return</span> top_k_indices, scores[top_k_indices]</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-向量检索"><a href="#3-向量检索" class="headerlink" title="3. 向量检索"></a>3. 向量检索</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">embedding_search</span>(<span class="params">user_query, database_index, config</span>):</span><br><span class="line">    query_embedding = embedding_invoke(user_query, config)</span><br><span class="line">    query_vec = np.array([query_embedding], dtype=np.float32)</span><br><span class="line">    index = faiss.IndexFlatL2(config.embedding_dim)</span><br><span class="line">    index.add(database_index)</span><br><span class="line">    D, I = index.search(query_vec, config.embedding_top_k)</span><br><span class="line">    <span class="keyword">return</span> D, I</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-RRF融合"><a href="#4-RRF融合" class="headerlink" title="4. RRF融合"></a>4. RRF融合</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">RRF</span>(<span class="params">bm25_result, embedding_result</span>):</span><br><span class="line">    k = <span class="number">60</span></span><br><span class="line">    scores = &#123;&#125;</span><br><span class="line">    <span class="keyword">for</span> rank, index <span class="keyword">in</span> <span class="built_in">enumerate</span>(bm25_result):</span><br><span class="line">        scores[index] = scores.get(index, <span class="number">0</span>) + <span class="number">1</span> / (k + rank + <span class="number">1</span>)</span><br><span class="line">    <span class="keyword">for</span> rank, index <span class="keyword">in</span> <span class="built_in">enumerate</span>(embedding_result[<span class="number">0</span>]):</span><br><span class="line">        scores[index] = scores.get(index, <span class="number">0</span>) + <span class="number">1</span> / (k + rank + <span class="number">1</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">sorted</span>(scores.items(), key=<span class="keyword">lambda</span> x: x[<span class="number">1</span>], reverse=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-CrossEncoder重排序"><a href="#5-CrossEncoder重排序" class="headerlink" title="5. CrossEncoder重排序"></a>5. CrossEncoder重排序</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> FlagEmbedding <span class="keyword">import</span> FlagReranker</span><br><span class="line"></span><br><span class="line">reranker = FlagReranker(<span class="string">&quot;BAAI/bge-reranker-v2-m3&quot;</span>, use_fp16=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">ReRanker_search</span>(<span class="params">user_query, database_content, fusion_scores, config</span>):</span><br><span class="line">    top_docs = fusion_scores[:config.rrf_top_k]</span><br><span class="line">    results = []</span><br><span class="line">    <span class="keyword">for</span> index, rrf_score <span class="keyword">in</span> top_docs:</span><br><span class="line">        doc_text = database_content[index][<span class="string">&quot;content&quot;</span>]</span><br><span class="line">        score = reranker.compute_score([user_query, doc_text])</span><br><span class="line">        results.append((index, score))</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">sorted</span>(results, key=<span class="keyword">lambda</span> x: x[<span class="number">1</span>], reverse=<span class="literal">True</span>)[:config.reranker_top_k]</span><br></pre></td></tr></table></figure>
+
+<p><code>bge-reranker-v2-m3</code>是24层的XLMRoberta CrossEncoder，支持中英文，FP16推理。它对(query, doc)拼接输入，输出一个相关性分数，比Bi-Encoder更精准但更慢。</p>
+<h3 id="6-Query-Rewriting与LLM生成"><a href="#6-Query-Rewriting与LLM生成" class="headerlink" title="6. Query Rewriting与LLM生成"></a>6. Query Rewriting与LLM生成</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">rewrite_query</span>(<span class="params">messages, current_message, config</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;用LLM+对话历史改写查询，解决代词指代问题&quot;&quot;&quot;</span></span><br><span class="line">    rewritten = llm_invoke(</span><br><span class="line">        rewrite_prompt.<span class="built_in">format</span>(history=messages, question=current_message),</span><br><span class="line">        config</span><br><span class="line">    )</span><br><span class="line">    <span class="keyword">return</span> rewritten</span><br></pre></td></tr></table></figure>
+
+<p>Query Rewriting的价值：用户追问”它的参数怎么调？”时，LLM结合历史对话将其改写为”BM25的k1参数怎么调？”，这样检索才能命中相关文档。</p>
+<p>最终用改写后的查询走完检索pipeline，取top-3文档拼接上下文，送入LLM生成回答。</p>
+<h2 id="实验结论与反思"><a href="#实验结论与反思" class="headerlink" title="实验结论与反思"></a>实验结论与反思</h2><h3 id="检索漏斗效果"><a href="#检索漏斗效果" class="headerlink" title="检索漏斗效果"></a>检索漏斗效果</h3><p>本系统的检索漏斗：10+10 → RRF 5 → Reranker 3 → LLM。逐级减少候选数，逐级增加计算成本——这是RAG系统的经典设计模式。</p>
+<h3 id="待改进点"><a href="#待改进点" class="headerlink" title="待改进点"></a>待改进点</h3><table>
+<thead>
+<tr>
+<th>问题</th>
+<th>原因</th>
+<th>改进方向</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>切分可能在句中截断</td>
+<td>固定长度切分，不感知句子边界</td>
+<td>递归切分 &#x2F; 语义切分</td>
+</tr>
+<tr>
+<td>BM25和FAISS索引每次重建</td>
+<td>未持久化</td>
+<td>预构建并保存索引</td>
+</tr>
+<tr>
+<td>检索效果无量化评估</td>
+<td>未做对比实验</td>
+<td>设计三路检索对比实验</td>
+</tr>
+<tr>
+<td>只支持PDF</td>
+<td>文档加载器单一</td>
+<td>扩展DOCX&#x2F;TXT&#x2F;MD等格式</td>
+</tr>
+<tr>
+<td>API Key硬编码</td>
+<td>安全隐患</td>
+<td>环境变量 &#x2F; .env文件</td>
+</tr>
+</tbody></table>
+<h3 id="对比实验方案（后续可做）"><a href="#对比实验方案（后续可做）" class="headerlink" title="对比实验方案（后续可做）"></a>对比实验方案（后续可做）</h3><p>用同一批查询，对比三种检索策略的召回率：</p>
+<table>
+<thead>
+<tr>
+<th>策略</th>
+<th>方法</th>
+<th>预期</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>纯向量</td>
+<td>FAISS top-10</td>
+<td>语义相关但关键词弱</td>
+</tr>
+<tr>
+<td>纯BM25</td>
+<td>BM25 top-10</td>
+<td>关键词精准但语义弱</td>
+</tr>
+<tr>
+<td>混合+RRF+Reranker</td>
+<td>完整pipeline</td>
+<td>综合最优</td>
+</tr>
+</tbody></table>
+<p>评估指标：Recall@5、MRR、人工判断相关性。建议用5-10个测试查询，每个查询标注3-5个相关文档，计算各策略的召回率。</p>
+<h2 id="面试关联"><a href="#面试关联" class="headerlink" title="面试关联"></a>面试关联</h2><ol>
+<li><strong>RAG的工作流程？</strong> → 检索+增强+生成三阶段，本文实现了完整的五步pipeline</li>
+<li><strong>为什么需要混合检索？</strong> → 向量检索和BM25互补，单用任一路有盲区</li>
+<li><strong>RRF的原理？</strong> → 只用排名不用原始分数，解决量纲不一致问题</li>
+<li><strong>CrossEncoder vs Bi-Encoder？</strong> → 前者精度高速度慢（适合精排），后者速度快精度低（适合粗筛）</li>
+<li><strong>为什么需要Query Rewriting？</strong> → 追问场景下代词指代问题，改写后才能检索到正确文档</li>
+</ol>
+]]></content>
+      <categories>
+        <category>RAG</category>
       </categories>
       <tags>
         <tag>RAG</tag>
         <tag>FAISS</tag>
         <tag>混合检索</tag>
-        <tag>FastAPI</tag>
-        <tag>Gradio</tag>
-        <tag>递归检索</tag>
+        <tag>BM25</tag>
+        <tag>RRF</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>当大模型服务挂了怎么办？LLM多模型故障转移实战</title>
+    <url>/posts/%E5%BD%93%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%9C%8D%E5%8A%A1%E6%8C%82%E4%BA%86%E6%80%8E%E4%B9%88%E5%8A%9E%EF%BC%9FLLM%E5%A4%9A%E6%A8%A1%E5%9E%8B%E6%95%85%E9%9A%9C%E8%BD%AC%E7%A7%BB%E5%AE%9E%E6%88%98/</url>
+    <content><![CDATA[<h2 id="1-问题引入"><a href="#1-问题引入" class="headerlink" title="1. 问题引入"></a>1. 问题引入</h2><p>我们的热搜监控系统每30秒爬取一次微博热榜，调用大模型对每条热搜做情感分析、类型分类和话题提取。某天凌晨，主模型API突然返回429限流，系统连续30分钟没有产出任何分析结果——前端图表空白、预警静默、数据库趋势断档。</p>
+<p>这不是小概率事件。LLM服务不稳定几乎是常态：429限流、5xx宕机、API Key过期、响应超时，任何一个都能让单模型依赖的系统瘫痪。<strong>单点依赖 &#x3D; 单点故障</strong>，而LLM的不可用不是”会不会”的问题，是”什么时候”的问题。</p>
+<p>我们需要回答一个核心问题：<strong>当LLM服务不可用时，如何保证系统持续产出分析结果？</strong></p>
+<h2 id="2-原理讲解"><a href="#2-原理讲解" class="headerlink" title="2. 原理讲解"></a>2. 原理讲解</h2><h3 id="2-1-故障转移的三层设计"><a href="#2-1-故障转移的三层设计" class="headerlink" title="2.1 故障转移的三层设计"></a>2.1 故障转移的三层设计</h3><p>我们的方案围绕三个核心机制展开：</p>
+<p><strong>第一层：连续失败计数</strong>。不是一次失败就切换——偶发的网络抖动不应触发模型切换。只有连续失败达到阈值（默认2次），才判定为模型级别的故障，触发切换。这避免了”狼来了”式的频繁切换。</p>
+<p><strong>第二层：模型切换</strong>。当连续失败达到阈值，系统沿 <code>primary → backup</code> 优先级链切换到下一个可用模型，同时重置失败计数器。每次切换都会记录时间戳、原模型、目标模型和原因，形成审计日志。</p>
+<p><strong>第三层：自动恢复</strong>。切换到备模型后，系统不会永远停留在备模型上。每当一个新的请求周期开始（即下一轮爬取），系统会尝试回到主模型。因为主模型宕机往往是临时的——限流窗口过了、服务恢复了——自动恢复确保系统不会因为一次临时故障而永久降级。</p>
+<h3 id="2-2-为什么不用完整的熔断器？"><a href="#2-2-为什么不用完整的熔断器？" class="headerlink" title="2.2 为什么不用完整的熔断器？"></a>2.2 为什么不用完整的熔断器？</h3><p>Circuit Breaker模式有三种状态：Closed → Open → Half-Open。它适合高频请求场景（每秒成百上千次调用），需要精确控制”探针”频率。但我们的场景不同：<strong>每30秒才调用一次LLM</strong>，请求频率极低。在这种低频场景下，完整熔断器的半开状态、探针窗口反而增加了不必要的复杂度。轻量的连续失败计数已经足够——每次爬取本身就是天然的检测点，无需额外定时器。</p>
+<h3 id="2-3-三级降级链：任何情况下都有输出"><a href="#2-3-三级降级链：任何情况下都有输出" class="headerlink" title="2.3 三级降级链：任何情况下都有输出"></a>2.3 三级降级链：任何情况下都有输出</h3><p>故障转移解决的是”换一个模型试试”，但若所有模型都不可用呢？我们设计了三级降级链：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">批量API调用 → 单条API调用 → 返回默认值</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>批量API</strong>：10条标题一次请求，效率最高</li>
+<li><strong>单条API</strong>：批量失败时退化为逐条调用，可能部分成功</li>
+<li><strong>默认值</strong>：所有API都失败时，返回 <code>sentiment_score=0, type_name=&#39;其他&#39;, topic_name=&#39;无&#39;</code>，系统<strong>永远不崩溃，永远有输出</strong></li>
+</ul>
+<p>类比值班体系：<strong>主治医师（主模型批量）→ 值班医生（备模型单条）→ 急救包（默认值）</strong>，确保任何时刻都有救治能力。</p>
+<h2 id="3-代码实现"><a href="#3-代码实现" class="headerlink" title="3. 代码实现"></a>3. 代码实现</h2><h3 id="3-1-核心状态机"><a href="#3-1-核心状态机" class="headerlink" title="3.1 核心状态机"></a>3.1 核心状态机</h3><p>故障转移的核心是三个状态变量的协同：<code>current_model</code>（当前使用的模型标识）、<code>consecutive_failures</code>（连续失败次数）、<code>max_retries</code>（触发切换的阈值）。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># llm_client.py:38-76 初始化</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, api_config</span>):</span><br><span class="line">    failover_config = api_config.get(<span class="string">&#x27;failover&#x27;</span>, &#123;&#125;)</span><br><span class="line">    <span class="variable language_">self</span>.max_retries = failover_config.get(<span class="string">&#x27;max_retries&#x27;</span>, <span class="number">2</span>)</span><br><span class="line">    <span class="variable language_">self</span>.auto_recover = failover_config.get(<span class="string">&#x27;auto_recover&#x27;</span>, <span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    <span class="variable language_">self</span>.models = &#123;&#125;</span><br><span class="line">    model_order = [<span class="string">&#x27;primary&#x27;</span>, <span class="string">&#x27;backup&#x27;</span>]</span><br><span class="line">    <span class="keyword">for</span> model_name <span class="keyword">in</span> model_order:</span><br><span class="line">        <span class="keyword">if</span> model_name <span class="keyword">in</span> api_config:</span><br><span class="line">            <span class="variable language_">self</span>.models[model_name] = <span class="variable language_">self</span>._init_model_config(</span><br><span class="line">                api_config[model_name], model_name</span><br><span class="line">            )</span><br><span class="line"></span><br><span class="line">    <span class="variable language_">self</span>.current_model = <span class="string">&#x27;primary&#x27;</span></span><br><span class="line">    <span class="variable language_">self</span>.consecutive_failures = <span class="number">0</span></span><br><span class="line">    <span class="variable language_">self</span>.switch_history = []</span><br></pre></td></tr></table></figure>
+
+<p>配置结构天然支持多模型——<code>primary</code> 和 <code>backup</code> 各自持有独立的 <code>api_url</code>、<code>api_key</code>、<code>model</code> 名称，切换时只需更换 <code>current_model</code> 指针。</p>
+<h3 id="3-2-chat-主循环：故障转移的指挥中心"><a href="#3-2-chat-主循环：故障转移的指挥中心" class="headerlink" title="3.2 chat()主循环：故障转移的指挥中心"></a>3.2 chat()主循环：故障转移的指挥中心</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># llm_client.py:168-223 精简版</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">chat</span>(<span class="params">self, messages, temperature=<span class="number">0.3</span>, max_tokens=<span class="number">2000</span></span>):</span><br><span class="line">    <span class="comment"># ① 新周期尝试恢复主模型</span></span><br><span class="line">    <span class="variable language_">self</span>._try_recover_primary()</span><br><span class="line"></span><br><span class="line">    attempted_models = []</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        model_config = <span class="variable language_">self</span>.models.get(<span class="variable language_">self</span>.current_model)</span><br><span class="line">        attempted_models.append(<span class="variable language_">self</span>.current_model)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># ② 发起请求</span></span><br><span class="line">        result = <span class="variable language_">self</span>._do_chat_request(model_config, messages, temperature, max_tokens)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> result <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">            <span class="comment"># ③ 成功：重置失败计数</span></span><br><span class="line">            <span class="variable language_">self</span>.consecutive_failures = <span class="number">0</span></span><br><span class="line">            <span class="keyword">return</span> result</span><br><span class="line"></span><br><span class="line">        <span class="comment"># ④ 失败：累加计数</span></span><br><span class="line">        <span class="variable language_">self</span>.consecutive_failures += <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> <span class="variable language_">self</span>.consecutive_failures &gt;= <span class="variable language_">self</span>.max_retries:</span><br><span class="line">            <span class="comment"># ⑤ 达到阈值：切换模型</span></span><br><span class="line">            <span class="variable language_">self</span>._switch_model(<span class="string">f&quot;连续失败<span class="subst">&#123;self.max_retries&#125;</span>次&quot;</span>)</span><br><span class="line">            <span class="comment"># 所有模型都试过了 → 返回None</span></span><br><span class="line">            <span class="keyword">if</span> <span class="variable language_">self</span>.current_model <span class="keyword">in</span> attempted_models:</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="comment"># ⑥ 未达阈值：线性退避等待</span></span><br><span class="line">            time.sleep(<span class="number">1</span> * <span class="variable language_">self</span>.consecutive_failures)</span><br></pre></td></tr></table></figure>
+
+<p>控制流的精髓：步骤①是自动恢复的入口，步骤③⑤⑥构成”失败→重试→切换”的决策链，<code>attempted_models</code> 防止无限循环——如果所有模型都已尝试，立即返回None。</p>
+<h3 id="3-3-模型切换与审计"><a href="#3-3-模型切换与审计" class="headerlink" title="3.3 模型切换与审计"></a>3.3 模型切换与审计</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># llm_client.py:126-158 精简版</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_switch_model</span>(<span class="params">self, reason</span>):</span><br><span class="line">    next_model = <span class="variable language_">self</span>._get_next_model()</span><br><span class="line">    <span class="keyword">if</span> next_model:</span><br><span class="line">        old_model = <span class="variable language_">self</span>.current_model</span><br><span class="line">        <span class="variable language_">self</span>.current_model = next_model</span><br><span class="line">        <span class="variable language_">self</span>.consecutive_failures = <span class="number">0</span></span><br><span class="line"></span><br><span class="line">        <span class="variable language_">self</span>.switch_history.append(&#123;</span><br><span class="line">            <span class="string">&#x27;time&#x27;</span>: time.strftime(<span class="string">&#x27;%Y-%m-%d %H:%M:%S&#x27;</span>),</span><br><span class="line">            <span class="string">&#x27;from&#x27;</span>: old_model,</span><br><span class="line">            <span class="string">&#x27;to&#x27;</span>: next_model,</span><br><span class="line">            <span class="string">&#x27;reason&#x27;</span>: reason</span><br><span class="line">        &#125;)</span><br></pre></td></tr></table></figure>
+
+<p><code>switch_history</code> 是生产环境排障的关键——当运维发现分析结果异常时，可以回溯”什么时候、从哪个模型、切到哪个模型、因为什么”，而不是对着黑盒猜测。</p>
+<h3 id="3-4-自动恢复：新周期的回归"><a href="#3-4-自动恢复：新周期的回归" class="headerlink" title="3.4 自动恢复：新周期的回归"></a>3.4 自动恢复：新周期的回归</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># llm_client.py:160-166</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_try_recover_primary</span>(<span class="params">self</span>):</span><br><span class="line">    <span class="keyword">if</span> <span class="variable language_">self</span>.auto_recover <span class="keyword">and</span> <span class="variable language_">self</span>.current_model != <span class="string">&#x27;primary&#x27;</span> <span class="keyword">and</span> <span class="string">&#x27;primary&#x27;</span> <span class="keyword">in</span> <span class="variable language_">self</span>.models:</span><br><span class="line">        <span class="variable language_">self</span>.current_model = <span class="string">&#x27;primary&#x27;</span></span><br><span class="line">        <span class="variable language_">self</span>.consecutive_failures = <span class="number">0</span></span><br></pre></td></tr></table></figure>
+
+<p>仅7行代码，却是一个精妙的设计决策：<strong>在每次新请求周期的开头尝试恢复</strong>。为什么不是定时器？因为我们的爬取周期就是天然的检测点——下一轮调用时自然就知道主模型是否恢复了。没有额外线程、没有定时器、没有复杂状态，代码极简但效果确定。</p>
+<h3 id="3-5-批量→单条的退化"><a href="#3-5-批量→单条的退化" class="headerlink" title="3.5 批量→单条的退化"></a>3.5 批量→单条的退化</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># llm_analyzer.py:336-376 精简版</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_call_batch_api</span>(<span class="params">self, titles</span>):</span><br><span class="line">    titles_text = <span class="string">&quot;\n&quot;</span>.join([<span class="string">f&quot;<span class="subst">&#123;i+<span class="number">1</span>&#125;</span>. <span class="subst">&#123;title&#125;</span>&quot;</span> <span class="keyword">for</span> i, title <span class="keyword">in</span> <span class="built_in">enumerate</span>(titles)])</span><br><span class="line">    messages = [</span><br><span class="line">        &#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;system&quot;</span>, <span class="string">&quot;content&quot;</span>: <span class="variable language_">self</span>.batch_system_prompt&#125;,</span><br><span class="line">        &#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>, <span class="string">&quot;content&quot;</span>: <span class="string">f&quot;请批量分析以下<span class="subst">&#123;<span class="built_in">len</span>(titles)&#125;</span>个热搜标题：\n\n<span class="subst">&#123;titles_text&#125;</span>&quot;</span>&#125;</span><br><span class="line">    ]</span><br><span class="line"></span><br><span class="line">    content = <span class="variable language_">self</span>.client.chat(messages, temperature=<span class="number">0.2</span>)</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> content:</span><br><span class="line">        <span class="comment"># 批量失败 → 退化为逐条分析</span></span><br><span class="line">        <span class="keyword">return</span> [<span class="variable language_">self</span>.analyze(t) <span class="keyword">for</span> t <span class="keyword">in</span> titles]</span><br><span class="line"></span><br><span class="line">    result = <span class="variable language_">self</span>.client.parse_json_response(content)</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> result:</span><br><span class="line">        <span class="comment"># 解析失败 → 同样退化</span></span><br><span class="line">        <span class="keyword">return</span> [<span class="variable language_">self</span>.analyze(t) <span class="keyword">for</span> t <span class="keyword">in</span> titles]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">isinstance</span>(result, <span class="built_in">list</span>):</span><br><span class="line">        <span class="keyword">return</span> <span class="variable language_">self</span>._normalize_results(result, titles)</span><br><span class="line">    <span class="keyword">elif</span> <span class="built_in">isinstance</span>(result, <span class="built_in">dict</span>):</span><br><span class="line">        <span class="keyword">return</span> [result] + [<span class="variable language_">self</span>._default_result(t) <span class="keyword">for</span> t <span class="keyword">in</span> titles[<span class="number">1</span>:]]</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">return</span> [<span class="variable language_">self</span>._default_result(t) <span class="keyword">for</span> t <span class="keyword">in</span> titles]</span><br></pre></td></tr></table></figure>
+
+<p>退化逻辑的关键：<strong>批量失败不是直接返回默认值，而是降级为单条调用</strong>。单条调用会再次经过 <code>chat()</code> 的故障转移逻辑，这意味着每条标题都有独立的机会通过备模型获得分析结果。只有当单条调用也失败时，才会走到最终的 <code>_default_result()</code> 兜底。</p>
+<h3 id="3-6-最终兜底"><a href="#3-6-最终兜底" class="headerlink" title="3.6 最终兜底"></a>3.6 最终兜底</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># llm_analyzer.py:452-467</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_default_result</span>(<span class="params">self, title</span>):</span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">        <span class="string">&#x27;sentiment_score&#x27;</span>: <span class="number">0.0</span>,</span><br><span class="line">        <span class="string">&#x27;type_name&#x27;</span>: <span class="string">&#x27;其他&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;topic_name&#x27;</span>: <span class="string">&#x27;无&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;keywords&#x27;</span>: []</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>默认值的设计不是”空”或”None”，而是<strong>语义合理的占位值</strong>：情感分数为0（中性）、类型为”其他”、话题为”无”。下游系统无需特殊处理null值，前端图表正常渲染，只是精度降低而非完全中断。</p>
+<h2 id="4-实验结论"><a href="#4-实验结论" class="headerlink" title="4. 实验结论"></a>4. 实验结论</h2><h3 id="4-1-基线性能"><a href="#4-1-基线性能" class="headerlink" title="4.1 基线性能"></a>4.1 基线性能</h3><p>使用50条测试用例（覆盖娱乐&#x2F;社会&#x2F;科技&#x2F;体育&#x2F;时政5类，每类10条），以10条为一组批量调用，禁用缓存：</p>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>结果</th>
+<th>基准线</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>调用成功率</td>
+<td><strong>96%</strong></td>
+<td>≥90%</td>
+</tr>
+<tr>
+<td>批量响应时间（10条）</td>
+<td><strong>8.2s</strong></td>
+<td>≤30s</td>
+</tr>
+<tr>
+<td>情感分析准确率</td>
+<td><strong>88%</strong></td>
+<td>≥70%</td>
+</tr>
+<tr>
+<td>类型分类准确率</td>
+<td><strong>82%</strong></td>
+<td>≥70%</td>
+</tr>
+<tr>
+<td>话题提取成功率</td>
+<td><strong>94%</strong></td>
+<td>≥60%</td>
+</tr>
+</tbody></table>
+<h3 id="4-2-故障注入：主模型429"><a href="#4-2-故障注入：主模型429" class="headerlink" title="4.2 故障注入：主模型429"></a>4.2 故障注入：主模型429</h3><p>通过Mock <code>_do_chat_request</code> 使主模型固定返回None（模拟429限流），观察切换行为：</p>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>触发切换的请求数</td>
+<td><strong>2次</strong>（与max_retries&#x3D;2一致）</td>
+</tr>
+<tr>
+<td>切换后成功率</td>
+<td><strong>恢复至95%</strong></td>
+</tr>
+<tr>
+<td>switch_history记录</td>
+<td><code>{&#39;from&#39;:&#39;primary&#39;,&#39;to&#39;:&#39;backup&#39;,&#39;reason&#39;:&#39;连续失败2次&#39;}</code></td>
+</tr>
+</tbody></table>
+<p><strong>关键发现</strong>：主模型故障后，系统在第2次失败后自动切换到备模型，切换后成功率立即恢复。整个切换过程对调用方完全透明。</p>
+<h3 id="4-3-自动恢复验证"><a href="#4-3-自动恢复验证" class="headerlink" title="4.3 自动恢复验证"></a>4.3 自动恢复验证</h3><p>切换到backup后，恢复主模型可用性：</p>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>恢复到primary的周期数</td>
+<td><strong>1个周期</strong>（下一次爬取即恢复）</td>
+</tr>
+<tr>
+<td>恢复后成功率</td>
+<td><strong>96%</strong>（与基线一致）</td>
+</tr>
+</tbody></table>
+<p>自动恢复机制工作正常：只要主模型恢复，下一个请求周期就会自动切回，无需人工干预。</p>
+<h3 id="4-4-全链路降级测试"><a href="#4-4-全链路降级测试" class="headerlink" title="4.4 全链路降级测试"></a>4.4 全链路降级测试</h3><p>模拟主模型和备模型均不可用：</p>
+<table>
+<thead>
+<tr>
+<th>降级层级</th>
+<th>产出</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>批量API</td>
+<td>失败</td>
+</tr>
+<tr>
+<td>单条API</td>
+<td>失败</td>
+</tr>
+<tr>
+<td>默认值</td>
+<td><strong>100%产出</strong></td>
+</tr>
+</tbody></table>
+<p>系统在所有模型不可用时仍然持续产出默认值结果，<strong>不崩溃、不中断</strong>。数据精度降级，但服务连续性得到保证。</p>
+<h3 id="4-5-缓存对韧性的贡献"><a href="#4-5-缓存对韧性的贡献" class="headerlink" title="4.5 缓存对韧性的贡献"></a>4.5 缓存对韧性的贡献</h3><p>在稳态运行（大部分热搜跨轮次持续存在）下，Redis缓存命中率可达<strong>80%以上</strong>。这意味着即使LLM服务完全不可用，仍有80%的热搜条目能从缓存返回分析结果，只有新上榜的热搜才会使用默认值。缓存是故障转移之外的第二道防线。</p>
+<h2 id="5-面试关联"><a href="#5-面试关联" class="headerlink" title="5. 面试关联"></a>5. 面试关联</h2><ul>
+<li><p><strong>面试题1：”如何设计一个高可用的LLM调用方案？”</strong> → 本文2-3节给出了完整答案：多模型配置 + 连续失败计数切换 + 新周期自动恢复 + 三级降级链，确保任何情况下系统有输出。</p>
+</li>
+<li><p><strong>面试题2：”熔断器模式和你的连续失败计数方案有什么区别？各适合什么场景？”</strong> → 第2节分析了两者差异：熔断器适合高频请求（每秒百次级），需要半开状态精确控制探针频率；连续失败计数适合低频场景（每30秒一次），每次请求本身就是天然检测点，无需额外状态机。</p>
+</li>
+<li><p><strong>面试题3：”系统降级策略怎么设计？如何保证任何情况下都有输出？”</strong> → 第3节的三级降级链是答案核心：批量→单条→默认值。设计原则是<strong>语义合理的占位值优于null</strong>，下游系统无需特殊处理，精度降低但服务不中断。</p>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>工程实践</category>
+      </categories>
+      <tags>
+        <tag>LLM</tag>
+        <tag>Python</tag>
+        <tag>故障转移</tag>
+        <tag>微服务韧性</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>企业知识库问答助手</title>
+    <url>/posts/prompts/%E4%BC%81%E4%B8%9A%E7%9F%A5%E8%AF%86%E5%BA%93%E9%97%AE%E7%AD%94%E5%8A%A9%E6%89%8B/</url>
+    <content><![CDATA[<h1 id="Role-企业知识库问答助手"><a href="#Role-企业知识库问答助手" class="headerlink" title="Role: 企业知识库问答助手"></a>Role: 企业知识库问答助手</h1><h2 id="Profile"><a href="#Profile" class="headerlink" title="Profile"></a>Profile</h2><ul>
+<li>Author: 吴纪辰</li>
+<li>Version: 1.0</li>
+<li>Language: 中文</li>
+<li>Description: 基于企业私有知识库的问答助手，面向内部员工提供专业、严谨、准确的文档查询与业务解答服务，确保回答基于知识库事实而非主观推测</li>
+</ul>
+<h3 id="Skill-1"><a href="#Skill-1" class="headerlink" title="Skill-1"></a>Skill-1</h3><ol>
+<li>根据用户问题，从知识库中检索相关文档片段，基于检索结果进行准确回答</li>
+<li>回答时必须标注信息来源（引用具体文档名称&#x2F;章节&#x2F;页码），确保可溯源、可验证</li>
+<li>若知识库中无相关信息，明确告知用户”当前知识库中未找到相关内容”，绝不编造或推测</li>
+</ol>
+<h3 id="Skill-2"><a href="#Skill-2" class="headerlink" title="Skill-2"></a>Skill-2</h3><ol>
+<li>对用户模糊的问题进行意图澄清，主动追问关键细节（如具体业务场景、时间范围、所属部门等）</li>
+<li>将复杂问题拆解为多个子问题，逐个检索并综合回答</li>
+<li>对涉及多个文档&#x2F;制度的问题，提供交叉对比和综合解读</li>
+</ol>
+<h3 id="Skill-3"><a href="#Skill-3" class="headerlink" title="Skill-3"></a>Skill-3</h3><ol>
+<li>使用专业、严谨、准确的用语，避免口语化表达</li>
+<li>回答结构化：先给出明确结论，再展开详细说明，最后附上引用来源</li>
+<li>涉及流程&#x2F;步骤类问题，使用编号列表清晰呈现</li>
+</ol>
+<h3 id="Skill-4"><a href="#Skill-4" class="headerlink" title="Skill-4"></a>Skill-4</h3><ol>
+<li>识别问题是否涉及敏感信息（薪资、人事、保密条款等），按知识库中的权限标注决定是否回答</li>
+<li>识别问题是否涉及跨部门&#x2F;跨制度冲突，主动提示用户需与相关部门确认</li>
+<li>对政策&#x2F;制度类问题，提醒用户注意文档版本和生效日期，避免引用过期信息</li>
+</ol>
+<h2 id="Rules"><a href="#Rules" class="headerlink" title="Rules"></a>Rules</h2><ol>
+<li>所有回答必须基于知识库检索结果，严禁凭记忆或常识编造内容</li>
+<li>回答必须标注信息来源，格式为：【来源：《文档名》- 章节&#x2F;页码】</li>
+<li>知识库中无相关信息时，必须明确告知”当前知识库未覆盖此内容”，建议用户联系相关部门</li>
+<li>涉及数字、日期、条款等关键信息时，必须与原文完全一致，不做概括或改写</li>
+<li>不确定的信息用”根据《文档名》所述”开头，不使用绝对肯定的表述除非原文明确</li>
+<li>涉及多个文档时，如有冲突或差异，需指出冲突点并建议用户确认最新版本</li>
+<li>不回答超出知识库范围的问题，包括但不限于：个人主观建议、外部行业信息、未收录的政策</li>
+<li>回答长度适中，重要问题详细展开，简单查询直接回答，不做不必要的冗余扩展</li>
+</ol>
+<h2 id="Workflow"><a href="#Workflow" class="headerlink" title="Workflow"></a>Workflow</h2><ol>
+<li>接收用户问题</li>
+<li>分析问题意图，判断是否需要澄清（模糊问题→追问；明确问题→检索）</li>
+<li>从知识库检索相关文档片段</li>
+<li>评估检索结果：<ul>
+<li>有明确结果 → 基于检索内容组织回答，标注来源</li>
+<li>有部分结果 → 回答已知部分，标注缺失部分，建议补充渠道</li>
+<li>无结果 → 明确告知未覆盖，建议联系相关部门</li>
+</ul>
+</li>
+<li>检查回答是否涉及：敏感信息&#x2F;版本时效&#x2F;跨制度冲突 → 添加必要提醒</li>
+<li>组织结构化回答：结论 → 详细说明 → 引用来源 → 必要提醒</li>
+<li>输出回答</li>
+</ol>
+<h2 id="Commands"><a href="#Commands" class="headerlink" title="Commands"></a>Commands</h2><ul>
+<li>&#x2F;来源：追问上一次回答的具体信息来源</li>
+<li>&#x2F;相关：查询与当前问题相关的其他文档或制度</li>
+<li>&#x2F;版本：确认所引用文档的最新版本和生效日期</li>
+<li>&#x2F;澄清：当回答不确定时，请求更详细的问题描述</li>
+</ul>
+<h2 id="Initialization"><a href="#Initialization" class="headerlink" title="Initialization"></a>Initialization</h2><p>作为 <Role>，你必须遵守 <Rules>，用 <Language> 交流。请先向用户问好，简要介绍自己的功能范围，然后等待用户提问。</p>
+<p>介绍示例：<br>“您好，我是企业知识库问答助手，可以帮您查询公司内部文档、规章制度、操作流程等内容。我的回答均基于知识库原文，并会标注信息来源供您验证。如遇知识库未覆盖的内容，我会建议您联系相关部门。请问您想查询什么？”</p>
+]]></content>
+      <categories>
+        <category>Prompts</category>
+      </categories>
+      <tags>
+        <tag>Prompt</tag>
+        <tag>Skill</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Hexo+GitHub Pages博客搭建指南：从零到自动部署</title>
+    <url>/posts/Hexo+GitHub-Pages%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA%E6%8C%87%E5%8D%97/</url>
+    <content><![CDATA[<h2 id="问题引入：为什么选择Hexo？"><a href="#问题引入：为什么选择Hexo？" class="headerlink" title="问题引入：为什么选择Hexo？"></a>问题引入：为什么选择Hexo？</h2><p>作为AI应用开发方向的学习者，我需要一个技术博客来沉淀项目经历、展示工程能力。Hexo的优势：</p>
+<ul>
+<li><strong>Markdown写作</strong>：技术文章天然适合Markdown，代码块、公式、表格无缝支持</li>
+<li><strong>静态站点</strong>：GitHub Pages免费托管，零服务器成本</li>
+<li><strong>主题生态</strong>：NexT主题成熟稳定，高度可定制</li>
+<li><strong>自动部署</strong>：push代码即可触发GitHub Actions构建发布，全流程自动化</li>
+</ul>
+<p>最终效果：<strong>push一篇Markdown → GitHub Actions自动构建 → 1分钟内线上更新</strong>。</p>
+<h2 id="原理讲解"><a href="#原理讲解" class="headerlink" title="原理讲解"></a>原理讲解</h2><h3 id="Hexo的工作流程"><a href="#Hexo的工作流程" class="headerlink" title="Hexo的工作流程"></a>Hexo的工作流程</h3><p>Hexo是一个基于Node.js的静态站点生成器，核心流程：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Markdown源文件 → Hexo渲染引擎 → HTML静态页面 → 部署到Web服务器</span><br></pre></td></tr></table></figure>
+
+<p>关键概念：</p>
+<table>
+<thead>
+<tr>
+<th>概念</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>source/_posts/</code></td>
+<td>文章Markdown存放目录</td>
+</tr>
+<tr>
+<td><code>_config.yml</code></td>
+<td>站点配置（标题、URL、部署方式等）</td>
+</tr>
+<tr>
+<td><code>_config.next.yml</code></td>
+<td>主题配置（NexT专用，覆盖默认配置）</td>
+</tr>
+<tr>
+<td><code>source/_data/</code></td>
+<td>自定义数据文件（样式、脚本、模板注入）</td>
+</tr>
+<tr>
+<td><code>themes/</code></td>
+<td>主题目录（npm安装的主题在node_modules中）</td>
+</tr>
+</tbody></table>
+<h3 id="GitHub-Pages-Actions部署原理"><a href="#GitHub-Pages-Actions部署原理" class="headerlink" title="GitHub Pages + Actions部署原理"></a>GitHub Pages + Actions部署原理</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">本地开发(push main) → GitHub Actions触发 → npm install → hexo generate → 产物推送到gh-pages分支 → GitHub Pages提供服务</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>main</code>分支：存放源码（Markdown、配置、样式）</li>
+<li><code>gh-pages</code>分支：存放构建产物（纯HTML&#x2F;CSS&#x2F;JS），由Actions自动推送</li>
+</ul>
+<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><h3 id="1-环境准备"><a href="#1-环境准备" class="headerlink" title="1. 环境准备"></a>1. 环境准备</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 安装Node.js（推荐18+LTS，我用的是20）</span></span><br><span class="line"><span class="comment"># Windows: https://nodejs.org/ 下载安装</span></span><br><span class="line"><span class="comment"># 验证</span></span><br><span class="line">node -v   <span class="comment"># v20.x.x</span></span><br><span class="line">npm -v    <span class="comment"># 10.x.x</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装Hexo CLI</span></span><br><span class="line">npm install -g hexo-cli</span><br><span class="line"></span><br><span class="line"><span class="comment"># 初始化博客</span></span><br><span class="line">hexo init my-blog</span><br><span class="line"><span class="built_in">cd</span> my-blog</span><br><span class="line">npm install</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-安装NexT主题"><a href="#2-安装NexT主题" class="headerlink" title="2. 安装NexT主题"></a>2. 安装NexT主题</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm install hexo-theme-next</span><br></pre></td></tr></table></figure>
+
+<p>然后在<code>_config.yml</code>中设置：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">theme:</span> <span class="string">next</span></span><br></pre></td></tr></table></figure>
+
+<p>NexT的主题配置不要改<code>node_modules/hexo-theme-next/_config.yml</code>，而是在项目根目录创建<code>_config.next.yml</code>，Hexo会自动合并。这样主题升级时不会丢失自定义配置。</p>
+<h3 id="3-站点配置-config-yml关键项"><a href="#3-站点配置-config-yml关键项" class="headerlink" title="3. 站点配置_config.yml关键项"></a>3. 站点配置<code>_config.yml</code>关键项</h3><figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">title:</span> <span class="string">你的博客标题</span></span><br><span class="line"><span class="attr">subtitle:</span> <span class="string">&#x27;副标题&#x27;</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">站点描述，用于SEO</span></span><br><span class="line"><span class="attr">keywords:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">关键词1</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">关键词2</span></span><br><span class="line"><span class="attr">author:</span> <span class="string">你的名字</span></span><br><span class="line"><span class="attr">language:</span> <span class="string">zh-CN</span></span><br><span class="line"><span class="attr">timezone:</span> <span class="string">&#x27;Asia/Shanghai&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="attr">url:</span> <span class="string">https://username.github.io</span></span><br><span class="line"><span class="attr">permalink:</span> <span class="string">posts/:title/</span></span><br><span class="line"></span><br><span class="line"><span class="attr">theme:</span> <span class="string">next</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 每篇文章必须有description字段，否则首页会展示全文</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="4-主题配置-config-next-yml关键项"><a href="#4-主题配置-config-next-yml关键项" class="headerlink" title="4. 主题配置_config.next.yml关键项"></a>4. 主题配置<code>_config.next.yml</code>关键项</h3><figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">scheme:</span> <span class="string">Pisces</span>           <span class="comment"># 双栏布局，适合技术博客</span></span><br><span class="line"><span class="attr">theme_color:</span></span><br><span class="line">  <span class="attr">light:</span> <span class="string">&quot;#7c3aed&quot;</span>       <span class="comment"># 浅色主色</span></span><br><span class="line">  <span class="attr">dark:</span> <span class="string">&quot;#a855f7&quot;</span>        <span class="comment"># 深色主色</span></span><br><span class="line"></span><br><span class="line"><span class="attr">font:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="literal">false</span>          <span class="comment"># 关闭Google Fonts，国内加载慢</span></span><br><span class="line"></span><br><span class="line"><span class="attr">local_search:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="literal">true</span>           <span class="comment"># 本地搜索功能</span></span><br><span class="line"></span><br><span class="line"><span class="attr">mermaid:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="literal">true</span>           <span class="comment"># Mermaid图表支持</span></span><br><span class="line"></span><br><span class="line"><span class="attr">darkmode:</span> <span class="literal">false</span>          <span class="comment"># 关闭系统跟随，改用手动切换按钮</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="5-自定义样式和组件注入"><a href="#5-自定义样式和组件注入" class="headerlink" title="5. 自定义样式和组件注入"></a>5. 自定义样式和组件注入</h3><p>NexT支持通过<code>source/_data/</code>目录注入自定义文件，这是最强大的定制方式：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># _config.next.yml</span></span><br><span class="line"><span class="attr">custom_file_path:</span></span><br><span class="line">  <span class="attr">sidebar:</span> <span class="string">source/_data/sidebar.njk</span>    <span class="comment"># 自定义左侧sidebar</span></span><br><span class="line">  <span class="attr">bodyEnd:</span> <span class="string">source/_data/body-end.njk</span>   <span class="comment"># body末尾注入HTML/JS</span></span><br><span class="line">  <span class="attr">variable:</span> <span class="string">source/_data/variables.styl</span> <span class="comment"># 覆盖CSS变量</span></span><br><span class="line">  <span class="attr">style:</span> <span class="string">source/_data/styles.styl</span>      <span class="comment"># 自定义样式</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>深浅色切换</strong>的实现思路：</p>
+<ol>
+<li>关闭NexT自带的<code>darkmode</code>（它基于<code>prefers-color-scheme</code>媒体查询，无切换按钮）</li>
+<li>在<code>body-end.njk</code>中添加切换按钮和JS，通过给<code>&lt;html&gt;</code>添加<code>data-theme=&quot;dark&quot;</code>属性控制</li>
+<li>在<code>styles.styl</code>中用<code>html[data-theme=&quot;dark&quot;]</code>选择器覆盖NexT的CSS变量和自定义组件样式</li>
+<li>主题偏好保存在<code>localStorage</code>，刷新后保持</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 核心切换逻辑</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">applyTheme</span>(<span class="params">dark</span>) &#123;</span><br><span class="line">  <span class="keyword">if</span> (dark) &#123;</span><br><span class="line">    html.<span class="title function_">setAttribute</span>(<span class="string">&#x27;data-theme&#x27;</span>, <span class="string">&#x27;dark&#x27;</span>);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    html.<span class="title function_">removeAttribute</span>(<span class="string">&#x27;data-theme&#x27;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 读取用户偏好</span></span><br><span class="line"><span class="keyword">var</span> saved = <span class="variable language_">localStorage</span>.<span class="title function_">getItem</span>(<span class="string">&#x27;theme&#x27;</span>);</span><br><span class="line"><span class="title function_">applyTheme</span>(saved === <span class="string">&#x27;dark&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 点击切换</span></span><br><span class="line">toggle.<span class="title function_">addEventListener</span>(<span class="string">&#x27;click&#x27;</span>, <span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="keyword">var</span> isDark = html.<span class="title function_">getAttribute</span>(<span class="string">&#x27;data-theme&#x27;</span>) === <span class="string">&#x27;dark&#x27;</span>;</span><br><span class="line">  <span class="title function_">applyTheme</span>(!isDark);</span><br><span class="line">  <span class="variable language_">localStorage</span>.<span class="title function_">setItem</span>(<span class="string">&#x27;theme&#x27;</span>, isDark ? <span class="string">&#x27;light&#x27;</span> : <span class="string">&#x27;dark&#x27;</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight styl"><table><tr><td class="code"><pre><span class="line"><span class="comment">// styles.styl 中的暗色覆盖</span></span><br><span class="line"><span class="selector-tag">html</span><span class="selector-attr">[data-theme=<span class="string">&quot;dark&quot;</span>]</span></span><br><span class="line">  <span class="attr">--body-bg-color</span>: <span class="number">#0a0a0f</span></span><br><span class="line">  <span class="attr">--content-bg-color</span>: <span class="number">#1a1a2e</span></span><br><span class="line">  <span class="attr">--text-color</span>: <span class="number">#e2e8f0</span></span><br><span class="line">  <span class="attr">--link-color</span>: <span class="number">#c084fc</span></span><br><span class="line">  <span class="comment">// ...更多变量</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="6-文章Front-Matter模板"><a href="#6-文章Front-Matter模板" class="headerlink" title="6. 文章Front Matter模板"></a>6. 文章Front Matter模板</h3><figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">文章标题</span></span><br><span class="line"><span class="attr">date:</span> <span class="number">2026-06-10</span></span><br><span class="line"><span class="attr">tags:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">标签1</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">标签2</span></span><br><span class="line"><span class="attr">categories:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">分类名</span></span><br><span class="line"><span class="attr">summary:</span> <span class="string">一句话摘要（列表页展示）</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">一句话描述（首页展示，必须有，否则首页会展示全文）</span></span><br><span class="line"><span class="meta">---</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>重要</strong>：<code>description</code>字段是首页展示简介的关键。没有<code>description</code>的文章会在首页展示全文。</p>
+<h3 id="7-GitHub-Actions自动部署"><a href="#7-GitHub-Actions自动部署" class="headerlink" title="7. GitHub Actions自动部署"></a>7. GitHub Actions自动部署</h3><p>在<code>.github/workflows/deploy.yml</code>中配置：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">name:</span> <span class="string">Deploy</span> <span class="string">to</span> <span class="string">GitHub</span> <span class="string">Pages</span></span><br><span class="line"></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">push:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">main</span></span><br><span class="line"></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="attr">deploy:</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">    <span class="attr">permissions:</span></span><br><span class="line">      <span class="attr">contents:</span> <span class="string">write</span></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Checkout</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">actions/checkout@v4</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">submodules:</span> <span class="string">recursive</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Setup</span> <span class="string">Node.js</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">actions/setup-node@v4</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">node-version:</span> <span class="string">&#x27;20&#x27;</span></span><br><span class="line">          <span class="attr">cache:</span> <span class="string">&#x27;npm&#x27;</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Install</span> <span class="string">dependencies</span></span><br><span class="line">        <span class="attr">run:</span> <span class="string">npm</span> <span class="string">install</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Build</span> <span class="string">Hexo</span></span><br><span class="line">        <span class="attr">run:</span> <span class="string">npx</span> <span class="string">hexo</span> <span class="string">clean</span> <span class="string">&amp;&amp;</span> <span class="string">npx</span> <span class="string">hexo</span> <span class="string">generate</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Deploy</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">peaceiris/actions-gh-pages@v4</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">github_token:</span> <span class="string">$&#123;&#123;</span> <span class="string">secrets.GITHUB_TOKEN</span> <span class="string">&#125;&#125;</span></span><br><span class="line">          <span class="attr">publish_dir:</span> <span class="string">./public</span></span><br><span class="line">          <span class="attr">publish_branch:</span> <span class="string">gh-pages</span></span><br></pre></td></tr></table></figure>
+
+<p>部署流程：<code>git push origin main</code> → Actions自动构建 → <code>gh-pages</code>分支更新 → 线上生效。</p>
+<h3 id="8-头像本地化"><a href="#8-头像本地化" class="headerlink" title="8. 头像本地化"></a>8. 头像本地化</h3><p>GitHub头像URL在国内访问不稳定，下载到本地解决：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> -p <span class="built_in">source</span>/images</span><br><span class="line">curl -L -o <span class="built_in">source</span>/images/avatar.png <span class="string">&quot;你的头像URL&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>配置中使用本地路径：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">avatar:</span></span><br><span class="line">  <span class="attr">url:</span> <span class="string">/images/avatar.png</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="实验结论与反思"><a href="#实验结论与反思" class="headerlink" title="实验结论与反思"></a>实验结论与反思</h2><h3 id="踩过的坑"><a href="#踩过的坑" class="headerlink" title="踩过的坑"></a>踩过的坑</h3><table>
+<thead>
+<tr>
+<th>问题</th>
+<th>原因</th>
+<th>解决方案</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>首页展示全文而非简介</td>
+<td>文章缺少<code>description</code>字段</td>
+<td>Front Matter中必须加<code>description</code></td>
+</tr>
+<tr>
+<td>Google Fonts加载极慢</td>
+<td>国内无法访问fonts.googleapis.com</td>
+<td><code>font.enable: false</code>，使用系统字体</td>
+</tr>
+<tr>
+<td>头像加载失败</td>
+<td>GitHub avatars域名国内不稳定</td>
+<td>头像下载到本地<code>source/images/</code></td>
+</tr>
+<tr>
+<td>NexT darkmode无切换按钮</td>
+<td>只支持<code>prefers-color-scheme</code>媒体查询</td>
+<td>自己实现JS切换+CSS变量覆盖</td>
+</tr>
+<tr>
+<td>自定义组件暗色模式下变浅</td>
+<td>CSS变量覆盖不完整</td>
+<td><code>html[data-theme=&quot;dark&quot;]</code>中覆盖<code>.sidebar-inner</code>等所有容器</td>
+</tr>
+<tr>
+<td><code>_data/body-end.njk</code>中使用Hexo变量报错</td>
+<td>某些上下文中<code>site</code>变量不可用</td>
+<td>改用<code>&#123;&#123; site.posts.length &#125;&#125;</code>等Nunjucks模板语法</td>
+</tr>
+</tbody></table>
+<h3 id="项目文件结构"><a href="#项目文件结构" class="headerlink" title="项目文件结构"></a>项目文件结构</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">├── _config.yml              # 站点配置</span><br><span class="line">├── _config.next.yml         # 主题配置</span><br><span class="line">├── .github/workflows/       # CI/CD</span><br><span class="line">│   └── deploy.yml</span><br><span class="line">├── source/</span><br><span class="line">│   ├── _posts/              # 文章</span><br><span class="line">│   ├── _data/               # 自定义注入</span><br><span class="line">│   │   ├── sidebar.njk      # 左侧sidebar</span><br><span class="line">│   │   ├── body-end.njk     # JS/HTML注入</span><br><span class="line">│   │   ├── variables.styl   # CSS变量覆盖</span><br><span class="line">│   │   └── styles.styl      # 自定义样式</span><br><span class="line">│   ├── images/              # 本地图片</span><br><span class="line">│   │   └── avatar.png</span><br><span class="line">│   ├── about/               # 关于页</span><br><span class="line">│   └── categories/          # 分类页</span><br><span class="line">└── package.json</span><br></pre></td></tr></table></figure>
+
+<h2 id="面试关联"><a href="#面试关联" class="headerlink" title="面试关联"></a>面试关联</h2><ol>
+<li><strong>CI&#x2F;CD流程设计？</strong> → GitHub Actions自动构建部署，push触发、多步骤编排、权限控制</li>
+<li><strong>前端主题切换实现？</strong> → CSS变量 + data属性 + localStorage持久化，不需要框架</li>
+<li><strong>静态站点生成原理？</strong> → 模板引擎渲染Markdown为HTML，部署到CDN&#x2F;静态托管</li>
+<li><strong>性能优化实践？</strong> → 字体本地化&#x2F;禁用、头像本地化、关闭不必要的外部CDN</li>
+</ol>
+]]></content>
+      <categories>
+        <category>Hexo建站</category>
+      </categories>
+      <tags>
+        <tag>Hexo</tag>
+        <tag>GitHub Pages</tag>
+        <tag>CI/CD</tag>
+        <tag>NexT</tag>
       </tags>
   </entry>
 </search>
