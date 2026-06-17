@@ -1,6 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>26年06月10日总结</title>
+    <url>/posts/26%E5%B9%B406%E6%9C%8810%E6%97%A5%E6%80%BB%E7%BB%93/</url>
+    <content><![CDATA[<p>今日总结：</p>
+<ol>
+<li>写了几篇新文章</li>
+<li>投了半天工作</li>
+</ol>
+<p>今日反思：</p>
+<ol>
+<li>学习进度没有推进</li>
+</ol>
+<p>明日计划：</p>
+<ol>
+<li>早上学完agent</li>
+<li>中午看完rag+agent面试题</li>
+<li>下午投简历，投到触发150次提醒</li>
+<li>晚上复盘，啥也不干，就思考，深度思考，不是思考求职，而是思考自身！</li>
+</ol>
+]]></content>
+      <categories>
+        <category>学习日志</category>
+      </categories>
+  </entry>
+  <entry>
     <title>26年06月09日总结</title>
     <url>/posts/26%E5%B9%B406%E6%9C%8809%E6%97%A5%E6%80%BB%E7%BB%93/</url>
     <content><![CDATA[<p>今日总结：</p>
@@ -28,28 +52,150 @@
       </categories>
   </entry>
   <entry>
-    <title>26年06月10日总结</title>
-    <url>/posts/26%E5%B9%B406%E6%9C%8810%E6%97%A5%E6%80%BB%E7%BB%93/</url>
-    <content><![CDATA[<p>今日总结：</p>
+    <title>Hexo+GitHub Pages博客搭建指南：从零到自动部署</title>
+    <url>/posts/Hexo+GitHub-Pages%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA%E6%8C%87%E5%8D%97/</url>
+    <content><![CDATA[<h2 id="问题引入：为什么选择Hexo？"><a href="#问题引入：为什么选择Hexo？" class="headerlink" title="问题引入：为什么选择Hexo？"></a>问题引入：为什么选择Hexo？</h2><p>作为AI应用开发方向的学习者，我需要一个技术博客来沉淀项目经历、展示工程能力。Hexo的优势：</p>
+<ul>
+<li><strong>Markdown写作</strong>：技术文章天然适合Markdown，代码块、公式、表格无缝支持</li>
+<li><strong>静态站点</strong>：GitHub Pages免费托管，零服务器成本</li>
+<li><strong>主题生态</strong>：NexT主题成熟稳定，高度可定制</li>
+<li><strong>自动部署</strong>：push代码即可触发GitHub Actions构建发布，全流程自动化</li>
+</ul>
+<p>最终效果：<strong>push一篇Markdown → GitHub Actions自动构建 → 1分钟内线上更新</strong>。</p>
+<h2 id="原理讲解"><a href="#原理讲解" class="headerlink" title="原理讲解"></a>原理讲解</h2><h3 id="Hexo的工作流程"><a href="#Hexo的工作流程" class="headerlink" title="Hexo的工作流程"></a>Hexo的工作流程</h3><p>Hexo是一个基于Node.js的静态站点生成器，核心流程：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Markdown源文件 → Hexo渲染引擎 → HTML静态页面 → 部署到Web服务器</span><br></pre></td></tr></table></figure>
+
+<p>关键概念：</p>
+<table>
+<thead>
+<tr>
+<th>概念</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>source/_posts/</code></td>
+<td>文章Markdown存放目录</td>
+</tr>
+<tr>
+<td><code>_config.yml</code></td>
+<td>站点配置（标题、URL、部署方式等）</td>
+</tr>
+<tr>
+<td><code>_config.next.yml</code></td>
+<td>主题配置（NexT专用，覆盖默认配置）</td>
+</tr>
+<tr>
+<td><code>source/_data/</code></td>
+<td>自定义数据文件（样式、脚本、模板注入）</td>
+</tr>
+<tr>
+<td><code>themes/</code></td>
+<td>主题目录（npm安装的主题在node_modules中）</td>
+</tr>
+</tbody></table>
+<h3 id="GitHub-Pages-Actions部署原理"><a href="#GitHub-Pages-Actions部署原理" class="headerlink" title="GitHub Pages + Actions部署原理"></a>GitHub Pages + Actions部署原理</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">本地开发(push main) → GitHub Actions触发 → npm install → hexo generate → 产物推送到gh-pages分支 → GitHub Pages提供服务</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>main</code>分支：存放源码（Markdown、配置、样式）</li>
+<li><code>gh-pages</code>分支：存放构建产物（纯HTML&#x2F;CSS&#x2F;JS），由Actions自动推送</li>
+</ul>
+<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><h3 id="1-环境准备"><a href="#1-环境准备" class="headerlink" title="1. 环境准备"></a>1. 环境准备</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 安装Node.js（推荐18+LTS，我用的是20）</span></span><br><span class="line"><span class="comment"># Windows: https://nodejs.org/ 下载安装</span></span><br><span class="line"><span class="comment"># 验证</span></span><br><span class="line">node -v   <span class="comment"># v20.x.x</span></span><br><span class="line">npm -v    <span class="comment"># 10.x.x</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装Hexo CLI</span></span><br><span class="line">npm install -g hexo-cli</span><br><span class="line"></span><br><span class="line"><span class="comment"># 初始化博客</span></span><br><span class="line">hexo init my-blog</span><br><span class="line"><span class="built_in">cd</span> my-blog</span><br><span class="line">npm install</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-安装NexT主题"><a href="#2-安装NexT主题" class="headerlink" title="2. 安装NexT主题"></a>2. 安装NexT主题</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm install hexo-theme-next</span><br></pre></td></tr></table></figure>
+
+<p>然后在<code>_config.yml</code>中设置：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">theme:</span> <span class="string">next</span></span><br></pre></td></tr></table></figure>
+
+<p>NexT的主题配置不要改<code>node_modules/hexo-theme-next/_config.yml</code>，而是在项目根目录创建<code>_config.next.yml</code>，Hexo会自动合并。这样主题升级时不会丢失自定义配置。</p>
+<h3 id="3-站点配置-config-yml关键项"><a href="#3-站点配置-config-yml关键项" class="headerlink" title="3. 站点配置_config.yml关键项"></a>3. 站点配置<code>_config.yml</code>关键项</h3><figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">title:</span> <span class="string">你的博客标题</span></span><br><span class="line"><span class="attr">subtitle:</span> <span class="string">&#x27;副标题&#x27;</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">站点描述，用于SEO</span></span><br><span class="line"><span class="attr">keywords:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">关键词1</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">关键词2</span></span><br><span class="line"><span class="attr">author:</span> <span class="string">你的名字</span></span><br><span class="line"><span class="attr">language:</span> <span class="string">zh-CN</span></span><br><span class="line"><span class="attr">timezone:</span> <span class="string">&#x27;Asia/Shanghai&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="attr">url:</span> <span class="string">https://username.github.io</span></span><br><span class="line"><span class="attr">permalink:</span> <span class="string">posts/:title/</span></span><br><span class="line"></span><br><span class="line"><span class="attr">theme:</span> <span class="string">next</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 每篇文章必须有description字段，否则首页会展示全文</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="4-主题配置-config-next-yml关键项"><a href="#4-主题配置-config-next-yml关键项" class="headerlink" title="4. 主题配置_config.next.yml关键项"></a>4. 主题配置<code>_config.next.yml</code>关键项</h3><figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">scheme:</span> <span class="string">Pisces</span>           <span class="comment"># 双栏布局，适合技术博客</span></span><br><span class="line"><span class="attr">theme_color:</span></span><br><span class="line">  <span class="attr">light:</span> <span class="string">&quot;#7c3aed&quot;</span>       <span class="comment"># 浅色主色</span></span><br><span class="line">  <span class="attr">dark:</span> <span class="string">&quot;#a855f7&quot;</span>        <span class="comment"># 深色主色</span></span><br><span class="line"></span><br><span class="line"><span class="attr">font:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="literal">false</span>          <span class="comment"># 关闭Google Fonts，国内加载慢</span></span><br><span class="line"></span><br><span class="line"><span class="attr">local_search:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="literal">true</span>           <span class="comment"># 本地搜索功能</span></span><br><span class="line"></span><br><span class="line"><span class="attr">mermaid:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="literal">true</span>           <span class="comment"># Mermaid图表支持</span></span><br><span class="line"></span><br><span class="line"><span class="attr">darkmode:</span> <span class="literal">false</span>          <span class="comment"># 关闭系统跟随，改用手动切换按钮</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="5-自定义样式和组件注入"><a href="#5-自定义样式和组件注入" class="headerlink" title="5. 自定义样式和组件注入"></a>5. 自定义样式和组件注入</h3><p>NexT支持通过<code>source/_data/</code>目录注入自定义文件，这是最强大的定制方式：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># _config.next.yml</span></span><br><span class="line"><span class="attr">custom_file_path:</span></span><br><span class="line">  <span class="attr">sidebar:</span> <span class="string">source/_data/sidebar.njk</span>    <span class="comment"># 自定义左侧sidebar</span></span><br><span class="line">  <span class="attr">bodyEnd:</span> <span class="string">source/_data/body-end.njk</span>   <span class="comment"># body末尾注入HTML/JS</span></span><br><span class="line">  <span class="attr">variable:</span> <span class="string">source/_data/variables.styl</span> <span class="comment"># 覆盖CSS变量</span></span><br><span class="line">  <span class="attr">style:</span> <span class="string">source/_data/styles.styl</span>      <span class="comment"># 自定义样式</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>深浅色切换</strong>的实现思路：</p>
 <ol>
-<li>写了几篇新文章</li>
-<li>投了半天工作</li>
+<li>关闭NexT自带的<code>darkmode</code>（它基于<code>prefers-color-scheme</code>媒体查询，无切换按钮）</li>
+<li>在<code>body-end.njk</code>中添加切换按钮和JS，通过给<code>&lt;html&gt;</code>添加<code>data-theme=&quot;dark&quot;</code>属性控制</li>
+<li>在<code>styles.styl</code>中用<code>html[data-theme=&quot;dark&quot;]</code>选择器覆盖NexT的CSS变量和自定义组件样式</li>
+<li>主题偏好保存在<code>localStorage</code>，刷新后保持</li>
 </ol>
-<p>今日反思：</p>
-<ol>
-<li>学习进度没有推进</li>
-</ol>
-<p>明日计划：</p>
-<ol>
-<li>早上学完agent</li>
-<li>中午看完rag+agent面试题</li>
-<li>下午投简历，投到触发150次提醒</li>
-<li>晚上复盘，啥也不干，就思考，深度思考，不是思考求职，而是思考自身！</li>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 核心切换逻辑</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">applyTheme</span>(<span class="params">dark</span>) &#123;</span><br><span class="line">  <span class="keyword">if</span> (dark) &#123;</span><br><span class="line">    html.<span class="title function_">setAttribute</span>(<span class="string">&#x27;data-theme&#x27;</span>, <span class="string">&#x27;dark&#x27;</span>);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    html.<span class="title function_">removeAttribute</span>(<span class="string">&#x27;data-theme&#x27;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 读取用户偏好</span></span><br><span class="line"><span class="keyword">var</span> saved = <span class="variable language_">localStorage</span>.<span class="title function_">getItem</span>(<span class="string">&#x27;theme&#x27;</span>);</span><br><span class="line"><span class="title function_">applyTheme</span>(saved === <span class="string">&#x27;dark&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 点击切换</span></span><br><span class="line">toggle.<span class="title function_">addEventListener</span>(<span class="string">&#x27;click&#x27;</span>, <span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="keyword">var</span> isDark = html.<span class="title function_">getAttribute</span>(<span class="string">&#x27;data-theme&#x27;</span>) === <span class="string">&#x27;dark&#x27;</span>;</span><br><span class="line">  <span class="title function_">applyTheme</span>(!isDark);</span><br><span class="line">  <span class="variable language_">localStorage</span>.<span class="title function_">setItem</span>(<span class="string">&#x27;theme&#x27;</span>, isDark ? <span class="string">&#x27;light&#x27;</span> : <span class="string">&#x27;dark&#x27;</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight styl"><table><tr><td class="code"><pre><span class="line"><span class="comment">// styles.styl 中的暗色覆盖</span></span><br><span class="line"><span class="selector-tag">html</span><span class="selector-attr">[data-theme=<span class="string">&quot;dark&quot;</span>]</span></span><br><span class="line">  <span class="attr">--body-bg-color</span>: <span class="number">#0a0a0f</span></span><br><span class="line">  <span class="attr">--content-bg-color</span>: <span class="number">#1a1a2e</span></span><br><span class="line">  <span class="attr">--text-color</span>: <span class="number">#e2e8f0</span></span><br><span class="line">  <span class="attr">--link-color</span>: <span class="number">#c084fc</span></span><br><span class="line">  <span class="comment">// ...更多变量</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="6-文章Front-Matter模板"><a href="#6-文章Front-Matter模板" class="headerlink" title="6. 文章Front Matter模板"></a>6. 文章Front Matter模板</h3><figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">文章标题</span></span><br><span class="line"><span class="attr">date:</span> <span class="number">2026-06-10</span></span><br><span class="line"><span class="attr">tags:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">标签1</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">标签2</span></span><br><span class="line"><span class="attr">categories:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">分类名</span></span><br><span class="line"><span class="attr">summary:</span> <span class="string">一句话摘要（列表页展示）</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">一句话描述（首页展示，必须有，否则首页会展示全文）</span></span><br><span class="line"><span class="meta">---</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>重要</strong>：<code>description</code>字段是首页展示简介的关键。没有<code>description</code>的文章会在首页展示全文。</p>
+<h3 id="7-GitHub-Actions自动部署"><a href="#7-GitHub-Actions自动部署" class="headerlink" title="7. GitHub Actions自动部署"></a>7. GitHub Actions自动部署</h3><p>在<code>.github/workflows/deploy.yml</code>中配置：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">name:</span> <span class="string">Deploy</span> <span class="string">to</span> <span class="string">GitHub</span> <span class="string">Pages</span></span><br><span class="line"></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">push:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">main</span></span><br><span class="line"></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="attr">deploy:</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">    <span class="attr">permissions:</span></span><br><span class="line">      <span class="attr">contents:</span> <span class="string">write</span></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Checkout</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">actions/checkout@v4</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">submodules:</span> <span class="string">recursive</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Setup</span> <span class="string">Node.js</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">actions/setup-node@v4</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">node-version:</span> <span class="string">&#x27;20&#x27;</span></span><br><span class="line">          <span class="attr">cache:</span> <span class="string">&#x27;npm&#x27;</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Install</span> <span class="string">dependencies</span></span><br><span class="line">        <span class="attr">run:</span> <span class="string">npm</span> <span class="string">install</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Build</span> <span class="string">Hexo</span></span><br><span class="line">        <span class="attr">run:</span> <span class="string">npx</span> <span class="string">hexo</span> <span class="string">clean</span> <span class="string">&amp;&amp;</span> <span class="string">npx</span> <span class="string">hexo</span> <span class="string">generate</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Deploy</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">peaceiris/actions-gh-pages@v4</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">github_token:</span> <span class="string">$&#123;&#123;</span> <span class="string">secrets.GITHUB_TOKEN</span> <span class="string">&#125;&#125;</span></span><br><span class="line">          <span class="attr">publish_dir:</span> <span class="string">./public</span></span><br><span class="line">          <span class="attr">publish_branch:</span> <span class="string">gh-pages</span></span><br></pre></td></tr></table></figure>
+
+<p>部署流程：<code>git push origin main</code> → Actions自动构建 → <code>gh-pages</code>分支更新 → 线上生效。</p>
+<h3 id="8-头像本地化"><a href="#8-头像本地化" class="headerlink" title="8. 头像本地化"></a>8. 头像本地化</h3><p>GitHub头像URL在国内访问不稳定，下载到本地解决：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> -p <span class="built_in">source</span>/images</span><br><span class="line">curl -L -o <span class="built_in">source</span>/images/avatar.png <span class="string">&quot;你的头像URL&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>配置中使用本地路径：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">avatar:</span></span><br><span class="line">  <span class="attr">url:</span> <span class="string">/images/avatar.png</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="实验结论与反思"><a href="#实验结论与反思" class="headerlink" title="实验结论与反思"></a>实验结论与反思</h2><h3 id="踩过的坑"><a href="#踩过的坑" class="headerlink" title="踩过的坑"></a>踩过的坑</h3><table>
+<thead>
+<tr>
+<th>问题</th>
+<th>原因</th>
+<th>解决方案</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>首页展示全文而非简介</td>
+<td>文章缺少<code>description</code>字段</td>
+<td>Front Matter中必须加<code>description</code></td>
+</tr>
+<tr>
+<td>Google Fonts加载极慢</td>
+<td>国内无法访问fonts.googleapis.com</td>
+<td><code>font.enable: false</code>，使用系统字体</td>
+</tr>
+<tr>
+<td>头像加载失败</td>
+<td>GitHub avatars域名国内不稳定</td>
+<td>头像下载到本地<code>source/images/</code></td>
+</tr>
+<tr>
+<td>NexT darkmode无切换按钮</td>
+<td>只支持<code>prefers-color-scheme</code>媒体查询</td>
+<td>自己实现JS切换+CSS变量覆盖</td>
+</tr>
+<tr>
+<td>自定义组件暗色模式下变浅</td>
+<td>CSS变量覆盖不完整</td>
+<td><code>html[data-theme=&quot;dark&quot;]</code>中覆盖<code>.sidebar-inner</code>等所有容器</td>
+</tr>
+<tr>
+<td><code>_data/body-end.njk</code>中使用Hexo变量报错</td>
+<td>某些上下文中<code>site</code>变量不可用</td>
+<td>改用<code>&#123;&#123; site.posts.length &#125;&#125;</code>等Nunjucks模板语法</td>
+</tr>
+</tbody></table>
+<h3 id="项目文件结构"><a href="#项目文件结构" class="headerlink" title="项目文件结构"></a>项目文件结构</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">├── _config.yml              # 站点配置</span><br><span class="line">├── _config.next.yml         # 主题配置</span><br><span class="line">├── .github/workflows/       # CI/CD</span><br><span class="line">│   └── deploy.yml</span><br><span class="line">├── source/</span><br><span class="line">│   ├── _posts/              # 文章</span><br><span class="line">│   ├── _data/               # 自定义注入</span><br><span class="line">│   │   ├── sidebar.njk      # 左侧sidebar</span><br><span class="line">│   │   ├── body-end.njk     # JS/HTML注入</span><br><span class="line">│   │   ├── variables.styl   # CSS变量覆盖</span><br><span class="line">│   │   └── styles.styl      # 自定义样式</span><br><span class="line">│   ├── images/              # 本地图片</span><br><span class="line">│   │   └── avatar.png</span><br><span class="line">│   ├── about/               # 关于页</span><br><span class="line">│   └── categories/          # 分类页</span><br><span class="line">└── package.json</span><br></pre></td></tr></table></figure>
+
+<h2 id="面试关联"><a href="#面试关联" class="headerlink" title="面试关联"></a>面试关联</h2><ol>
+<li><strong>CI&#x2F;CD流程设计？</strong> → GitHub Actions自动构建部署，push触发、多步骤编排、权限控制</li>
+<li><strong>前端主题切换实现？</strong> → CSS变量 + data属性 + localStorage持久化，不需要框架</li>
+<li><strong>静态站点生成原理？</strong> → 模板引擎渲染Markdown为HTML，部署到CDN&#x2F;静态托管</li>
+<li><strong>性能优化实践？</strong> → 字体本地化&#x2F;禁用、头像本地化、关闭不必要的外部CDN</li>
 </ol>
 ]]></content>
       <categories>
-        <category>学习日志</category>
+        <category>Hexo建站</category>
       </categories>
+      <tags>
+        <tag>Hexo</tag>
+        <tag>GitHub Pages</tag>
+        <tag>CI/CD</tag>
+        <tag>NexT</tag>
+      </tags>
   </entry>
   <entry>
     <title>LangChain学习问答：从模型调用到工具链全解析</title>
@@ -502,6 +648,91 @@
         <tag>LLM</tag>
         <tag>Python</tag>
         <tag>AI应用开发</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>LangChain学习问答：大模型是怎么&quot;知道&quot;要调用工具的？</title>
+    <url>/posts/LangChain%E5%AD%A6%E4%B9%A0%E9%97%AE%E7%AD%94-%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%98%AF%E6%80%8E%E4%B9%88%E7%9F%A5%E9%81%93%E8%A6%81%E8%B0%83%E7%94%A8%E5%B7%A5%E5%85%B7%E7%9A%84/</url>
+    <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>上一篇问答覆盖了 LangChain 框架的基础知识。这篇是追问篇——围绕”模型到底是怎么知道要调用工具的”这个问题，一层一层往底层挖，最终落到 Transformer 的自注意力机制上。</p>
+<hr>
+<h2 id="Q11：模型从哪知道要查哪个城市的天气？"><a href="#Q11：模型从哪知道要查哪个城市的天气？" class="headerlink" title="Q11：模型从哪知道要查哪个城市的天气？"></a>Q11：模型从哪知道要查哪个城市的天气？</h2><p>代码里只是 <code>bind_tools([get_weather])</code> 然后问”请问北京今天的天气如何”，模型怎么知道该查北京？</p>
+<p><strong>答案是模型从用户输入里自己提取的。</strong> 整个过程分三步：</p>
+<ol>
+<li><code>bind_tools([get_weather])</code> 把工具定义（名字、描述、参数 schema）塞进发给模型的请求体</li>
+<li>模型同时看到两样东西：用户说”请问北京今天的天气如何” + 有个工具叫 <code>get_weather</code>，参数是 <code>loc: str</code>，描述写着”查询指定城市的即时天气，建议传英文城市名”</li>
+<li>模型推理：用户问天气 + 有天气工具 → 应该调用 <code>get_weather</code>，参数 <code>loc</code> 填 <code>Beijing</code>（docstring 里写了建议英文，所以模型把”北京”翻译成 <code>Beijing</code>）</li>
+</ol>
+<p><strong>模型没有读你的函数代码，也没有直接调 HTTP 请求。它只看了三样东西——工具名、工具描述、参数 schema——然后从用户的话里自己推断出该填什么参数。</strong></p>
+<p>这也是为什么工具描述写得好不好，直接影响模型能不能正确调用。如果只写”查天气”三个字，模型可能不知道 <code>loc</code> 该传中文还是英文；而 docstring 写了”建议优先传英文城市名，如 Beijing、Shanghai”，模型才大概率把”北京”翻译成 <code>Beijing</code>。</p>
+<hr>
+<h2 id="Q12：没绑定任何工具时，模型会一直尝试寻找工具吗？"><a href="#Q12：没绑定任何工具时，模型会一直尝试寻找工具吗？" class="headerlink" title="Q12：没绑定任何工具时，模型会一直尝试寻找工具吗？"></a>Q12：没绑定任何工具时，模型会一直尝试寻找工具吗？</h2><p><strong>不会。模型根本不知道工具的存在，除非你主动告诉它。</strong></p>
+<p>关键在于 <code>bind_tools</code> 到底做了什么。不绑定工具时，发给 API 的请求是这样的：</p>
+<figure class="highlight json"><table><tr><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;model&quot;</span><span class="punctuation">:</span> <span class="string">&quot;qwen-plus&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;messages&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">&#123;</span><span class="attr">&quot;role&quot;</span><span class="punctuation">:</span> <span class="string">&quot;user&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;content&quot;</span><span class="punctuation">:</span> <span class="string">&quot;你好&quot;</span><span class="punctuation">&#125;</span><span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>绑定了工具后，请求变成了：</p>
+<figure class="highlight json"><table><tr><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;model&quot;</span><span class="punctuation">:</span> <span class="string">&quot;qwen-plus&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;messages&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">&#123;</span><span class="attr">&quot;role&quot;</span><span class="punctuation">:</span> <span class="string">&quot;user&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;content&quot;</span><span class="punctuation">:</span> <span class="string">&quot;你好&quot;</span><span class="punctuation">&#125;</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;tools&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">    <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;function&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;function&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;get_weather&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span> <span class="string">&quot;查询指定城市的即时天气...&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;parameters&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;object&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;properties&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="attr">&quot;loc&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;string&quot;</span><span class="punctuation">&#125;</span><span class="punctuation">&#125;</span><span class="punctuation">&#125;</span></span><br><span class="line">      <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>区别很明显：<strong><code>tools</code> 字段有没有内容，决定了模型能不能看到工具。</strong> 没绑工具时，请求里根本没有 <code>tools</code> 字段，模型就像一个”不知道自己有手有脚的人”，只会用嘴巴说话。它不会去想”我有没有工具”，因为这个概念根本不在它的输入里。</p>
+<p>模型不是在”尝试找工具”，而是被动地看请求里有没有工具定义。有就看，没有就正常说话。就像你进一家餐厅，菜单上写了什么菜你才能点什么，没有的菜你根本不会去想。</p>
+<hr>
+<h2 id="Q13：绑定了工具后，模型怎么知道什么时候该调用？又是怎么”记住”自己有工具的？"><a href="#Q13：绑定了工具后，模型怎么知道什么时候该调用？又是怎么”记住”自己有工具的？" class="headerlink" title="Q13：绑定了工具后，模型怎么知道什么时候该调用？又是怎么”记住”自己有工具的？"></a>Q13：绑定了工具后，模型怎么知道什么时候该调用？又是怎么”记住”自己有工具的？</h2><p>这个问题要拆成两半回答。</p>
+<p><strong>先说”什么时候该调用”：</strong> 模型同时看到用户消息 + 全部工具定义，然后做一次推理，输出两种可能——要么直接回文字，要么返回 <code>tool_calls</code> 说”我想调这个工具”。判断的依据就是相关性：用户问题跟工具描述关联度高就调，关联度低就跳过。</p>
+<p><strong>再说”怎么记住”：模型不是”记住”自己有工具，而是每次请求都重新看一遍工具定义。</strong></p>
+<p>每次用户发一句话，程序都会构造一个新的 HTTP 请求发给模型，每一次请求里 <code>tools</code> 字段的内容都会完整带上：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">第 1 轮请求：</span><br><span class="line">  messages: [用户: &quot;你好&quot;]</span><br><span class="line">  tools: [get_weather 的完整定义]     ← 每次都带</span><br><span class="line"></span><br><span class="line">第 2 轮请求：</span><br><span class="line">  messages: [用户: &quot;你好&quot;, AI: &quot;你好呀&quot;, 用户: &quot;北京天气怎么样&quot;]</span><br><span class="line">  tools: [get_weather 的完整定义]     ← 又完整带了一遍</span><br></pre></td></tr></table></figure>
+
+<p>模型处理每一轮请求时，看到的都是<strong>完整的对话历史 + 完整的工具定义</strong>。它不需要”记住”上一轮有没有工具，因为这一轮的请求里工具定义又在眼前了。</p>
+<p>打个比方：不是你”记得冰箱里有牛奶”，而是<strong>你每次走进厨房，冰箱上都贴着一张清单写着”冰箱里有牛奶”</strong>。你每做一道菜之前都会看一遍这张清单，然后判断这道菜要不要用牛奶。清单不是你脑里的记忆，是每次都摆在眼前的信息。</p>
+<p>所以：没有数据库存储、没有缓存存储、没有模型内部的”记忆”。<strong>是你的程序在每次请求时，主动把工具定义塞进请求体里。</strong> 这也是为什么工具越多，每轮请求的 token 消耗越大——每个工具的 name、description、args_schema 都要全文塞进去，不管这轮用不用。</p>
+<hr>
+<h2 id="Q14：3万字长文本下，模型怎么还能”记住”自己有工具？是自注意力机制吗？"><a href="#Q14：3万字长文本下，模型怎么还能”记住”自己有工具？是自注意力机制吗？" class="headerlink" title="Q14：3万字长文本下，模型怎么还能”记住”自己有工具？是自注意力机制吗？"></a>Q14：3万字长文本下，模型怎么还能”记住”自己有工具？是自注意力机制吗？</h2><p><strong>是的，就是自注意力机制。</strong> 但”记住”这个词不够准确，更精确的说法是——<strong>模型不需要记住，因为它一直在看着。</strong></p>
+<p>人阅读3万字文章时，读到第10个问题时，前面看过的内容已经变成”记忆”了，你需要靠脑子回忆。但模型的推理方式不是这样的——它不是”读完再回忆”，而是<strong>把所有 token 同时摆在面前，一次性计算它们之间的关系</strong>。</p>
+<p>当模型在生成第10个问题的回答时，它的自注意力机制在做的事情是：<strong>计算当前位置的 token 和前面每一个 token 之间的关联度。</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">位置 1-5000:     用户那3万字文章</span><br><span class="line">位置 5001-5010:  用户提的10个问题</span><br><span class="line">位置 5011-5030:  工具定义（name/description/args）</span><br><span class="line">位置 5031+:      模型正在生成的回答</span><br></pre></td></tr></table></figure>
+
+<p>模型在生成位置 5031 的 token 时，自注意力会计算它和位置 1-5030 每一个 token 的关联权重。如果第10个问题提到了”天气”，而工具定义里写着”查询天气”，这两个位置之间就会产生很高的注意力权重——<strong>模型不是”想起来了”，而是它一直在看着工具定义，只是第9个问题和工具的关联度低，第10个问题和工具的关联度高。</strong></p>
+<p>这跟人类的区别：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>人类</th>
+<th>模型</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>方式</td>
+<td>读完后靠记忆回忆</td>
+<td>所有 token 同时在场，注意力权重决定关联</td>
+</tr>
+<tr>
+<td>“记住”</td>
+<td>需要存到脑子里</td>
+<td>不需要存储，因为原文就在输入里</td>
+</tr>
+<tr>
+<td>遗忘</td>
+<td>会忘</td>
+<td>不会忘，但注意力权重可能被稀释</td>
+</tr>
+</tbody></table>
+<p><strong>所以这里有一个真正的工程问题：输入越长，注意力越可能被稀释。</strong> 3万字文章 + 10个问题 + 工具定义的场景下，模型有时候会”忽略”工具——不是它忘了，而是注意力权重被大量文章内容分散了，工具定义的权重相对变低了。这也是为什么工程上会控制输入长度、把工具定义放在靠后的位置、或者用 RAG 先做一轮筛选再喂给模型。</p>
+<hr>
+<h2 id="追问链总结"><a href="#追问链总结" class="headerlink" title="追问链总结"></a>追问链总结</h2><p>这四个问题形成了一条完整的追问链：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Q11: 城市名从哪来？        → 从用户输入 + 工具描述里推理出来的</span><br><span class="line">Q12: 不绑工具会怎样？       → 请求里根本没有 tools 字段，模型不知道工具存在</span><br><span class="line">Q13: 怎么&quot;记住&quot;有工具？    → 每次请求都重新带一遍工具定义，不需要记忆</span><br><span class="line">Q14: 长文本下怎么不遗忘？   → 自注意力机制，所有 token 同时在场</span><br><span class="line">                         → 但注意力可能被稀释，这是真正的工程挑战</span><br></pre></td></tr></table></figure>
+
+<p>从”模型怎么知道查北京”一路追问到”Transformer 自注意力机制”，这就是从应用层挖到模型层的过程。理解了这层，你以后写工具定义、设计工具数量、控制输入长度，都知道背后的原因了。</p>
+]]></content>
+      <categories>
+        <category>LangChain</category>
+        <category>AI问答</category>
+      </categories>
+      <tags>
+        <tag>LangChain</tag>
+        <tag>AI应用开发</tag>
+        <tag>Tool Calling</tag>
+        <tag>自注意力机制</tag>
+        <tag>Transformer</tag>
       </tags>
   </entry>
   <entry>
@@ -1094,6 +1325,31 @@
       </tags>
   </entry>
   <entry>
+    <title>26年06月10日总结</title>
+    <url>/posts/%E9%9D%A2%E8%AF%95%E8%AE%B0%E5%BD%95-20260616/</url>
+    <content><![CDATA[<h1 id="面试记录-2026-06-16"><a href="#面试记录-2026-06-16" class="headerlink" title="面试记录 2026-06-16"></a>面试记录 2026-06-16</h1><h2 id="Q：你做的这个RAG系统，你做了一些什么东西？"><a href="#Q：你做的这个RAG系统，你做了一些什么东西？" class="headerlink" title="Q：你做的这个RAG系统，你做了一些什么东西？"></a>Q：你做的这个RAG系统，你做了一些什么东西？</h2><p>首先是离线阶段，就是用户上传他想要检索的文档，然后对这个文档进行切块，根据提前设定好的分块值，然后进行分块，并保持一定的块间重叠，保证上下文语义连贯，然后通过标模型把它进行向量化，然后这个时候就可以进行检索阶段。</p>
+<p>检索阶段就是利用BM25和FAISS的索引，对它进行关键词匹配和向量匹配，然后再用RRF混合融合给它们打分，然后出排序出来，然后再用重排序的模型对它进行排序提取最有价值的前几条，然后包装成上下文给大模型。</p>
+<h2 id="Q：这个系统是你自己开发的？"><a href="#Q：这个系统是你自己开发的？" class="headerlink" title="Q：这个系统是你自己开发的？"></a>Q：这个系统是你自己开发的？</h2><p>这个项目是根据网上开源的项目改编的，RAG系统是个人开发的。</p>
+<h2 id="Q：你这个RAG系统，实时分析分析的一些是什么，主要分析一些什么内容？"><a href="#Q：你这个RAG系统，实时分析分析的一些是什么，主要分析一些什么内容？" class="headerlink" title="Q：你这个RAG系统，实时分析分析的一些是什么，主要分析一些什么内容？"></a>Q：你这个RAG系统，实时分析分析的一些是什么，主要分析一些什么内容？</h2><p>主要分析的是微博的热搜50条信息，就是现在大部分平台都会有一个热搜榜单，微博就有这样一个榜单，我就查询这个榜单所有的热搜标题信息，然后把它进行数据清洗，然后再喂给大模型。</p>
+<p>然后大模型根据预先设置好提示词，对它进行情感分析、类型分析，还有话题聚类。然后这样的结果再存到MySQL和Redis里面，然后再通过Kafka传递给Java的后端，用Flink计算5分钟的窗口值，计算这5分钟之内的情感统计结果、类型统计结果和话题统计结果。</p>
+<p>然后再由SpringBoot加Vue3组合的前后端服务进行展示。</p>
+<h2 id="Q：那么这个有什么作用？"><a href="#Q：那么这个有什么作用？" class="headerlink" title="Q：那么这个有什么作用？"></a>Q：那么这个有什么作用？</h2><p>作用就是可以分析热搜的一个舆情走向，比如你看到热搜之后再点进这个热搜，再去分析这个热搜的相关情感，还有它可能的走向，这一套就只能靠人工进行。我这个系统就把它变成一个自动化的流程，它可以每隔半分钟都抓取50条热搜，然后对它进行分析。</p>
+<p>分析之后计算，比如计算科技类的平均情感，你就可以看到科技热搜在今天的一个走向，就是可以快速判断出微博热搜的一个舆情走向。</p>
+<h2 id="Q：那你这个能不能改一改去抓淘宝？"><a href="#Q：那你这个能不能改一改去抓淘宝？" class="headerlink" title="Q：那你这个能不能改一改去抓淘宝？"></a>Q：那你这个能不能改一改去抓淘宝？</h2><p>可以，这个有预制这样的一个接口，它是分模块开发的，只要把抓取模块改成淘宝热搜就可以。</p>
+<h2 id="Q：那能抓取一些企业的数据？"><a href="#Q：那能抓取一些企业的数据？" class="headerlink" title="Q：那能抓取一些企业的数据？"></a>Q：那能抓取一些企业的数据？</h2><p>网站数据可以，就看那个企业的反扒，改一下反扒策略就行。</p>
+<h2 id="Q：你对爬虫这一块怎么样？"><a href="#Q：你对爬虫这一块怎么样？" class="headerlink" title="Q：你对爬虫这一块怎么样？"></a>Q：你对爬虫这一块怎么样？</h2><p>爬虫的话，我主要了解的是我这个项目使用的是requests直接发送请求。之前我也尝试过用Selenium进行自动化查询，但那个需要打开一个实例化浏览器，性能方面比较慢，我就用requests直接发送网络请求，然后去爬取了百度、微博、知乎这些网站。</p>
+<p>因为我研究的主要是微博平台，所以就主要针对微博的反扒进行了一些优化。比如微博上需要携带cookie，我就会去网站F12控制台去复制一下cookie。然后我也有计划后期写一个cookie更新器，去自动更新cookie，还有IP代理来防止IP封禁，不过目前微博还没有这样的反扒策略。</p>
+<h2 id="Q：你这大模型，现在用的模型基本上都是直接用API调用的是吧？"><a href="#Q：你这大模型，现在用的模型基本上都是直接用API调用的是吧？" class="headerlink" title="Q：你这大模型，现在用的模型基本上都是直接用API调用的是吧？"></a>Q：你这大模型，现在用的模型基本上都是直接用API调用的是吧？</h2><p>RAG的重排序模型用的是本地模型，本地在HuggingFace社区开源下载的一个重排序模型，其他都是调的现成的API，比如千问的和阿里那边的。重排序模型是在HuggingFace上面下载的一个比较通用的纯排序模型，那个模型名字我也忘了，就是一个开源的比较小的模型，只有几十M，所以比较方便。</p>
+<h2 id="Q：你对服务器熟悉吗？"><a href="#Q：你对服务器熟悉吗？" class="headerlink" title="Q：你对服务器熟悉吗？"></a>Q：你对服务器熟悉吗？</h2><p>服务器方面我有学过Linux相关操作，但是目前没有往更深入了解，我懂一些简单的命令，还有包括Linux上面的Kali系统，还有Ubuntu，还有Docker，还有大数据，这些我们学校也有可能学过，就是说可能会上手比较快一点，因为有实际操作，但是是两三年前的了，也没有更深入，大一大二学的。</p>
+<h2 id="Q：Java你熟悉吗？"><a href="#Q：Java你熟悉吗？" class="headerlink" title="Q：Java你熟悉吗？"></a>Q：Java你熟悉吗？</h2><p>Java的话，我有学过SpringBoot加Vue3的前后端架构，然后还有一些基础的，比如集合、泛型，然后各种Java特性有一点了解。前端框架还是挺熟悉的，独立完成是可以的，简单的逻辑其实AI也都可以实现，我这个毕设项目就是Vue3实现的。</p>
+<h2 id="Q：PDF里面的图片怎么处理？"><a href="#Q：PDF里面的图片怎么处理？" class="headerlink" title="Q：PDF里面的图片怎么处理？"></a>Q：PDF里面的图片怎么处理？</h2><p>PDF里面图片，主要是把图片向量化，有两种方案我觉得，一种是找专门的类去提取，还有一种就是先把图片全部提取出来，然后再单独进行向量化，避免跟文字混淆。有的图片里面也是文字，这种就用OCR图片文字识别就行，就没必要再去搞向量化。那种纯图片没有文字的，就向量化提取。</p>
+<h2 id="Q：你目前想做的是在模型的基础上做一些应用？"><a href="#Q：你目前想做的是在模型的基础上做一些应用？" class="headerlink" title="Q：你目前想做的是在模型的基础上做一些应用？"></a>Q：你目前想做的是在模型的基础上做一些应用？</h2><p>对，就比如一些用模型进行编程的，相当于Claude的Code和Cursor就是编程的助手，然后还有Coze和Dify这些平台就是自动化的助手，它们都是已经有模型，然后给这些模型加功能，比如让模型帮你发邮件，这种功能就像之前小龙虾的方案。</p>
+]]></content>
+      <categories>
+        <category>面试</category>
+      </categories>
+  </entry>
+  <entry>
     <title>企业知识库问答助手</title>
     <url>/posts/prompts/%E4%BC%81%E4%B8%9A%E7%9F%A5%E8%AF%86%E5%BA%93%E9%97%AE%E7%AD%94%E5%8A%A9%E6%89%8B/</url>
     <content><![CDATA[<h1 id="Role-企业知识库问答助手"><a href="#Role-企业知识库问答助手" class="headerlink" title="Role: 企业知识库问答助手"></a>Role: 企业知识库问答助手</h1><h2 id="Profile"><a href="#Profile" class="headerlink" title="Profile"></a>Profile</h2><ul>
@@ -1161,152 +1417,6 @@
       <tags>
         <tag>Prompt</tag>
         <tag>Skill</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Hexo+GitHub Pages博客搭建指南：从零到自动部署</title>
-    <url>/posts/Hexo+GitHub-Pages%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA%E6%8C%87%E5%8D%97/</url>
-    <content><![CDATA[<h2 id="问题引入：为什么选择Hexo？"><a href="#问题引入：为什么选择Hexo？" class="headerlink" title="问题引入：为什么选择Hexo？"></a>问题引入：为什么选择Hexo？</h2><p>作为AI应用开发方向的学习者，我需要一个技术博客来沉淀项目经历、展示工程能力。Hexo的优势：</p>
-<ul>
-<li><strong>Markdown写作</strong>：技术文章天然适合Markdown，代码块、公式、表格无缝支持</li>
-<li><strong>静态站点</strong>：GitHub Pages免费托管，零服务器成本</li>
-<li><strong>主题生态</strong>：NexT主题成熟稳定，高度可定制</li>
-<li><strong>自动部署</strong>：push代码即可触发GitHub Actions构建发布，全流程自动化</li>
-</ul>
-<p>最终效果：<strong>push一篇Markdown → GitHub Actions自动构建 → 1分钟内线上更新</strong>。</p>
-<h2 id="原理讲解"><a href="#原理讲解" class="headerlink" title="原理讲解"></a>原理讲解</h2><h3 id="Hexo的工作流程"><a href="#Hexo的工作流程" class="headerlink" title="Hexo的工作流程"></a>Hexo的工作流程</h3><p>Hexo是一个基于Node.js的静态站点生成器，核心流程：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Markdown源文件 → Hexo渲染引擎 → HTML静态页面 → 部署到Web服务器</span><br></pre></td></tr></table></figure>
-
-<p>关键概念：</p>
-<table>
-<thead>
-<tr>
-<th>概念</th>
-<th>说明</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>source/_posts/</code></td>
-<td>文章Markdown存放目录</td>
-</tr>
-<tr>
-<td><code>_config.yml</code></td>
-<td>站点配置（标题、URL、部署方式等）</td>
-</tr>
-<tr>
-<td><code>_config.next.yml</code></td>
-<td>主题配置（NexT专用，覆盖默认配置）</td>
-</tr>
-<tr>
-<td><code>source/_data/</code></td>
-<td>自定义数据文件（样式、脚本、模板注入）</td>
-</tr>
-<tr>
-<td><code>themes/</code></td>
-<td>主题目录（npm安装的主题在node_modules中）</td>
-</tr>
-</tbody></table>
-<h3 id="GitHub-Pages-Actions部署原理"><a href="#GitHub-Pages-Actions部署原理" class="headerlink" title="GitHub Pages + Actions部署原理"></a>GitHub Pages + Actions部署原理</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">本地开发(push main) → GitHub Actions触发 → npm install → hexo generate → 产物推送到gh-pages分支 → GitHub Pages提供服务</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li><code>main</code>分支：存放源码（Markdown、配置、样式）</li>
-<li><code>gh-pages</code>分支：存放构建产物（纯HTML&#x2F;CSS&#x2F;JS），由Actions自动推送</li>
-</ul>
-<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><h3 id="1-环境准备"><a href="#1-环境准备" class="headerlink" title="1. 环境准备"></a>1. 环境准备</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 安装Node.js（推荐18+LTS，我用的是20）</span></span><br><span class="line"><span class="comment"># Windows: https://nodejs.org/ 下载安装</span></span><br><span class="line"><span class="comment"># 验证</span></span><br><span class="line">node -v   <span class="comment"># v20.x.x</span></span><br><span class="line">npm -v    <span class="comment"># 10.x.x</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装Hexo CLI</span></span><br><span class="line">npm install -g hexo-cli</span><br><span class="line"></span><br><span class="line"><span class="comment"># 初始化博客</span></span><br><span class="line">hexo init my-blog</span><br><span class="line"><span class="built_in">cd</span> my-blog</span><br><span class="line">npm install</span><br></pre></td></tr></table></figure>
-
-<h3 id="2-安装NexT主题"><a href="#2-安装NexT主题" class="headerlink" title="2. 安装NexT主题"></a>2. 安装NexT主题</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm install hexo-theme-next</span><br></pre></td></tr></table></figure>
-
-<p>然后在<code>_config.yml</code>中设置：</p>
-<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">theme:</span> <span class="string">next</span></span><br></pre></td></tr></table></figure>
-
-<p>NexT的主题配置不要改<code>node_modules/hexo-theme-next/_config.yml</code>，而是在项目根目录创建<code>_config.next.yml</code>，Hexo会自动合并。这样主题升级时不会丢失自定义配置。</p>
-<h3 id="3-站点配置-config-yml关键项"><a href="#3-站点配置-config-yml关键项" class="headerlink" title="3. 站点配置_config.yml关键项"></a>3. 站点配置<code>_config.yml</code>关键项</h3><figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">title:</span> <span class="string">你的博客标题</span></span><br><span class="line"><span class="attr">subtitle:</span> <span class="string">&#x27;副标题&#x27;</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">站点描述，用于SEO</span></span><br><span class="line"><span class="attr">keywords:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">关键词1</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">关键词2</span></span><br><span class="line"><span class="attr">author:</span> <span class="string">你的名字</span></span><br><span class="line"><span class="attr">language:</span> <span class="string">zh-CN</span></span><br><span class="line"><span class="attr">timezone:</span> <span class="string">&#x27;Asia/Shanghai&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="attr">url:</span> <span class="string">https://username.github.io</span></span><br><span class="line"><span class="attr">permalink:</span> <span class="string">posts/:title/</span></span><br><span class="line"></span><br><span class="line"><span class="attr">theme:</span> <span class="string">next</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 每篇文章必须有description字段，否则首页会展示全文</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="4-主题配置-config-next-yml关键项"><a href="#4-主题配置-config-next-yml关键项" class="headerlink" title="4. 主题配置_config.next.yml关键项"></a>4. 主题配置<code>_config.next.yml</code>关键项</h3><figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">scheme:</span> <span class="string">Pisces</span>           <span class="comment"># 双栏布局，适合技术博客</span></span><br><span class="line"><span class="attr">theme_color:</span></span><br><span class="line">  <span class="attr">light:</span> <span class="string">&quot;#7c3aed&quot;</span>       <span class="comment"># 浅色主色</span></span><br><span class="line">  <span class="attr">dark:</span> <span class="string">&quot;#a855f7&quot;</span>        <span class="comment"># 深色主色</span></span><br><span class="line"></span><br><span class="line"><span class="attr">font:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="literal">false</span>          <span class="comment"># 关闭Google Fonts，国内加载慢</span></span><br><span class="line"></span><br><span class="line"><span class="attr">local_search:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="literal">true</span>           <span class="comment"># 本地搜索功能</span></span><br><span class="line"></span><br><span class="line"><span class="attr">mermaid:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="literal">true</span>           <span class="comment"># Mermaid图表支持</span></span><br><span class="line"></span><br><span class="line"><span class="attr">darkmode:</span> <span class="literal">false</span>          <span class="comment"># 关闭系统跟随，改用手动切换按钮</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="5-自定义样式和组件注入"><a href="#5-自定义样式和组件注入" class="headerlink" title="5. 自定义样式和组件注入"></a>5. 自定义样式和组件注入</h3><p>NexT支持通过<code>source/_data/</code>目录注入自定义文件，这是最强大的定制方式：</p>
-<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># _config.next.yml</span></span><br><span class="line"><span class="attr">custom_file_path:</span></span><br><span class="line">  <span class="attr">sidebar:</span> <span class="string">source/_data/sidebar.njk</span>    <span class="comment"># 自定义左侧sidebar</span></span><br><span class="line">  <span class="attr">bodyEnd:</span> <span class="string">source/_data/body-end.njk</span>   <span class="comment"># body末尾注入HTML/JS</span></span><br><span class="line">  <span class="attr">variable:</span> <span class="string">source/_data/variables.styl</span> <span class="comment"># 覆盖CSS变量</span></span><br><span class="line">  <span class="attr">style:</span> <span class="string">source/_data/styles.styl</span>      <span class="comment"># 自定义样式</span></span><br></pre></td></tr></table></figure>
-
-<p><strong>深浅色切换</strong>的实现思路：</p>
-<ol>
-<li>关闭NexT自带的<code>darkmode</code>（它基于<code>prefers-color-scheme</code>媒体查询，无切换按钮）</li>
-<li>在<code>body-end.njk</code>中添加切换按钮和JS，通过给<code>&lt;html&gt;</code>添加<code>data-theme=&quot;dark&quot;</code>属性控制</li>
-<li>在<code>styles.styl</code>中用<code>html[data-theme=&quot;dark&quot;]</code>选择器覆盖NexT的CSS变量和自定义组件样式</li>
-<li>主题偏好保存在<code>localStorage</code>，刷新后保持</li>
-</ol>
-<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 核心切换逻辑</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">applyTheme</span>(<span class="params">dark</span>) &#123;</span><br><span class="line">  <span class="keyword">if</span> (dark) &#123;</span><br><span class="line">    html.<span class="title function_">setAttribute</span>(<span class="string">&#x27;data-theme&#x27;</span>, <span class="string">&#x27;dark&#x27;</span>);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    html.<span class="title function_">removeAttribute</span>(<span class="string">&#x27;data-theme&#x27;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 读取用户偏好</span></span><br><span class="line"><span class="keyword">var</span> saved = <span class="variable language_">localStorage</span>.<span class="title function_">getItem</span>(<span class="string">&#x27;theme&#x27;</span>);</span><br><span class="line"><span class="title function_">applyTheme</span>(saved === <span class="string">&#x27;dark&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 点击切换</span></span><br><span class="line">toggle.<span class="title function_">addEventListener</span>(<span class="string">&#x27;click&#x27;</span>, <span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="keyword">var</span> isDark = html.<span class="title function_">getAttribute</span>(<span class="string">&#x27;data-theme&#x27;</span>) === <span class="string">&#x27;dark&#x27;</span>;</span><br><span class="line">  <span class="title function_">applyTheme</span>(!isDark);</span><br><span class="line">  <span class="variable language_">localStorage</span>.<span class="title function_">setItem</span>(<span class="string">&#x27;theme&#x27;</span>, isDark ? <span class="string">&#x27;light&#x27;</span> : <span class="string">&#x27;dark&#x27;</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight styl"><table><tr><td class="code"><pre><span class="line"><span class="comment">// styles.styl 中的暗色覆盖</span></span><br><span class="line"><span class="selector-tag">html</span><span class="selector-attr">[data-theme=<span class="string">&quot;dark&quot;</span>]</span></span><br><span class="line">  <span class="attr">--body-bg-color</span>: <span class="number">#0a0a0f</span></span><br><span class="line">  <span class="attr">--content-bg-color</span>: <span class="number">#1a1a2e</span></span><br><span class="line">  <span class="attr">--text-color</span>: <span class="number">#e2e8f0</span></span><br><span class="line">  <span class="attr">--link-color</span>: <span class="number">#c084fc</span></span><br><span class="line">  <span class="comment">// ...更多变量</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="6-文章Front-Matter模板"><a href="#6-文章Front-Matter模板" class="headerlink" title="6. 文章Front Matter模板"></a>6. 文章Front Matter模板</h3><figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">文章标题</span></span><br><span class="line"><span class="attr">date:</span> <span class="number">2026-06-10</span></span><br><span class="line"><span class="attr">tags:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">标签1</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">标签2</span></span><br><span class="line"><span class="attr">categories:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">分类名</span></span><br><span class="line"><span class="attr">summary:</span> <span class="string">一句话摘要（列表页展示）</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">一句话描述（首页展示，必须有，否则首页会展示全文）</span></span><br><span class="line"><span class="meta">---</span></span><br></pre></td></tr></table></figure>
-
-<p><strong>重要</strong>：<code>description</code>字段是首页展示简介的关键。没有<code>description</code>的文章会在首页展示全文。</p>
-<h3 id="7-GitHub-Actions自动部署"><a href="#7-GitHub-Actions自动部署" class="headerlink" title="7. GitHub Actions自动部署"></a>7. GitHub Actions自动部署</h3><p>在<code>.github/workflows/deploy.yml</code>中配置：</p>
-<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">name:</span> <span class="string">Deploy</span> <span class="string">to</span> <span class="string">GitHub</span> <span class="string">Pages</span></span><br><span class="line"></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">push:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">main</span></span><br><span class="line"></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="attr">deploy:</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">    <span class="attr">permissions:</span></span><br><span class="line">      <span class="attr">contents:</span> <span class="string">write</span></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Checkout</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">actions/checkout@v4</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">submodules:</span> <span class="string">recursive</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Setup</span> <span class="string">Node.js</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">actions/setup-node@v4</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">node-version:</span> <span class="string">&#x27;20&#x27;</span></span><br><span class="line">          <span class="attr">cache:</span> <span class="string">&#x27;npm&#x27;</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Install</span> <span class="string">dependencies</span></span><br><span class="line">        <span class="attr">run:</span> <span class="string">npm</span> <span class="string">install</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Build</span> <span class="string">Hexo</span></span><br><span class="line">        <span class="attr">run:</span> <span class="string">npx</span> <span class="string">hexo</span> <span class="string">clean</span> <span class="string">&amp;&amp;</span> <span class="string">npx</span> <span class="string">hexo</span> <span class="string">generate</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Deploy</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">peaceiris/actions-gh-pages@v4</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">github_token:</span> <span class="string">$&#123;&#123;</span> <span class="string">secrets.GITHUB_TOKEN</span> <span class="string">&#125;&#125;</span></span><br><span class="line">          <span class="attr">publish_dir:</span> <span class="string">./public</span></span><br><span class="line">          <span class="attr">publish_branch:</span> <span class="string">gh-pages</span></span><br></pre></td></tr></table></figure>
-
-<p>部署流程：<code>git push origin main</code> → Actions自动构建 → <code>gh-pages</code>分支更新 → 线上生效。</p>
-<h3 id="8-头像本地化"><a href="#8-头像本地化" class="headerlink" title="8. 头像本地化"></a>8. 头像本地化</h3><p>GitHub头像URL在国内访问不稳定，下载到本地解决：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> -p <span class="built_in">source</span>/images</span><br><span class="line">curl -L -o <span class="built_in">source</span>/images/avatar.png <span class="string">&quot;你的头像URL&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>配置中使用本地路径：</p>
-<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">avatar:</span></span><br><span class="line">  <span class="attr">url:</span> <span class="string">/images/avatar.png</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="实验结论与反思"><a href="#实验结论与反思" class="headerlink" title="实验结论与反思"></a>实验结论与反思</h2><h3 id="踩过的坑"><a href="#踩过的坑" class="headerlink" title="踩过的坑"></a>踩过的坑</h3><table>
-<thead>
-<tr>
-<th>问题</th>
-<th>原因</th>
-<th>解决方案</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>首页展示全文而非简介</td>
-<td>文章缺少<code>description</code>字段</td>
-<td>Front Matter中必须加<code>description</code></td>
-</tr>
-<tr>
-<td>Google Fonts加载极慢</td>
-<td>国内无法访问fonts.googleapis.com</td>
-<td><code>font.enable: false</code>，使用系统字体</td>
-</tr>
-<tr>
-<td>头像加载失败</td>
-<td>GitHub avatars域名国内不稳定</td>
-<td>头像下载到本地<code>source/images/</code></td>
-</tr>
-<tr>
-<td>NexT darkmode无切换按钮</td>
-<td>只支持<code>prefers-color-scheme</code>媒体查询</td>
-<td>自己实现JS切换+CSS变量覆盖</td>
-</tr>
-<tr>
-<td>自定义组件暗色模式下变浅</td>
-<td>CSS变量覆盖不完整</td>
-<td><code>html[data-theme=&quot;dark&quot;]</code>中覆盖<code>.sidebar-inner</code>等所有容器</td>
-</tr>
-<tr>
-<td><code>_data/body-end.njk</code>中使用Hexo变量报错</td>
-<td>某些上下文中<code>site</code>变量不可用</td>
-<td>改用<code>&#123;&#123; site.posts.length &#125;&#125;</code>等Nunjucks模板语法</td>
-</tr>
-</tbody></table>
-<h3 id="项目文件结构"><a href="#项目文件结构" class="headerlink" title="项目文件结构"></a>项目文件结构</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">├── _config.yml              # 站点配置</span><br><span class="line">├── _config.next.yml         # 主题配置</span><br><span class="line">├── .github/workflows/       # CI/CD</span><br><span class="line">│   └── deploy.yml</span><br><span class="line">├── source/</span><br><span class="line">│   ├── _posts/              # 文章</span><br><span class="line">│   ├── _data/               # 自定义注入</span><br><span class="line">│   │   ├── sidebar.njk      # 左侧sidebar</span><br><span class="line">│   │   ├── body-end.njk     # JS/HTML注入</span><br><span class="line">│   │   ├── variables.styl   # CSS变量覆盖</span><br><span class="line">│   │   └── styles.styl      # 自定义样式</span><br><span class="line">│   ├── images/              # 本地图片</span><br><span class="line">│   │   └── avatar.png</span><br><span class="line">│   ├── about/               # 关于页</span><br><span class="line">│   └── categories/          # 分类页</span><br><span class="line">└── package.json</span><br></pre></td></tr></table></figure>
-
-<h2 id="面试关联"><a href="#面试关联" class="headerlink" title="面试关联"></a>面试关联</h2><ol>
-<li><strong>CI&#x2F;CD流程设计？</strong> → GitHub Actions自动构建部署，push触发、多步骤编排、权限控制</li>
-<li><strong>前端主题切换实现？</strong> → CSS变量 + data属性 + localStorage持久化，不需要框架</li>
-<li><strong>静态站点生成原理？</strong> → 模板引擎渲染Markdown为HTML，部署到CDN&#x2F;静态托管</li>
-<li><strong>性能优化实践？</strong> → 字体本地化&#x2F;禁用、头像本地化、关闭不必要的外部CDN</li>
-</ol>
-]]></content>
-      <categories>
-        <category>Hexo建站</category>
-      </categories>
-      <tags>
-        <tag>Hexo</tag>
-        <tag>GitHub Pages</tag>
-        <tag>CI/CD</tag>
-        <tag>NexT</tag>
       </tags>
   </entry>
 </search>

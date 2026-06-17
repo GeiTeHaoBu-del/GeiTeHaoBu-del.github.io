@@ -19,13 +19,15 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"geitehaobu-del.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":280,"width_dual_column":240,"display":"always","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":"flat","show_result":true},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":false,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":true,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInUp","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":10,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
 
-    <meta name="description" content="记录大模型应用开发的学习与实践，涵盖RAG系统、Agent架构、模型微调、工程化部署等技术方向">
-<meta property="og:type" content="website">
-<meta property="og:title" content="吴纪辰的大模型学习路径">
-<meta property="og:url" content="https://geitehaobu-del.github.io/tags/FAISS/index.html">
+    <meta name="description" content="一家半导体公司，想要开发半导体ai">
+<meta property="og:type" content="article">
+<meta property="og:title" content="26年06月10日总结">
+<meta property="og:url" content="https://geitehaobu-del.github.io/posts/%E9%9D%A2%E8%AF%95%E8%AE%B0%E5%BD%95-20260616/index.html">
 <meta property="og:site_name" content="吴纪辰的大模型学习路径">
-<meta property="og:description" content="记录大模型应用开发的学习与实践，涵盖RAG系统、Agent架构、模型微调、工程化部署等技术方向">
+<meta property="og:description" content="一家半导体公司，想要开发半导体ai">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-06-15T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-06-17T15:47:30.207Z">
 <meta property="article:author" content="吴纪辰">
 <meta property="article:tag" content="AI应用开发">
 <meta property="article:tag" content="Agent">
@@ -36,13 +38,13 @@
 <meta name="twitter:card" content="summary">
 
 
-<link rel="canonical" href="https://geitehaobu-del.github.io/tags/FAISS/">
+<link rel="canonical" href="https://geitehaobu-del.github.io/posts/%E9%9D%A2%E8%AF%95%E8%AE%B0%E5%BD%95-20260616/">
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":false,"lang":"zh-CN","comments":"","permalink":"","path":"tags/FAISS/index.html","title":""}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://geitehaobu-del.github.io/posts/%E9%9D%A2%E8%AF%95%E8%AE%B0%E5%BD%95-20260616/","path":"posts/面试记录-20260616/","title":"26年06月10日总结"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>标签: FAISS | 吴纪辰的大模型学习路径</title>
+<title>26年06月10日总结 | 吴纪辰的大模型学习路径</title>
   
 
 
@@ -151,7 +153,7 @@
   
   <aside class="sidebar">
 
-    <div class="sidebar-inner sidebar-overview-active">
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
       <ul class="sidebar-nav">
         <li class="sidebar-nav-toc">
           文章目录
@@ -164,6 +166,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%9D%A2%E8%AF%95%E8%AE%B0%E5%BD%95-2026-06-16"><span class="nav-number">1.</span> <span class="nav-text">面试记录 2026-06-16</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Q%EF%BC%9A%E4%BD%A0%E5%81%9A%E7%9A%84%E8%BF%99%E4%B8%AARAG%E7%B3%BB%E7%BB%9F%EF%BC%8C%E4%BD%A0%E5%81%9A%E4%BA%86%E4%B8%80%E4%BA%9B%E4%BB%80%E4%B9%88%E4%B8%9C%E8%A5%BF%EF%BC%9F"><span class="nav-number">1.1.</span> <span class="nav-text">Q：你做的这个RAG系统，你做了一些什么东西？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Q%EF%BC%9A%E8%BF%99%E4%B8%AA%E7%B3%BB%E7%BB%9F%E6%98%AF%E4%BD%A0%E8%87%AA%E5%B7%B1%E5%BC%80%E5%8F%91%E7%9A%84%EF%BC%9F"><span class="nav-number">1.2.</span> <span class="nav-text">Q：这个系统是你自己开发的？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Q%EF%BC%9A%E4%BD%A0%E8%BF%99%E4%B8%AARAG%E7%B3%BB%E7%BB%9F%EF%BC%8C%E5%AE%9E%E6%97%B6%E5%88%86%E6%9E%90%E5%88%86%E6%9E%90%E7%9A%84%E4%B8%80%E4%BA%9B%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%8C%E4%B8%BB%E8%A6%81%E5%88%86%E6%9E%90%E4%B8%80%E4%BA%9B%E4%BB%80%E4%B9%88%E5%86%85%E5%AE%B9%EF%BC%9F"><span class="nav-number">1.3.</span> <span class="nav-text">Q：你这个RAG系统，实时分析分析的一些是什么，主要分析一些什么内容？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Q%EF%BC%9A%E9%82%A3%E4%B9%88%E8%BF%99%E4%B8%AA%E6%9C%89%E4%BB%80%E4%B9%88%E4%BD%9C%E7%94%A8%EF%BC%9F"><span class="nav-number">1.4.</span> <span class="nav-text">Q：那么这个有什么作用？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Q%EF%BC%9A%E9%82%A3%E4%BD%A0%E8%BF%99%E4%B8%AA%E8%83%BD%E4%B8%8D%E8%83%BD%E6%94%B9%E4%B8%80%E6%94%B9%E5%8E%BB%E6%8A%93%E6%B7%98%E5%AE%9D%EF%BC%9F"><span class="nav-number">1.5.</span> <span class="nav-text">Q：那你这个能不能改一改去抓淘宝？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Q%EF%BC%9A%E9%82%A3%E8%83%BD%E6%8A%93%E5%8F%96%E4%B8%80%E4%BA%9B%E4%BC%81%E4%B8%9A%E7%9A%84%E6%95%B0%E6%8D%AE%EF%BC%9F"><span class="nav-number">1.6.</span> <span class="nav-text">Q：那能抓取一些企业的数据？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Q%EF%BC%9A%E4%BD%A0%E5%AF%B9%E7%88%AC%E8%99%AB%E8%BF%99%E4%B8%80%E5%9D%97%E6%80%8E%E4%B9%88%E6%A0%B7%EF%BC%9F"><span class="nav-number">1.7.</span> <span class="nav-text">Q：你对爬虫这一块怎么样？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Q%EF%BC%9A%E4%BD%A0%E8%BF%99%E5%A4%A7%E6%A8%A1%E5%9E%8B%EF%BC%8C%E7%8E%B0%E5%9C%A8%E7%94%A8%E7%9A%84%E6%A8%A1%E5%9E%8B%E5%9F%BA%E6%9C%AC%E4%B8%8A%E9%83%BD%E6%98%AF%E7%9B%B4%E6%8E%A5%E7%94%A8API%E8%B0%83%E7%94%A8%E7%9A%84%E6%98%AF%E5%90%A7%EF%BC%9F"><span class="nav-number">1.8.</span> <span class="nav-text">Q：你这大模型，现在用的模型基本上都是直接用API调用的是吧？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Q%EF%BC%9A%E4%BD%A0%E5%AF%B9%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%86%9F%E6%82%89%E5%90%97%EF%BC%9F"><span class="nav-number">1.9.</span> <span class="nav-text">Q：你对服务器熟悉吗？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Q%EF%BC%9AJava%E4%BD%A0%E7%86%9F%E6%82%89%E5%90%97%EF%BC%9F"><span class="nav-number">1.10.</span> <span class="nav-text">Q：Java你熟悉吗？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Q%EF%BC%9APDF%E9%87%8C%E9%9D%A2%E7%9A%84%E5%9B%BE%E7%89%87%E6%80%8E%E4%B9%88%E5%A4%84%E7%90%86%EF%BC%9F"><span class="nav-number">1.11.</span> <span class="nav-text">Q：PDF里面的图片怎么处理？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Q%EF%BC%9A%E4%BD%A0%E7%9B%AE%E5%89%8D%E6%83%B3%E5%81%9A%E7%9A%84%E6%98%AF%E5%9C%A8%E6%A8%A1%E5%9E%8B%E7%9A%84%E5%9F%BA%E7%A1%80%E4%B8%8A%E5%81%9A%E4%B8%80%E4%BA%9B%E5%BA%94%E7%94%A8%EF%BC%9F"><span class="nav-number">1.12.</span> <span class="nav-text">Q：你目前想做的是在模型的基础上做一些应用？</span></a></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -269,70 +272,120 @@
 
     </div>
 
-    <div class="main-inner tag posts-collapse">
+    <div class="main-inner post posts-expand">
 
 
   
+
+
+<div class="post-block">
   
   
-  <div class="post-block">
-    <div class="post-content">
-      <div class="collection-title">
-        <h1 class="collection-header">FAISS
-          <small>标签</small>
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://geitehaobu-del.github.io/posts/%E9%9D%A2%E8%AF%95%E8%AE%B0%E5%BD%95-20260616/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="吴纪辰">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="吴纪辰的大模型学习路径">
+      <meta itemprop="description" content="记录大模型应用开发的学习与实践，涵盖RAG系统、Agent架构、模型微调、工程化部署等技术方向">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="26年06月10日总结 | 吴纪辰的大模型学习路径">
+      <meta itemprop="description" content="一家半导体公司，想要开发半导体ai">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          26年06月10日总结
         </h1>
-      </div>
 
-      
-    <div class="collection-year">
-      <span class="collection-header">2026</span>
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2026-06-16 00:00:00" itemprop="dateCreated datePublished" datetime="2026-06-16T00:00:00+08:00">2026-06-16</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-06-17 23:47:30" itemprop="dateModified" datetime="2026-06-17T23:47:30+08:00">2026-06-17</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E9%9D%A2%E8%AF%95/" itemprop="url" rel="index"><span itemprop="name">面试</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+            <div class="post-description">一家半导体公司，想要开发半导体ai</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="面试记录-2026-06-16"><a href="#面试记录-2026-06-16" class="headerlink" title="面试记录 2026-06-16"></a>面试记录 2026-06-16</h1><h2 id="Q：你做的这个RAG系统，你做了一些什么东西？"><a href="#Q：你做的这个RAG系统，你做了一些什么东西？" class="headerlink" title="Q：你做的这个RAG系统，你做了一些什么东西？"></a>Q：你做的这个RAG系统，你做了一些什么东西？</h2><p>首先是离线阶段，就是用户上传他想要检索的文档，然后对这个文档进行切块，根据提前设定好的分块值，然后进行分块，并保持一定的块间重叠，保证上下文语义连贯，然后通过标模型把它进行向量化，然后这个时候就可以进行检索阶段。</p>
+<p>检索阶段就是利用BM25和FAISS的索引，对它进行关键词匹配和向量匹配，然后再用RRF混合融合给它们打分，然后出排序出来，然后再用重排序的模型对它进行排序提取最有价值的前几条，然后包装成上下文给大模型。</p>
+<h2 id="Q：这个系统是你自己开发的？"><a href="#Q：这个系统是你自己开发的？" class="headerlink" title="Q：这个系统是你自己开发的？"></a>Q：这个系统是你自己开发的？</h2><p>这个项目是根据网上开源的项目改编的，RAG系统是个人开发的。</p>
+<h2 id="Q：你这个RAG系统，实时分析分析的一些是什么，主要分析一些什么内容？"><a href="#Q：你这个RAG系统，实时分析分析的一些是什么，主要分析一些什么内容？" class="headerlink" title="Q：你这个RAG系统，实时分析分析的一些是什么，主要分析一些什么内容？"></a>Q：你这个RAG系统，实时分析分析的一些是什么，主要分析一些什么内容？</h2><p>主要分析的是微博的热搜50条信息，就是现在大部分平台都会有一个热搜榜单，微博就有这样一个榜单，我就查询这个榜单所有的热搜标题信息，然后把它进行数据清洗，然后再喂给大模型。</p>
+<p>然后大模型根据预先设置好提示词，对它进行情感分析、类型分析，还有话题聚类。然后这样的结果再存到MySQL和Redis里面，然后再通过Kafka传递给Java的后端，用Flink计算5分钟的窗口值，计算这5分钟之内的情感统计结果、类型统计结果和话题统计结果。</p>
+<p>然后再由SpringBoot加Vue3组合的前后端服务进行展示。</p>
+<h2 id="Q：那么这个有什么作用？"><a href="#Q：那么这个有什么作用？" class="headerlink" title="Q：那么这个有什么作用？"></a>Q：那么这个有什么作用？</h2><p>作用就是可以分析热搜的一个舆情走向，比如你看到热搜之后再点进这个热搜，再去分析这个热搜的相关情感，还有它可能的走向，这一套就只能靠人工进行。我这个系统就把它变成一个自动化的流程，它可以每隔半分钟都抓取50条热搜，然后对它进行分析。</p>
+<p>分析之后计算，比如计算科技类的平均情感，你就可以看到科技热搜在今天的一个走向，就是可以快速判断出微博热搜的一个舆情走向。</p>
+<h2 id="Q：那你这个能不能改一改去抓淘宝？"><a href="#Q：那你这个能不能改一改去抓淘宝？" class="headerlink" title="Q：那你这个能不能改一改去抓淘宝？"></a>Q：那你这个能不能改一改去抓淘宝？</h2><p>可以，这个有预制这样的一个接口，它是分模块开发的，只要把抓取模块改成淘宝热搜就可以。</p>
+<h2 id="Q：那能抓取一些企业的数据？"><a href="#Q：那能抓取一些企业的数据？" class="headerlink" title="Q：那能抓取一些企业的数据？"></a>Q：那能抓取一些企业的数据？</h2><p>网站数据可以，就看那个企业的反扒，改一下反扒策略就行。</p>
+<h2 id="Q：你对爬虫这一块怎么样？"><a href="#Q：你对爬虫这一块怎么样？" class="headerlink" title="Q：你对爬虫这一块怎么样？"></a>Q：你对爬虫这一块怎么样？</h2><p>爬虫的话，我主要了解的是我这个项目使用的是requests直接发送请求。之前我也尝试过用Selenium进行自动化查询，但那个需要打开一个实例化浏览器，性能方面比较慢，我就用requests直接发送网络请求，然后去爬取了百度、微博、知乎这些网站。</p>
+<p>因为我研究的主要是微博平台，所以就主要针对微博的反扒进行了一些优化。比如微博上需要携带cookie，我就会去网站F12控制台去复制一下cookie。然后我也有计划后期写一个cookie更新器，去自动更新cookie，还有IP代理来防止IP封禁，不过目前微博还没有这样的反扒策略。</p>
+<h2 id="Q：你这大模型，现在用的模型基本上都是直接用API调用的是吧？"><a href="#Q：你这大模型，现在用的模型基本上都是直接用API调用的是吧？" class="headerlink" title="Q：你这大模型，现在用的模型基本上都是直接用API调用的是吧？"></a>Q：你这大模型，现在用的模型基本上都是直接用API调用的是吧？</h2><p>RAG的重排序模型用的是本地模型，本地在HuggingFace社区开源下载的一个重排序模型，其他都是调的现成的API，比如千问的和阿里那边的。重排序模型是在HuggingFace上面下载的一个比较通用的纯排序模型，那个模型名字我也忘了，就是一个开源的比较小的模型，只有几十M，所以比较方便。</p>
+<h2 id="Q：你对服务器熟悉吗？"><a href="#Q：你对服务器熟悉吗？" class="headerlink" title="Q：你对服务器熟悉吗？"></a>Q：你对服务器熟悉吗？</h2><p>服务器方面我有学过Linux相关操作，但是目前没有往更深入了解，我懂一些简单的命令，还有包括Linux上面的Kali系统，还有Ubuntu，还有Docker，还有大数据，这些我们学校也有可能学过，就是说可能会上手比较快一点，因为有实际操作，但是是两三年前的了，也没有更深入，大一大二学的。</p>
+<h2 id="Q：Java你熟悉吗？"><a href="#Q：Java你熟悉吗？" class="headerlink" title="Q：Java你熟悉吗？"></a>Q：Java你熟悉吗？</h2><p>Java的话，我有学过SpringBoot加Vue3的前后端架构，然后还有一些基础的，比如集合、泛型，然后各种Java特性有一点了解。前端框架还是挺熟悉的，独立完成是可以的，简单的逻辑其实AI也都可以实现，我这个毕设项目就是Vue3实现的。</p>
+<h2 id="Q：PDF里面的图片怎么处理？"><a href="#Q：PDF里面的图片怎么处理？" class="headerlink" title="Q：PDF里面的图片怎么处理？"></a>Q：PDF里面的图片怎么处理？</h2><p>PDF里面图片，主要是把图片向量化，有两种方案我觉得，一种是找专门的类去提取，还有一种就是先把图片全部提取出来，然后再单独进行向量化，避免跟文字混淆。有的图片里面也是文字，这种就用OCR图片文字识别就行，就没必要再去搞向量化。那种纯图片没有文字的，就向量化提取。</p>
+<h2 id="Q：你目前想做的是在模型的基础上做一些应用？"><a href="#Q：你目前想做的是在模型的基础上做一些应用？" class="headerlink" title="Q：你目前想做的是在模型的基础上做一些应用？"></a>Q：你目前想做的是在模型的基础上做一些应用？</h2><p>对，就比如一些用模型进行编程的，相当于Claude的Code和Cursor就是编程的助手，然后还有Coze和Dify这些平台就是自动化的助手，它们都是已经有模型，然后给这些模型加功能，比如让模型帮你发邮件，这种功能就像之前小龙虾的方案。</p>
+
     </div>
 
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-      <div class="post-meta-container">
-        <time itemprop="dateCreated"
-              datetime="2026-06-12T00:00:00+08:00"
-              content="2026-06-12">
-          06-12
-        </time>
-      </div>
+    
+    
+    
 
-      <div class="post-title">
-          <a class="post-title-link" href="/posts/LocalFileRAG-%E6%9C%AC%E5%9C%B0%E6%99%BA%E8%83%BD%E6%96%87%E6%A1%A3%E9%97%AE%E7%AD%94%E7%B3%BB%E7%BB%9F%E5%AE%9E%E6%88%98/" itemprop="url">
-            <span itemprop="name">LocalFileRAG：本地智能文档问答系统实战——从RAG Demo到可部署应用</span>
-          </a>
-      </div>
+    <footer class="post-footer">
 
-      
-    </header>
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/posts/LangChain%E5%AD%A6%E4%B9%A0%E9%97%AE%E7%AD%94-%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%98%AF%E6%80%8E%E4%B9%88%E7%9F%A5%E9%81%93%E8%A6%81%E8%B0%83%E7%94%A8%E5%B7%A5%E5%85%B7%E7%9A%84/" rel="prev" title="LangChain学习问答：大模型是怎么&quot;知道&quot;要调用工具的？">
+                  <i class="fa fa-angle-left"></i> LangChain学习问答：大模型是怎么"知道"要调用工具的？
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
   </article>
+</div>
 
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-      <div class="post-meta-container">
-        <time itemprop="dateCreated"
-              datetime="2026-06-09T00:00:00+08:00"
-              content="2026-06-09">
-          06-09
-        </time>
-      </div>
 
-      <div class="post-title">
-          <a class="post-title-link" href="/posts/%E4%BB%8E%E9%9B%B6%E6%89%8B%E5%86%99RAG-%E5%90%91%E9%87%8F%E6%A3%80%E7%B4%A2BM25-RRF%E6%B7%B7%E5%90%88%E6%A3%80%E7%B4%A2%E5%AE%9E%E6%88%98/" itemprop="url">
-            <span itemprop="name">从零手写RAG：向量检索+BM25+RRF混合检索实战</span>
-          </a>
-      </div>
 
-      
-    </header>
-  </article>
 
-    </div>
-  </div>
-  
-  
-  
+
 
 </div>
   </main>
