@@ -1,0 +1,199 @@
+{
+  "main": {
+    "id": "f794e9c3503d9c4b",
+    "type": "split",
+    "children": [
+      {
+        "id": "1448435cc6af08bb",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "e9a1091fcbfc0900",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "面试记录-20260616.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "面试记录-20260616"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "cfee60c7b1e3a4cd",
+    "type": "split",
+    "children": [
+      {
+        "id": "fef7b6199de8cb78",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "b0b0c349f2365a79",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "f8b19d18b5ec4440",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "aa1f5ee6faf0dcb9",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "dd2b4be11fd755cd",
+    "type": "split",
+    "children": [
+      {
+        "id": "d31ad20a4ecc1ae7",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "2d9c2fce59ac81a9",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "面试记录-20260616.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for 面试记录-20260616"
+            }
+          },
+          {
+            "id": "da9a23e28049669c",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "面试记录-20260616.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from 面试记录-20260616"
+            }
+          },
+          {
+            "id": "bf207d79ac10eeda",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "f4eebce85be852bb",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "a4a001b21d6888e1",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "面试记录-20260616.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of 面试记录-20260616"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "b0b0c349f2365a79",
+  "lastOpenFiles": [
+    "Hexo+GitHub-Pages博客搭建指南.md",
+    "当大模型服务挂了怎么办？LLM多模型故障转移实战.md",
+    "LocalFileRAG-本地智能文档问答系统实战.md",
+    "面试记录-20260616.md",
+    "markDown1781606097201.md",
+    "面试记录-202606161.md",
+    "2026-06-10.md",
+    "26年06月10日总结.md",
+    "从零手写RAG-向量检索BM25-RRF混合检索实战.md",
+    "26年06月09日总结.md"
+  ]
+}
